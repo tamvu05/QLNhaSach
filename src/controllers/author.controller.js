@@ -1,53 +1,53 @@
-import TacGiaService from '../services/tacGia.service.js'
+import AuthorService from '../services/author.service.js'
 
-const TacGiaController = {
-    // GET /tacgia
+const AuthorController = {
+    // GET /author
     async getAll(req, res, next) {
         try {
-            const data = await TacGiaService.getAll()
+            const data = await AuthorService.getAll()
             res.json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    // GET /tacgia/:id
+    // GET /author/:id
     async getById(req, res, next) {
         try {
             const { id } = req.params
-            const data = await TacGiaService.getById(id)
+            const data = await AuthorService.getById(id)
             res.json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    // POST /tacgia
+    // POST /api/author
     async create(req, res, next) {
         try {
-            const data = await TacGiaService.create(req.body)
+            const data = await AuthorService.create(req.body)
             res.status(201).json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    // PUT /tacgia/:id
+    // PUT /api/author/:id
     async update(req, res, next) {
         try {
             const { id } = req.params
-            const data = await TacGiaService.update(id, req.body)
+            const data = await AuthorService.update(id, req.body)
             res.json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    // DELETE /tacgia/:id
+    // DELETE /api/author/:id
     async delete(req, res, next) {
         try {
             const { id } = req.params
-            const success = await TacGiaService.delete(id)
+            const success = await AuthorService.delete(id)
             res.json({ success })
         } catch (err) {
             next(err)
@@ -55,4 +55,4 @@ const TacGiaController = {
     },
 }
 
-export default TacGiaController
+export default AuthorController

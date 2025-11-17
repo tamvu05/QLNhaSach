@@ -1,6 +1,6 @@
 import express from 'express'
-import SachController from '../../controllers/sach.controller.js';
-import TheLoaiController from '../../controllers/theLoai.controller.js';
+import BookController from '../../controllers/book.controller.js'
+import CategoryController from '../../controllers/category.controller.js'
 
 const setUserLayout = (req, res, next) => {
     res.locals.userLayout = 'layouts/userLayout'
@@ -11,7 +11,7 @@ const router = express.Router()
 
 router.use(setUserLayout)
 
-router.get('/sach', SachController.getAllUser);
-router.get('/theloai', TheLoaiController.getAllUser)
+router.get('/book', BookController.userGetAll);
+router.get('/category', CategoryController.userGetAll)
 
 export default router

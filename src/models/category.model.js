@@ -1,6 +1,6 @@
 import pool from '../configs/db.js'
 
-const TheLoaiModel = {
+const CategoryModel = {
     async getAll() {
         const [rows] = await pool.query('SELECT * FROM TheLoai')
         return rows
@@ -27,4 +27,4 @@ const TheLoaiModel = {
     },
 }
 
-export default TheLoaiModel
+export default CategoryModel

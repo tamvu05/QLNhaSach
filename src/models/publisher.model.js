@@ -1,6 +1,6 @@
 import pool from '../configs/db.js'
 
-const NhaXuatBanModel = {
+const PublisherBanModel = {
     async getAll() {
         const [rows] = await pool.query('SELECT * FROM NhaXuatBan')
         return rows
@@ -27,4 +27,4 @@ const NhaXuatBanModel = {
     },
 }
 
-export default NhaXuatBanModel
+export default PublisherBanModel

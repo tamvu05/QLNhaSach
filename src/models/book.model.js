@@ -1,6 +1,6 @@
 import pool from '../configs/db.js'
 
-const SachModel = {
+const BookModel = {
     async getAll() {
         const [rows] = await pool.query('SELECT * FROM Sach')
         return rows
@@ -52,4 +52,4 @@ const SachModel = {
     },
 }
 
-export default SachModel
+export default BookModel

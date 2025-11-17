@@ -1,15 +1,14 @@
-import { error } from 'console'
-import SachModel from '../models/sach.model.js'
+import BookModel from '../models/book.model.js'
 
-const SachService = {
+const BookService = {
     async getAll() {
-        return await SachModel.getAll()
+        return await BookModel.getAll()
     },
 
     async getById(id) {
         if (!id) throw new Error('Thiếu mã sách')
 
-        const data = await SachModel.getById(id)
+        const data = await BookModel.getById(id)
         if (!data) throw new Error('Không tìm thấy sách')
 
         return data
@@ -25,7 +24,7 @@ const SachService = {
         if (!MaTL) throw new Error('Thiếu mã thể loại')
         if (!DonGia) throw new Error('Thiếu đơn giá')
 
-        const insertId = await SachModel.create({
+        const insertId = await BookModel.create({
             TenSach,
             MaTG,
             MaNXB,
@@ -40,7 +39,7 @@ const SachService = {
     async update(id, payload) {
         if (!id) throw new Error('Thiếu mã sách')
 
-        const exist = await SachModel.getById(id)
+        const exist = await BookModel.getById(id)
         if (!exist) throw new Error('Sách không tồn tại')
 
         const { TenSach, MaTG, MaNXB, MaTL, DonGia, SoLuongTon } = payload
@@ -53,19 +52,19 @@ const SachService = {
         if (!DonGia) throw new Error('Thiếu đơn giá')
         if (SoLuongTon === undefined || SoLuongTon === null) throw new Error('Thiếu số lượng tồn')
 
-        const success = await SachModel.update(id, { TenSach, MaTG, MaNXB, MaTL, DonGia, SoLuongTon })
+        const success = await BookModel.update(id, { TenSach, MaTG, MaNXB, MaTL, DonGia, SoLuongTon })
         if (!success) throw new Error('Cập nhật thất bại')
 
-        return await SachModel.getById(id)
+        return await BookModel.getById(id)
     },
 
     async delete(id) {
         if (!id) throw new Error('Thiếu mã sách')
 
-        const exist = await SachModel.getById(id)
+        const exist = await BookModel.getById(id)
         if (!exist) throw new Error('Sách không tồn tại')
 
-        const success = await SachModel.delete(id)
+        const success = await BookModel.delete(id)
         if (!success) throw new Error('Xóa thất bại')
 
         return true
@@ -75,14 +74,14 @@ const SachService = {
         if (!id) throw new Error('Thiếu mã sách')
         if (typeof amount !== 'number') throw new Error('Số lượng phải là số')
 
-        const exist = await SachModel.getById(id)
+        const exist = await BookModel.getById(id)
         if (!exist) throw new Error('Sách không tồn tại')
 
-        const success = await SachModel.updateStock(id, amount)
+        const success = await BookModel.updateStock(id, amount)
         if (!success) throw new Error('Không cập nhật được tồn kho')
 
-        return await SachModel.getById(id)
+        return await BookModel.getById(id)
     },
 }
 
-export default SachService
+export default BookService

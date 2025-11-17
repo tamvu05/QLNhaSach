@@ -1,11 +1,11 @@
-import SachService from '../services/sach.service.js'
+import BookService from '../services/book.service.js'
 
-const SachController = {
-    // GET /admin/sach
+const BookController = {
+    // GET /admin/book
     async getAll(req, res, next) {
         try {
-            const data = await SachService.getAll()
-            res.render('admin/sach', {
+            const data = await BookService.getAll()
+            res.render('admin/book', {
                 title: 'Admin Dashboard',
                 data
             })
@@ -14,22 +14,22 @@ const SachController = {
         }
     },
 
-    // GET /admin/sach/:id
+    // GET /admin/book/:id
     async getById(req, res, next) {
         try {
             const { id } = req.params
-            const data = await SachService.getById(id)
+            const data = await BookService.getById(id)
             res.json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    // GET /sach
-    async getAllUser(req, res, next) {
+    // GET /book
+    async userGetAll(req, res, next) {
         try {
-            const data = await SachService.getAll()
-            res.render('user/sach', {
+            const data = await BookService.getAll()
+            res.render('user/book', {
                 title: 'Nhà sách ...',
                 layout: res.userLayout,
                 data
@@ -39,56 +39,56 @@ const SachController = {
         }
     },
 
-    // GET /sach/:id
-    async getByIdUser(req, res, next) {
+    // GET /book/:id
+    async userGetById(req, res, next) {
         try {
             const { id } = req.params
-            const data = await SachService.getById(id)
+            const data = await BookService.getById(id)
             res.json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    // POST /sach
+    // POST /api/book
     async create(req, res, next) {
         try {
-            const data = await SachService.create(req.body)
+            const data = await BookService.create(req.body)
             res.status(201).json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    // PUT /sach/:id
+    // PUT /api/book/:id
     async update(req, res, next) {
         try {
             const { id } = req.params
-            const data = await SachService.update(id, req.body)
+            const data = await BookService.update(id, req.body)
             res.json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    // DELETE /sach/:id
+    // DELETE /api/book/:id
     async delete(req, res, next) {
         try {
             const { id } = req.params
-            const success = await SachService.delete(id)
+            const success = await BookService.delete(id)
             res.json({ success })
         } catch (err) {
             next(err)
         }
     },
 
-    // PATCH /sach/:id/stock
+    // PATCH /api/book/:id/stock
     async updateStock(req, res, next) {
         try {
             const { id } = req.params
             const { amount } = req.body
 
-            const data = await SachService.updateStock(id, Number(amount))
+            const data = await BookService.updateStock(id, Number(amount))
             res.json(data)
         } catch (err) {
             next(err)
@@ -96,4 +96,4 @@ const SachController = {
     },
 }
 
-export default SachController
+export default BookController

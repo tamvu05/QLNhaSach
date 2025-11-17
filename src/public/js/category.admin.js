@@ -13,7 +13,7 @@ btnThemTL.onclick = async () => {
     }
 
     try {
-        const res = await fetch('/api/theloai', {
+        const res = await fetch('/api/category', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ TenTL, GhiChu }),
@@ -34,7 +34,7 @@ btnXoaTL.forEach((btn) => {
     btn.onclick = async () => {
         try {
             const id = btn.dataset.id
-            const res = await fetch('/api/theloai/' + id, {
+            const res = await fetch('/api/category/' + id, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
             })

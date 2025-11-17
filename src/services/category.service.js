@@ -1,14 +1,14 @@
-import TheLoaiModel from '../models/theLoai.model.js'
+import CategoryModel from '../models/category.model.js'
 
-const TheLoaiService = {
+const CategoryService = {
     async getAll() {
-        return await TheLoaiModel.getAll()
+        return await CategoryModel.getAll()
     },
 
     async getById(id) {
         if (!id) throw new Error('Thiếu mã thể loại')
 
-        const tl = await TheLoaiModel.getById(id)
+        const tl = await CategoryModel.getById(id)
         if (!tl) throw new Error('Thể loại không tồn tại')
 
         return tl
@@ -22,14 +22,14 @@ const TheLoaiService = {
             throw new Error('Tên thể loại là bắt buộc')
         }
 
-        const insertId = await TheLoaiModel.create({ TenTL, GhiChu })
-        return await TheLoaiModel.getById(insertId)
+        const insertId = await CategoryModel.create({ TenTL, GhiChu })
+        return await CategoryModel.getById(insertId)
     },
 
     async update(id, payload) {
         if (!id) throw new Error('Thiếu mã thể loại')
 
-        const exist = await TheLoaiModel.getById(id)
+        const exist = await CategoryModel.getById(id)
         if (!exist) throw new Error('Thể loại không tồn tại')
 
         const { TenTL, GhiChu } = payload
@@ -38,23 +38,23 @@ const TheLoaiService = {
             throw new Error('Tên thể loại là bắt buộc')
         }
 
-        const success = await TheLoaiModel.update(id, { TenTL, GhiChu })
+        const success = await CategoryModel.update(id, { TenTL, GhiChu })
         if (!success) throw new Error('Cập nhật thất bại')
 
-        return await TheLoaiModel.getById(id)
+        return await CategoryModel.getById(id)
     },
 
     async delete(id) {
         if (!id) throw new Error('Thiếu mã thể loại')
 
-        const exist = await TheLoaiModel.getById(id)
+        const exist = await CategoryModel.getById(id)
         if (!exist) throw new Error('Thể loại không tồn tại')
 
-        const success = await TheLoaiModel.delete(id)
+        const success = await CategoryModel.delete(id)
         if (!success) throw new Error('Xóa thất bại')
 
         return true
     },
 }
 
-export default TheLoaiService
+export default CategoryService

@@ -1,13 +1,15 @@
 import express from 'express'
-import sachRouter from './sach.router.js'
-import nhaXuatBanRouter from './nhaXuatBan.router.js'
-import tacGiaRouter from './tacGia.router.js'
-import theLoaiRouter from './theLoai.router.js'
+import authorRouter from './author.router.js'
+import categoryRouter from './category.router.js'
+import publisherRouter from './publisher.router.js'
+import bookRouter from './book.router.js'
+
+
 const router = express.Router()
 
-router.use('/tacgia', tacGiaRouter)
-router.use('/theloai', theLoaiRouter)
-router.use('/nhaxuatban', nhaXuatBanRouter)
-router.use('/sach', sachRouter)
+router.use('/author', authorRouter)
+router.use('/category', categoryRouter)
+router.use('/publisher', publisherRouter)
+router.use('/book', bookRouter)
 
 export default router

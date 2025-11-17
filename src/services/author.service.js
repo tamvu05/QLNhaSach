@@ -1,14 +1,14 @@
-import TacGiaModel from '../models/tacGia.model.js'
+import AuthorModel from '../models/author.model.js'
 
-const TacGiaService = {
+const AuthorService = {
     async getAll() {
-        return await TacGiaModel.getAll()
+        return await AuthorModel.getAll()
     },
 
     async getById(id) {
         if (!id) throw new Error('Thiếu mã tác giả')
 
-        const tg = await TacGiaModel.getById(id)
+        const tg = await AuthorModel.getById(id)
         if (!tg) throw new Error('Tác giả không tồn tại')
 
         return tg
@@ -22,15 +22,15 @@ const TacGiaService = {
             throw new Error('Tên tác giả là bắt buộc')
         }
 
-        const insertId = await TacGiaModel.create({ TenTG, GhiChu })
+        const insertId = await AuthorModel.create({ TenTG, GhiChu })
 
-        return await TacGiaModel.getById(insertId)
+        return await AuthorModel.getById(insertId)
     },
 
     async update(id, payload) {
         if (!id) throw new Error('Thiếu mã tác giả')
 
-        const exist = await TacGiaModel.getById(id)
+        const exist = await AuthorModel.getById(id)
         if (!exist) throw new Error('Tác giả không tồn tại')
 
         const { TenTG, GhiChu } = payload
@@ -39,23 +39,23 @@ const TacGiaService = {
             throw new Error('Tên tác giả là bắt buộc')
         }
 
-        const success = await TacGiaModel.update(id, { TenTG, GhiChu })
+        const success = await AuthorModel.update(id, { TenTG, GhiChu })
         if (!success) throw new Error('Cập nhật thất bại')
 
-        return await TacGiaModel.getById(id)
+        return await AuthorModel.getById(id)
     },
 
     async delete(id) {
         if (!id) throw new Error('Thiếu mã tác giả')
 
-        const exist = await TacGiaModel.getById(id)
+        const exist = await AuthorModel.getById(id)
         if (!exist) throw new Error('Tác giả không tồn tại')
 
-        const success = await TacGiaModel.delete(id)
+        const success = await AuthorModel.delete(id)
         if (!success) throw new Error('Xóa thất bại')
 
         return true
     },
 }
 
-export default TacGiaService
+export default AuthorService

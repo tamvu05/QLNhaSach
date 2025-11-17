@@ -1,54 +1,54 @@
-import NhaXuanBanService from "../services/nhaXuatBan.service.js";
+import PublisherService from "../services/publisher.service.js";
 
-const NhaXuatBanController = {
-  // GET /nhaxuatban
+const PublisherController = {
+  // GET /publisher
   async getAll(req, res, next) {
     try {
-      const data = await NhaXuanBanService.getAll();
+      const data = await PublisherService.getAll();
       res.json(data);
     } catch (err) {
       next(err);
     }
   },
 
-  // GET /nhaxuatban/:id
+  // GET /publisher/:id
   async getById(req, res, next) {
     try {
       const { id } = req.params;
-      const data = await NhaXuanBanService.getById(id);
+      const data = await PublisherService.getById(id);
       res.json(data);
     } catch (err) {
       next(err);
     }
   },
 
-  // POST /nhaxuatban
+  // POST /api/publisher
   async create(req, res, next) {
     try {
-      const data = await NhaXuanBanService.create(req.body);
+      const data = await PublisherService.create(req.body);
       res.status(201).json(data);
     } catch (err) {
       next(err);
     }
   },
 
-  // PUT /nhaxuatban/:id
+  // PUT /api/publisher/:id
   async update(req, res, next) {
     try {
       const { id } = req.params;
       console.log(req.body);
-      const data = await NhaXuanBanService.update(id, req.body);
+      const data = await PublisherService.update(id, req.body);
       res.json(data);
     } catch (err) {
       next(err);
     }
   },
 
-  // DELETE /nhaxuatban/:id
+  // DELETE /api/publisher/:id
   async delete(req, res, next) {
     try {
       const { id } = req.params;
-      const success = await NhaXuanBanService.delete(id);
+      const success = await PublisherService.delete(id);
       res.json({ success });
     } catch (err) {
       next(err);
@@ -56,4 +56,4 @@ const NhaXuatBanController = {
   },
 };
 
-export default NhaXuatBanController;
+export default PublisherController;

@@ -1,6 +1,6 @@
 import pool from '../configs/db.js'
 
-const TacGiaModel = {
+const AuthorModel = {
     async getAll() {
         const [rows] = await pool.query('SELECT * FROM TacGia')
         return rows
@@ -27,4 +27,4 @@ const TacGiaModel = {
     },
 }
 
-export default TacGiaModel
+export default AuthorModel

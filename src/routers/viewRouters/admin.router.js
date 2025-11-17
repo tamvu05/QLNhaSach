@@ -1,11 +1,11 @@
 import express from 'express'
-import SachController from '../../controllers/sach.controller.js'
-import TheLoaiController from '../../controllers/theLoai.controller.js'
+import BookController from '../../controllers/book.controller.js'
+import CategoryController from '../../controllers/category.controller.js'
 
 const router = express.Router()
 
-router.get('/sach', SachController.getAll)
-router.get('/theloai', TheLoaiController.getAll)
+router.get('/book', BookController.getAll)
+router.get('/category', CategoryController.getAll)
 
 router.get('/', (req, res, next) => {
     res.render('admin/dashboard', {
