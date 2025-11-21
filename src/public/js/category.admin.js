@@ -1,3 +1,4 @@
+import showToast from './toast.js'
 const tbodyElement = document.querySelector('.category-table tbody')
 
 // Hanlde thêm thể loại và ẩn/hiện modal
@@ -44,13 +45,14 @@ if (btnAddCategory) {
                 )
 
             updateTableAfterAdd(data)
+            showToast('Đã thêm thể loại', 'success')
 
             if (addModal) {
                 const modalInstance = bootstrap.Modal.getInstance(addModal)
                 modalInstance.hide()
             }
         } catch (error) {
-            console.log('Lỗi khi thêm thể loại:' + error)
+            showToast(error.message, 'danger')
         }
     }
 }
@@ -168,8 +170,10 @@ async function deleteCategory(btnDelete) {
 
             rowElement.remove()
             updateSTT('.category-table tbody')
+            showToast('Đã xóa thể loại', 'success')
+
         } catch (error) {
-            console.log('Lỗi khi xóa thể loại:' + error)
+            showToast(error.message, 'danger')
         }
     }
 }
@@ -283,13 +287,14 @@ if (btnUpdate) {
                 )
 
             updateTableAfterUpdate(data)
+            showToast('Đã cập nhật thể loại', 'success')
 
             if (updateModal) {
                 const modalInstance = bootstrap.Modal.getInstance(updateModal)
                 modalInstance.hide()
             }
         } catch (error) {
-            console.log('Lỗi khi chỉnh sửa thể loại:' + error)
+            showToast(error.message, 'danger')
         }
     }
 }

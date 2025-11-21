@@ -50,6 +50,11 @@ const BookModel = {
         const [result] = await pool.query('UPDATE Sach SET SoLuongTon = SoLuongTon + ? WHERE MaSach = ?', [amount, id])
         return result.affectedRows > 0
     },
+
+    async countByCategory(MaTL) {
+        const [result] = await pool.query('SELECT COUNT(*) AS bookCount FROM Sach WHERE MaTL = ?', [MaTL])
+        return result[0].bookCount
+    }
 }
 
 export default BookModel

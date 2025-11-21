@@ -1,4 +1,5 @@
 import CategoryModel from '../models/category.model.js'
+import BookModel from '../models/book.model.js'
 
 const CategoryService = {
     async getAll() {
@@ -37,7 +38,7 @@ const CategoryService = {
         if (!TenTL || TenTL.trim() === '') {
             throw new Error('Tên thể loại là bắt buộc')
         }
-
+        
         const success = await CategoryModel.update(id, { TenTL, MoTa })
         if (!success) throw new Error('Cập nhật thất bại')
 
@@ -49,6 +50,9 @@ const CategoryService = {
 
         const exist = await CategoryModel.getById(id)
         if (!exist) throw new Error('Thể loại không tồn tại')
+
+        const bookCount = await BookModel.countByCategory(id)
+        if(bookCount > 0) throw new Error('Không thể xóa thể loại vì đang có sách tham chiếu')
 
         const success = await CategoryModel.delete(id)
         if (!success) throw new Error('Xóa thất bại')

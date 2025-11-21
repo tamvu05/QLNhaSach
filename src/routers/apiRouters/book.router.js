@@ -3,6 +3,7 @@ import BookController from '../../controllers/book.controller.js'
 
 const router = express.Router()
 
+
 router.post('/', BookController.create);
 
 router.put('/:id', BookController.update);
