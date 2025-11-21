@@ -1,15 +1,21 @@
+<% const LIMIT = 10 %>
+<% const prevPage = currentPage - 1 < 1 ? totalPage : currentPage - 1 %>
+<% const nextPage = currentPage + 1 > totalPage ? 1 : currentPage + 1 %>
+
 <nav aria-label="Page navigation example">
   <ul class="pagination d-flex justify-content-center">
     <li class="page-item">
-      <a class="page-link" href="#" aria-label="Previous">
+      <a class="page-link" href="<%= hrefPagination %>?page=<%= prevPage %>&limit=<%= LIMIT %>" aria-label="Previous">
         <span aria-hidden="true">&laquo;</span>
       </a>
     </li>
-    <li class="page-item"><a class="page-link" href="#">1</a></li>
-    <li class="page-item"><a class="page-link" href="#">2</a></li>
-    <li class="page-item"><a class="page-link" href="#">3</a></li>
+
+    <% for( let i=1; i <=totalPage; i++ ) { %>
+      <li class="page-item"><a class="page-link" href="<%= hrefPagination %>?page=<%= i %>&limit=<%= LIMIT %>"><%= i %></a></li>
+    <% } %>
+
     <li class="page-item">
-      <a class="page-link" href="#" aria-label="Next">
+      <a class="page-link" href="<%= hrefPagination %>?page=<%= nextPage %>&limit=<%= LIMIT %>" aria-label="Next">
         <span aria-hidden="true">&raquo;</span>
       </a>
     </li>

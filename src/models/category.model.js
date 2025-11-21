@@ -1,8 +1,13 @@
 import pool from '../configs/db.js'
 
 const CategoryModel = {
-    async getAll() {
-        const [rows] = await pool.query('SELECT * FROM TheLoai')
+    async getTotal() {
+        const [result] = await pool.query('SELECT COUNT(*) AS total FROM TheLoai')
+        return result[0].total
+    },
+
+    async getAll(limit, offset) {
+        const [rows] = await pool.query('SELECT * FROM TheLoai LIMIT ? OFFSET ?', [limit, offset])
         return rows
     },
 

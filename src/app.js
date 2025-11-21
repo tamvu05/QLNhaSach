@@ -24,6 +24,8 @@ app.use(
                     "'self'",
                     'https://cdn.jsdelivr.net',
                     'https://ka-f.fontawesome.com',
+                    // Bổ sung: Google Fonts CSS
+                    'https://fonts.googleapis.com', 
                     "'unsafe-inline'",
                 ],
                 'script-src': [
@@ -36,11 +38,18 @@ app.use(
                     'https://cdn.jsdelivr.net',
                     'https://ka-f.fontawesome.com',
                 ],
-                'font-src': ["'self'", 'https://ka-f.fontawesome.com'],
+                'font-src': [
+                    "'self'", 
+                    'https://ka-f.fontawesome.com',
+                    // Bổ sung: Google Fonts files
+                    'https://fonts.gstatic.com',
+                    // Bổ sung: Bootstrap Icons files
+                    'https://cdn.jsdelivr.net', 
+                ],
             },
         },
     })
-)
+);
 app.use(compression())
 
 app.set('view engine', 'ejs')

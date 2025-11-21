@@ -1,19 +1,22 @@
 import CategoryService from '../services/category.service.js'
 
 const CategoryController = {
-
     // GET /admin/category
     async getViewAll(req, res, next) {
         try {
-            const categories = await CategoryService.getAll()
+            const { page, limit } = req.query
+            const data = await CategoryService.getAll(page, limit)
             res.render('admin/viewManager', {
                 scripts: ['/js/category.admin.js'],
-                categories,
+                categories: data.categories,
+                currentPage: data.currentPage,
+                totalPage: data.totalPage,
                 entityName: 'thể loại',
                 tablePartial: 'partials/category/tableCategory',
                 modalAddSelector: '#add-category-modal',
                 modalAddPartial: 'partials/category/modalAddCategory',
                 modalUpdatePartial: 'partials/category/modalUpdateCategory',
+                hrefPagination: '/admin/category/'
             })
         } catch (err) {
             next(err)
@@ -98,7 +101,6 @@ const CategoryController = {
             next(err)
         }
     },
-    
 }
 
 export default CategoryController
