@@ -1,0 +1,87 @@
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/book" class="text-decoration-none">Sách</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><%= book.TenSach %></li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <div class="col-md-4 text-center">
+            <div class="p-3 border rounded shadow-sm bg-white">
+                <% if (book.HinhAnh) { %>
+                    <img src="<%= book.HinhAnh %>" class="img-fluid rounded" alt="<%= book.TenSach %>" style="max-height: 450px; width: 100%; object-fit: contain;">
+                <% } else { %>
+                    <div class="d-flex align-items-center justify-content-center bg-light text-muted" style="height: 400px;">
+                        <span>Chưa có ảnh</span>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h1 class="fw-bold text-primary mb-3"><%= book.TenSach %></h1>
+            
+            <div class="d-flex align-items-center mb-4">
+                <span class="h2 text-danger fw-bold me-3 mb-0">
+                    <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.DonGia) %>
+                </span>
+                <span class="badge bg-danger">-10%</span>
+            </div>
+
+            <div class="card mb-4 border-0 bg-light">
+                <div class="card-body">
+                    <h5 class="card-title border-bottom pb-2 mb-3"><i class="bi bi-info-circle"></i> Thông tin chi tiết</h5>
+                    <table class="table table-borderless table-sm mb-0">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted" style="width: 150px;">Tác giả:</td>
+                                <td class="fw-bold"><%= book.TacGia %></td> </tr>
+                            <tr>
+                                <td class="text-muted">Nhà xuất bản:</td>
+                                <td><%= book.NhaXuatBan %></td> </tr>
+                            <tr>
+                                <td class="text-muted">Thể loại:</td>
+                                <td><span class="badge bg-info text-dark"><%= book.TheLoai %></span></td> </tr>
+                            <tr>
+                                <td class="text-muted">Mã ISBN:</td>
+                                <td class="font-monospace"><%= book.ISBN || 'Đang cập nhật' %></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Tình trạng:</td>
+                                <td>
+                                    <% if (book.SoLuong > 0) { %>
+                                        <span class="text-success fw-bold">✅ Còn hàng (<%= book.SoLuong %> bản)</span>
+                                    <% } else { %>
+                                        <span class="text-danger fw-bold">❌ Hết hàng</span>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 mb-5">
+                <button class="btn btn-outline-primary btn-lg px-4">
+                    <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                </button>
+                <button class="btn btn-primary btn-lg px-5 shadow-sm">
+                    Mua ngay
+                </button>
+            </div>
+
+            <div>
+                <h4 class="fw-bold border-bottom pb-2 mb-3">📖 Giới thiệu nội dung</h4>
+                <div class="text-secondary" style="line-height: 1.8; text-align: justify;">
+                    <% if (book.MoTa) { %>
+                        <p><%= book.MoTa %></p>
+                    <% } else { %>
+                        <p class="fst-italic text-muted">Đang cập nhật mô tả cho cuốn sách này...</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

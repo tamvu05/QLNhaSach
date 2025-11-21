@@ -1,0 +1,152 @@
+/* src/public/css/user.css */
+
+/* --- 1. CẤU HÌNH CHUNG --- */
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+/* --- 2. NAVBAR (MENU TRẮNG) --- */
+.navbar {
+    /* Đổi nền sang màu XANH để chữ trắng nổi bật */
+    background: linear-gradient(to right, #0d6efd, #0099ff) !important; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 15px 0; /* Tăng khoảng cách trên dưới cho thanh menu dày dặn hơn */
+}
+
+.navbar-brand {
+    font-weight: 800;
+    font-size: 1.8rem; /* Tăng cỡ Logo */
+    color: #ffffff !important;
+}
+
+.nav-link {
+    color: #ffffff !important;     
+    font-weight: 780 !important;   
+    font-size: 1.1rem !important;  
+    margin-left: 25px;            
+    transition: all 0.3s;
+    text-transform: uppercase;     
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #ffc107 !important;     /* Hover hoặc Active thì chuyển màu Vàng cho nổi */
+    transform: translateY(-2px);   /* Bay lên nhẹ */
+}
+
+
+/* --- 3. HERO SECTION (BANNER XANH NHẠT) --- */
+.hero-section {
+    background-color: #f0f7ff; 
+    padding: 20px 0;  /* <-- GIẢM CỰC MẠNH: Từ 40px xuống 20px */
+    margin-bottom: 0;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+/* Ảnh Banner */
+.hero-img-style {
+    border-radius: 20px; /* Bo góc nhỏ lại xíu cho hợp tỉ lệ */
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    transition: transform 0.5s ease;
+}
+
+.hero-img-style:hover {
+    transform: translateY(-5px) scale(1.01);
+}
+
+/* Hiệu ứng nút bấm */
+.hover-up {
+    transition: all 0.3s ease;
+}
+.hover-up:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15) !important;
+}
+
+/* --- 4. CARD SÁCH --- */
+.book-card-hover {
+    transition: all 0.3s ease;
+    background: white;
+    border: 1px solid #eee;
+}
+
+.book-card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    border-color: transparent;
+}
+
+.hover-zoom {
+    transition: transform 0.3s;
+}
+.book-card-hover:hover .hover-zoom {
+    transform: scale(1.05);
+}
+
+.hover-bg-primary:hover {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-color: #0d6efd !important;
+}
+
+/* --- 5. CÁC PHẦN KHÁC --- */
+.trust-bar {
+    background: white;
+    padding: 15px 0; /* Giảm padding thanh cam kết */
+    border-bottom: 1px solid #eee;
+}
+
+.newsletter-section {
+    background-color: #ffffff;
+    border-top: 1px solid #eee;
+    padding: 50px 0;
+}
+
+/* Hiệu ứng cho Trust Badge */
+.col-auto .shadow-sm {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.col-auto .shadow-sm:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+}
+
+/* --- FOOTER (MODERN DARK UI) --- */
+.footer-section {
+    background-color: #0f172a;
+    /* Padding trên dưới 30px là vừa đủ đẹp */
+    padding: 30px 0; 
+    color: #94a3b8;
+    font-size: 0.85rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.footer-link {
+    text-decoration: none;
+    color: #94a3b8;
+    transition: all 0.2s ease;
+    display: inline-block;
+    padding: 2px 0;
+}
+
+.footer-link:hover { color: #ffffff; }
+
+.social-btn-sm {
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-size: 0.8rem;
+}
+
+.social-btn-sm:hover { background-color: #0d6efd; transform: translateY(-2px); }
