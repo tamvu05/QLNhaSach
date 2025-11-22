@@ -1,7 +1,8 @@
 import express from 'express'
 import BookController from '../../controllers/book.controller.js'
 import CategoryController from '../../controllers/category.controller.js'
-import AuthController from '../../controllers/auth.controller.js' // 1. Import thêm cái này
+import AuthController from '../../controllers/auth.controller.js' 
+import UserController from '../../controllers/user.controller.js';
 
 const router = express.Router()
 
@@ -32,5 +33,9 @@ router.get('/logout', AuthController.logout);
 // Xử lý dữ liệu gửi lên (POST)
 router.post('/login', AuthController.handleLogin);       
 router.post('/register', AuthController.handleRegister); 
+
+// --- ROUTE TÀI KHOẢN ---
+router.get('/profile', UserController.getProfile);
+router.post('/profile/update', UserController.updateProfile); 
 
 export default router
