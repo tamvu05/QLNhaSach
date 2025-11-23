@@ -34,16 +34,17 @@ const CategoryController = {
     // --- PHẦN CHO ADMIN (Giữ nguyên khung sườn cũ của cậu) ---
 
     // GET /admin/category
-    async getViewAll(req, res, next) {
+    async getViewManager(req, res, next) {
         try {
-            const { page } = req.query
-            const data = await CategoryService.getWithPage(page)
+            const query = req.query
+            const data = await CategoryService.getWithParam(query)
             res.render('admin/viewManager', {
                 scripts: ['/js/category.admin.js'],
                 categories: data.categories,
                 currentPage: data.currentPage,
                 totalPage: data.totalPage,
-                totalItem: data.categories.length,
+                totalItem: data.totalItem,
+                totalItemPerPage: data.categories.length,
                 PAGE_LIMIT: data.PAGE_LIMIT,
                 entityName: 'thể loại',
                 tablePartial: 'partials/category/tableCategory',
@@ -73,15 +74,16 @@ const CategoryController = {
         }
 
         try {
-            const { page } = req.query
-            const data = await CategoryService.getWithPage(page)
+            const query = req.query
+            const data = await CategoryService.getWithParam(query)
             const table = await renderPartial(
                 'admin/partials/category/tableCategory',
                 {
                     categories: data.categories,
                     currentPage: data.currentPage,
                     totalPage: data.totalPage,
-                    totalItem: data.categories.length,
+                    totalItem:  data.totalItem,
+                    totalItemPerPage: data.categories.length,
                     PAGE_LIMIT: data.PAGE_LIMIT,
                 }
             )

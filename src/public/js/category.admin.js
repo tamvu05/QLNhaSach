@@ -43,15 +43,13 @@ if (btnAddCategory) {
                         `Lỗi HTTP ${res.status}: Thao tác thất bại.`
                 )
 
-            const dataAttributeElement =
-                tableWrapper.querySelector('#data-attribute')
-            const pageLimit = dataAttributeElement.dataset.pageLimit
-            const totalItem = dataAttributeElement.dataset.totalItem
-            const currentPage = dataAttributeElement.dataset.currentPage
-            let targetPage = totalItem < pageLimit ? currentPage : Number(currentPage) + 1
-            console.log(targetPage);
+            // const dataAttributeElement = tableWrapper.querySelector('#data-attribute')
+            // const pageLimit = Number(dataAttributeElement.dataset.pageLimit)
+            // const totalItem = Number(dataAttributeElement.dataset.totalItem)
+            // const totalPage = Number(dataAttributeElement.dataset.totalPage)
+            // let targetPage = totalItem % pageLimit  !== 0 ? totalPage : totalPage + 1
 
-            updateView(targetPage)
+            updateView(1)
             showToast('Đã thêm thể loại', 'success')
 
             if (addModal) {
@@ -94,9 +92,10 @@ if (addModal) {
 }
 
 /**
- * Element của Update Modal
+ * Tất cả xử lý có dính tới thành phần của Table
  * Xử lý Delete button
  * Xử lý Update button
+ * Xử lý sort dữ liệu
  */
 
 if (tableWrapper) {
@@ -112,9 +111,15 @@ if (tableWrapper) {
         if (btnUpdate) {
             await showModalUpdate(btnUpdate)
         }
+
+        const sortableHeader = event.target.closest('tr i.sortable')
+        if (sortableHeader) {
+            sortData(sortableHeader)
+        }
     }
 }
 
+// Delete
 async function deleteCategory(btnDelete) {
     const rowElement = btnDelete.parentElement.parentElement
     const MaTL = rowElement.dataset.id
@@ -133,10 +138,12 @@ async function deleteCategory(btnDelete) {
                         `Lỗi HTTP ${res.status}: Thao tác thất bại.`
                 )
 
-            const dataAttributeElement = tableWrapper.querySelector('#data-attribute')
+            const dataAttributeElement =
+                tableWrapper.querySelector('#data-attribute')
             let targetPage = dataAttributeElement.dataset.currentPage
 
-            if (dataAttributeElement.dataset.totalItem < 2) targetPage -= 1
+            if (dataAttributeElement.dataset.totalItemPerPage < 2)
+                targetPage -= 1
 
             updateView(targetPage)
             showToast('Đã xóa thể loại', 'success')
@@ -183,7 +190,7 @@ async function showModalUpdate(btnUpdate) {
     }
 }
 
-// Chỉnh sửa thể loại
+// Update
 const btnUpdate = updateModal.querySelector('.btn-update-category-name')
 const updateNameElement = updateModal.querySelector('#update-category-name')
 const updateDescElement = updateModal.querySelector('#update-category-desc')
@@ -221,7 +228,8 @@ if (btnUpdate) {
 
             const dataAttributeElement =
                 tableWrapper.querySelector('#data-attribute')
-            updateView(dataAttributeElement.dataset.currentPage)
+            const currentPage = dataAttributeElement.dataset.currentPage
+            updateView(currentPage)
             showToast('Đã cập nhật thể loại', 'success')
 
             if (updateModal) {
@@ -237,6 +245,37 @@ if (btnUpdate) {
             showToast(error.message, 'danger')
         }
     }
+}
+
+// Sort data
+function sortData(currentHeader) {
+    const sortableHeaders = tableWrapper.querySelectorAll('tr .sortable')
+    // 1. Loại bỏ trạng thái sắp xếp của các cột khác (Đưa về icon mặc định)
+    sortableHeaders.forEach((h) => {
+        if (h !== currentHeader) {
+            h.removeAttribute('data-order') // Xóa data-order để áp dụng CSS mặc định
+        }
+    })
+
+    // 2. Chuyển đổi trạng thái sắp xếp của cột hiện tại
+    let currentOrder = currentHeader.getAttribute('data-order')
+    let newOrder
+
+    if (currentOrder === 'asc') {
+        newOrder = 'desc'
+    } else if (currentOrder === 'desc') {
+        newOrder = 'asc'
+    } else {
+        newOrder = 'desc'
+    }
+
+    currentHeader.setAttribute('data-order', newOrder)
+
+    const currentPage =
+        tableWrapper.querySelector('#data-attribute').dataset.currentPage
+    const sort = currentHeader.dataset.sort
+
+    updateView(currentPage, sort, newOrder)
 }
 
 // Loại bỏ element thông báo invalid
@@ -268,26 +307,43 @@ if (updateModal) {
  * @param {*} page : page muốn chuyển đến
  */
 
-async function updateView(page = 1) {
+async function updateView(page = 1, sort, order) {
     try {
         if (isNaN(page) || Number(page) < 1) page = 1
 
-        const res = await fetch(`/api/category/partials?page=${page}`)
+        let query = `page=${page}`
+        if (sort) query += `&sort=${sort}`
+        if (order) query += `&order=${order}`
+
+        const res = await fetch(`/api/category/partials?${query}`)
         const data = await res.json()
 
-        if(!res.ok) {
+        if (!res.ok) {
             throw new Error(data.message || `Lỗi không xác định: ${res.status}`)
         }
 
         if (tableWrapper) tableWrapper.innerHTML = data.table
         if (paginationWrapper) paginationWrapper.innerHTML = data.pagination
 
+        updateSortIcon(sort, order)
+
         // Cập nhật lại URL trình duyệt mà kh reload trang
-        const currentUrl = new URL(window.location.href)
-        currentUrl.searchParams.set('page', page)
-        history.pushState(null, '', currentUrl.toString())
+        //const currentUrl = new URL(window.location.href)
+        //currentUrl.searchParams.set('page', page)
+        //history.pushState(null, '', currentUrl.toString())
     } catch (error) {
         // console.log(error)
         showToast(error.message, 'danger')
     }
+}
+
+// Update sort icon
+function updateSortIcon(sortKey, sortOrder) {
+    const sortableHeaders = tableWrapper.querySelectorAll('tr i.sortable')
+    sortableHeaders.forEach((h) => {
+        if (h.dataset.sort === sortKey) {
+            h.setAttribute('data-order', sortOrder)
+            return
+        }
+    })
 }

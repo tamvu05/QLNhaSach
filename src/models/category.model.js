@@ -13,9 +13,9 @@ const CategoryModel = {
         return rows
     },
 
-    async getLimit(limit, offset) {
+    async getWithParam(limit, offset, sortBy = 'MaTL', sortOrder = 'DESC') {
         const [rows] = await pool.query(
-            'SELECT * FROM TheLoai LIMIT ? OFFSET ?',
+            `SELECT * FROM TheLoai ORDER BY ${sortBy} ${sortOrder} LIMIT ? OFFSET ?`,
             [limit, offset]
         )
         return rows

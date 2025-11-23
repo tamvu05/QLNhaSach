@@ -2,6 +2,7 @@
     data-current-page = '<%= currentPage %>'
     data-total-page = '<%= totalPage %>'
     data-total-item = '<%= totalItem %>'
+    data-total-item-per-page = '<%= totalItemPerPage %>'
     data-page-limit = '<%= PAGE_LIMIT %>'
 ></div>
 
@@ -9,13 +10,11 @@
     <thead>
         <tr>
             <th>STT</th>
-            <th class="sortable" data-sort-by="TenTL">
-                Tên thể loại 
-                <i class="fas fa-sort-up text-muted"></i> 
+            <th>
+                <i class="sortable" data-sort="TenTL" >Tên thể loại </i>
             </th>
-            <th class="sortable" data-sort-by="MoTa">
-                Mô tả 
-                <i class="fas fa-sort-down text-muted"></i>
+            <th>
+                <i class="sortable" data-sort="MoTa" >Mô tả</i>
             </th>
             <th>Thao tác</th>
         </tr>
@@ -27,7 +26,7 @@
             <% categories.forEach((category, index)=> { %>
 
                 <tr data-id="<%= category.MaTL %>">
-                    <td class="stt">
+                    <td>
                         <%= index + 1 %>
                     </td>
                     <td class="name">
@@ -60,3 +59,41 @@
     </tbody>
 </table>
 
+
+<style>
+    /**
+    * Tạo icon cho cột cần sort
+    */
+
+    th i.sortable {
+        font-style: normal;
+        position: relative; 
+        cursor: pointer;
+        padding-right: 25px; 
+    }
+
+    /* 3. Icon cho trạng thái MẶC ĐỊNH */
+    th i.sortable::after {
+        font-family: "Font Awesome 5 Free"; 
+        font-weight: 900;
+        content: "\f0dc"; /* Unicode cho fa-sort (biểu tượng mặc định) */
+        color: #ccc;
+        
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    /* 3. Icon cho trạng thái SẮP XẾP TĂNG DẦN (ASC) */
+    th i.sortable[data-order="asc"]::after {
+        content: "\f0de"; /* Unicode cho fa-sort-up */
+        color: #333; 
+    }
+
+    /* 4. Icon cho trạng thái SẮP XẾP GIẢM DẦN (DESC) */
+    th i.sortable[data-order="desc"]::after {
+        content: "\f0dd"; /* Unicode cho fa-sort-down */
+        color: #333; 
+    }
+</style>

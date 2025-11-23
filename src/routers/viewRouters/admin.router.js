@@ -4,7 +4,7 @@ import CategoryController from '../../controllers/category.controller.js'
 
 const router = express.Router()
 
-router.get('/category', CategoryController.getViewAll)
+router.get('/category', CategoryController.getViewManager)
 router.get('/book', BookController.getAll)
 
 router.get('/', (req, res, next) => {

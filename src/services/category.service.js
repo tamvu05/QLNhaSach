@@ -19,7 +19,9 @@ const CategoryService = {
     },
 
     // Truyền page nếu cần phân trang, không truyền thì lấy tất cả
-    async getWithPage(page) {
+    async getWithParam(query) {
+        const {page, sort, order} = query
+
         let currentPage = Number(page)
         let limit = Number(PAGE_LIMIT)
 
@@ -33,13 +35,22 @@ const CategoryService = {
 
         const offset = (currentPage - 1) * limit
 
-        const categories = await CategoryModel.getLimit(limit, offset)
+        const validParam = ['MaTL', 'TenTL', 'MoTa', 'ASC', 'asc', 'DESC', 'desc']
+
+        const sortBy = validParam.includes(sort) ? sort : 'MaTL'
+        const sortOrder = validParam.includes(order) ? order : 'DESC'
+        
+
+        const categories = await CategoryModel.getWithParam(limit, offset, sortBy, sortOrder)
+        const totalItem = await CategoryModel.getTotal()
+
         return {
             categories,
             currentPage,
             limit,
             totalPage,
             total,
+            totalItem,
             PAGE_LIMIT,
         }
     },
