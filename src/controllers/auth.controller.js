@@ -36,13 +36,32 @@ const AuthController = {
 
     async handleLogin(req, res) {
         try {
-            const { email, password } = req.body;
+            // Lấy thêm biến remember từ form
+            const { email, password, remember } = req.body;
+
             const user = await AuthService.login(email, password);
+            
+            // Lưu thông tin vào session
             req.session.user = user;
+
+            // --- LOGIC GHI NHỚ ĐĂNG NHẬP ---
+            if (remember === 'on') {
+                // Nếu tích: Gia hạn cookie lên 30 ngày
+                req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; 
+            } else {
+                // Không tích: Để mặc định (theo cấu hình app.js là 24h)
+                // Hoặc muốn tắt trình duyệt là mất thì set = null
+                req.session.cookie.expires = null; 
+            }
+            // -------------------------------
+
             res.redirect('/');
+
         } catch (err) {
             res.render('user/login', {
-                title: 'Đăng nhập - BookStore', path: '/login', error: err.message
+                title: 'Đăng nhập - BookStore',
+                path: '/login',
+                error: err.message
             });
         }
     },

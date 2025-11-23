@@ -57,9 +57,10 @@ const AuthService = {
         const customer = customers[0];
 
         return {
-            id: user.MaTK,
+            id: user.MaTK,          // ID Tài khoản
             email: user.TenDangNhap,
             roleId: user.MaVT,
+            customerId: customer ? customer.MaKH : null, 
             fullname: customer ? customer.HoTen : 'Khách hàng'
         };
     },

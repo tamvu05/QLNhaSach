@@ -8,6 +8,7 @@ import session from 'express-session'
 import router from './routers/index.js'
 import path from 'path'
 import expressEjsLayouts from 'express-ejs-layouts'
+import CartService from './services/cart.service.js'
 
 const app = express()
 const __dirname = import.meta.dirname
@@ -32,8 +33,17 @@ app.use(session({
 
 // TRUYỀN USER XUỐNG VIEW (Thêm đoạn này) 
 // Giúp tất cả file .ejs đều dùng được biến 'user' mà không cần truyền thủ công ở từng Controller
-app.use((req, res, next) => {
+app.use(async(req, res, next) => {
     res.locals.user = req.session.user || null; 
+
+    // --- ĐOẠN MỚI: Lấy số lượng giỏ hàng thật từ DB ---
+    if (req.session.user && req.session.user.customerId) {
+        const count = await CartService.getCartCount(req.session.user.customerId);
+        res.locals.totalQuantity = count;
+    } else {
+        res.locals.totalQuantity = 0;
+    }
+
     next();
 });
 // --------------------------------------------

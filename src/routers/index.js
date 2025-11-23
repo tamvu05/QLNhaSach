@@ -1,26 +1,53 @@
 import express from 'express'
-import viewRouter from './viewRouters/index.js'
+
+// 1. Import trực tiếp các Router giao diện (Thay vì qua file trung gian)
+import adminRouter from './viewRouters/admin.router.js'
+import userRouter from './viewRouters/user.router.js'
+import cartRouter from './viewRouters/cart.router.js'
+
+// 2. Import Router API (Giữ nguyên cái này vì thư mục apiRouters vẫn còn)
 import apiRouter from './apiRouters/index.js'
 
 const router = express.Router()
 
-const asyncHandler = (fn) => (req, res, next) =>
-    Promise.resolve(fn(req, res, next)).catch(next)
+// 3. Định nghĩa các luồng đi (Routes)
 
-router.use('/api', asyncHandler(apiRouter))
-router.use('/', asyncHandler(viewRouter))
+// -> Đường dẫn cho Admin
+router.use('/admin', adminRouter)
 
-// handling error
+// -> Đường dẫn cho Giỏ hàng
+router.use('/cart', cartRouter)
+
+// -> Đường dẫn cho API (Trả về JSON)
+router.use('/api', apiRouter)
+
+// -> Đường dẫn cho Khách hàng (Trang chủ, Sách...) - Để cuối cùng
+router.use('/', userRouter)
+
+// 4. Xử lý lỗi tập trung (Error Handling)
 router.use((err, req, res, next) => {
-   
-    const status = err.status || 500; 
+    console.error('❌ Lỗi hệ thống:', err); // In lỗi ra Terminal để cậu sửa
+
+    const status = err.status || 500;
     const message = err.message || 'Lỗi hệ thống không xác định';
-    
-    res.status(status).json({
-        success: false,
-        status: status,
-        message: message
-    });
+
+    // Nếu lỗi xảy ra trong khi gọi API -> Trả về JSON
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/cart')) {
+        return res.status(status).json({
+            success: false,
+            status: status,
+            message: message
+        });
+    }
+
+    // Nếu lỗi xảy ra ở giao diện Web -> Trả về trang báo lỗi đẹp (hoặc text tạm)
+    res.status(status).send(`
+        <div style="text-align: center; padding: 50px;">
+            <h1>⚠️ Đã có lỗi xảy ra!</h1>
+            <p>${message}</p>
+            <a href="/">Quay về trang chủ</a>
+        </div>
+    `);
 });
 
 export default router

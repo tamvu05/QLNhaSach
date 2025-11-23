@@ -113,7 +113,9 @@
                                 <span class="text-primary fw-bold fs-5">
                                     <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.DonGia) %>
                                 </span>
-                                <button class="btn btn-light text-primary btn-sm border rounded-circle hover-bg-primary" style="width: 35px; height: 35px;">
+                                <button class="btn btn-light text-primary btn-sm border rounded-circle hover-bg-primary btn-add-cart" 
+                                        data-id="<%= book.id %>" 
+                                        style="width: 35px; height: 35px;">
                                     <i class="bi bi-bag-plus-fill"></i>
                                 </button>
                             </div>
