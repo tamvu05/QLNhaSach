@@ -46,10 +46,10 @@
 
                 <% } %>
 
-                <a href="#" class="btn btn-light text-primary rounded-pill position-relative btn-sm px-3 shadow-sm">
+                <a href="/cart" class="btn btn-light text-primary rounded-pill position-relative btn-sm px-3 shadow-sm">
                     <i class="bi bi-cart-fill me-1"></i> 
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
-                        0
+                        <%= typeof totalQuantity !== 'undefined' ? totalQuantity : 0 %>
                     </span>
                 </a>
             </div>
