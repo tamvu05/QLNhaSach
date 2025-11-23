@@ -1,0 +1,26 @@
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-body p-5 text-center">
+                    <h3 class="fw-bold mb-3">Nhập Mã Xác Minh</h3>
+                    <p class="text-muted small mb-4">Mã 6 số đã được gửi tới: <strong><%= email %></strong></p>
+
+                    <% if (error) { %> <div class="alert alert-danger py-2 small"><%= error %></div> <% } %>
+
+                    <form action="/verify-code" method="POST">
+                        <input type="hidden" name="email" value="<%= email %>">
+                        
+                        <div class="form-floating mb-4">
+                            <input type="text" class="form-control rounded-pill px-4 text-center fw-bold fs-4 tracking-widest" 
+                                   name="otp" placeholder="XXXXXX" maxlength="6" required autocomplete="off">
+                            <label class="w-100 text-center">Nhập 6 số OTP</label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold">Xác Nhận</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

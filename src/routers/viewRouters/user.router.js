@@ -38,4 +38,10 @@ router.post('/register', AuthController.handleRegister);
 router.get('/profile', UserController.getProfile);
 router.post('/profile/update', UserController.updateProfile); 
 
+// --- QUÊN MẬT KHẨU ---
+router.get('/forgot-password', AuthController.forgotPasswordPage);
+router.post('/forgot-password', AuthController.handleForgotPassword); // B1: Gửi Email
+router.post('/verify-code', AuthController.handleVerifyCode);         // B2: Check Mã
+router.post('/reset-password', AuthController.handleResetPassword);   // B3: Đổi Pass
+
 export default router
