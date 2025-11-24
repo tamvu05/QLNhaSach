@@ -4,6 +4,7 @@ import express from 'express'
 import adminRouter from './viewRouters/admin.router.js'
 import userRouter from './viewRouters/user.router.js'
 import cartRouter from './viewRouters/cart.router.js'
+import checkoutRouter from './viewRouters/checkout.router.js'
 
 // 2. Import Router API (Giữ nguyên cái này vì thư mục apiRouters vẫn còn)
 import apiRouter from './apiRouters/index.js'
@@ -23,6 +24,9 @@ router.use('/api', apiRouter)
 
 // -> Đường dẫn cho Khách hàng (Trang chủ, Sách...) - Để cuối cùng
 router.use('/', userRouter)
+
+// -> Đường dẫn cho thanh toán
+router.use('/checkout', checkoutRouter)
 
 // 4. Xử lý lỗi tập trung (Error Handling)
 router.use((err, req, res, next) => {
