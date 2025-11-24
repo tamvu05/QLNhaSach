@@ -1,0 +1,62 @@
+<div class="container py-5">
+    <h3 class="fw-bold mb-4 text-primary"><i class="bi bi-clock-history"></i> Lịch Sử Đơn Hàng</h3>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="py-3 ps-4">Mã đơn</th>
+                        <th class="py-3">Ngày đặt</th>
+                        <th class="py-3">Người nhận</th>
+                        <th class="py-3">Tổng tiền</th>
+                        <th class="py-3">Trạng thái</th>
+                        <th class="py-3 text-end pe-4">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (orders && orders.length > 0) { %>
+                        <% orders.forEach(order => { %>
+                            <tr>
+                                <td class="ps-4 fw-bold text-primary">#<%= order.MaPX %></td>
+                                <td><%= new Date(order.NgayXuat).toLocaleDateString('vi-VN') %></td>
+                                <td>
+                                    <div class="fw-bold text-dark"><%= order.TenNguoiNhan %></div>
+                                    <div class="small"><%= order.DiaChiNhan %></div>
+                                    <small class="text-muted"><%= order.SDT %></small>
+                                </td>
+                                <td class="fw-bold text-danger">
+                                    <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.TongTien) %>
+                                </td>
+                                <td>
+                                    <% if (order.TrangThai === 'CHO_XAC_NHAN') { %>
+                                        <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                    <% } else if (order.TrangThai === 'DANG_GIAO') { %>
+                                        <span class="badge bg-primary">Đang giao</span>
+                                    <% } else if (order.TrangThai === 'DA_GIAO') { %>
+                                        <span class="badge bg-success">Thành công</span>
+                                    <% } else { %>
+                                        <span class="badge bg-danger">Đã hủy</span>
+                                    <% } %>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="/order/detail/<%= order.MaPX %>" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        Xem
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 opacity-25"></i>
+                                <p class="mt-2">Bạn chưa có đơn hàng nào.</p>
+                                <a href="/book" class="btn btn-primary btn-sm rounded-pill">Mua sắm ngay</a>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

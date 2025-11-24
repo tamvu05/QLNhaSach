@@ -6,7 +6,9 @@ const CheckoutService = {
     async placeOrder(customerId, orderInfo) {
         let connection;
         try {
-            const { diaChi, sdt, ghiChu } = orderInfo;
+            // 👇 SỬA DÒNG NÀY: Thêm 'nguoiNhan' vào danh sách lấy ra
+            const { nguoiNhan, diaChi, sdt, ghiChu } = orderInfo;
+            // -----------------------------------------------------
 
             // 1. Lấy thông tin giỏ hàng hiện tại
             const cartData = await CartService.getCartDetails(customerId);
@@ -17,10 +19,11 @@ const CheckoutService = {
             await connection.beginTransaction();
 
             // 3. Tạo Đơn hàng (PhieuXuat)
+            // Lưu ý: Thứ tự biến trong mảng [] phải khớp với dấu ? trong câu SQL
             const [orderResult] = await connection.query(
-                `INSERT INTO PhieuXuat (MaKH, NgayXuat, TongTien, DiaChiNhan, SDT, MucDich, TrangThai) 
-                 VALUES (?, NOW(), ?, ?, ?, ?, 'CHO_XAC_NHAN')`,
-                [customerId, cartData.grandTotal, diaChi, sdt, ghiChu || 'Mua online']
+                `INSERT INTO PhieuXuat (MaKH, NgayXuat, TongTien, TenNguoiNhan, DiaChiNhan, SDT, MucDich, TrangThai) 
+                 VALUES (?, NOW(), ?, ?, ?, ?, ?, 'CHO_XAC_NHAN')`,
+                [customerId, cartData.grandTotal, nguoiNhan, diaChi, sdt, ghiChu || 'Mua online']
             );
             const orderId = orderResult.insertId; // Lấy mã đơn hàng vừa tạo
 
@@ -31,8 +34,6 @@ const CheckoutService = {
                      VALUES (?, ?, ?, ?)`,
                     [orderId, item.MaSach, item.SoLuong, item.DonGia]
                 );
-                
-                // (Tùy chọn: Trừ tồn kho sách tại đây nếu muốn)
             }
 
             // 5. Xóa sạch Giỏ hàng của khách
