@@ -1,4 +1,6 @@
 import CategoryService from '../services/category.service.js'
+import exportFileExcel from '../utils/exportFileExcel.js'
+import { categoryConfig } from '../configs/adminView.config.js'
 
 const CategoryController = {
     // --- PHẦN CHO USER (Giao diện khách hàng) ---
@@ -39,19 +41,22 @@ const CategoryController = {
             const query = req.query
             const data = await CategoryService.getWithParam(query)
             res.render('admin/viewManager', {
-                scripts: ['/js/category.admin.js'],
                 categories: data.categories,
                 currentPage: data.currentPage,
                 totalPage: data.totalPage,
                 totalItem: data.totalItem,
                 totalItemPerPage: data.categories.length,
                 PAGE_LIMIT: data.PAGE_LIMIT,
-                entityName: 'thể loại',
-                tablePartial: 'partials/category/tableCategory',
-                modalAddSelector: '#add-category-modal',
-                modalAddPartial: 'partials/category/modalAddCategory',
-                modalUpdatePartial: 'partials/category/modalUpdateCategory',
-                hrefPagination: '/admin/category/',
+                scripts: categoryConfig.scripts,
+                entityName: categoryConfig.entityName,
+                tablePartial: categoryConfig.tablePartial,
+                modalAddSelector: categoryConfig.modalAddSelector,
+                modalAddPartial: categoryConfig.modalAddPartial,
+                modalUpdatePartial: categoryConfig.modalUpdatePartial,
+                hrefBase: categoryConfig.hrefBase,
+                apiBase: categoryConfig.apiBase,
+                modalAddId: categoryConfig.modalAddId,
+                modalUpdateId: categoryConfig.modalUpdateId,
             })
         } catch (err) {
             next(err)
@@ -93,7 +98,8 @@ const CategoryController = {
                 {
                     currentPage: data.currentPage,
                     totalPage: data.totalPage,
-                    hrefPagination: '/admin/category/',
+                    hrefBase: categoryConfig.hrefBase,
+                    apiBase: categoryConfig.apiBase,
                 }
             )
 
@@ -148,6 +154,30 @@ const CategoryController = {
             return res.json({ success })
         } catch (err) {
             next(err)
+        }
+    },
+
+    // /api/category/export 
+    async export(req, res, next) {
+        try {
+            const categories = await CategoryService.getAll()
+            const excelData = categories.map(data => {
+                return {
+                    'Tên thể loại': data.TenTL,
+                    'Mô tả': data.MoTa,
+                }
+            })
+
+            const fileBuffer = exportFileExcel(excelData)
+            const filename = 'DanhSachTheLoai.xlsx'
+            
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`)
+            res.setHeader('Content-Length', fileBuffer.length)
+
+            res.send(fileBuffer)
+        } catch (error) {
+            next(error)
         }
     },
 }

@@ -1,45 +1,126 @@
 <div class="sidebar-admin">
-    <span>Trang quản trị</span>
+    <div class="sidebar-header">Trang quản trị</div>
 
-    <!-- Sidebar Menu -->
     <div class="sidebar-menu">
-        <ul class="nav  flex-column">
+        <ul class="nav flex-column">
             <li class="nav-item">
                 <a href="/admin">
-                    <i class="fa-regular fa-house"></i>
-                    <span>Trang chủ</span>
+                    <i class="fas fa-tachometer-alt"></i> <span>Trang chủ</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="/admin/author">
-                    <i class="fa-regular fa-house"></i>
-                    <span>Danh mục tác giả</span>
+                    <i class="fas fa-pen-nib"></i> <span>Danh mục tác giả</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="/admin/category">
-                    <i class="fa-regular fa-house"></i>
-                    <span>Danh mục thể loại</span>
+                    <i class="fas fa-layer-group"></i> <span>Danh mục thể loại</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="/admin/publisher">
-                    <i class="fa-regular fa-house"></i>
-                    <span>Danh mục nhà xuất bản</span>
+                    <i class="fas fa-building"></i> <span>Danh mục nhà xuất bản</span>
                 </a>
             </li>
 
             <li class="nav-item">
                 <a href="/admin/book">
-                    <i class="fa-regular fa-house"></i>
-                    <span>Danh mục sách</span>
+                    <i class="fas fa-book"></i> <span>Danh mục sách</span>
                 </a>
             </li>
-
         </ul>
     </div>
-
 </div>
+
+
+<style>
+    /* Màu sắc đề xuất:
+   - Màu nền sidebar: #2c3e50 (Dark Blue/Navy)
+   - Màu chữ mặc định: #ecf0f1 (Light Gray)
+   - Màu chữ hover/active: #ffffff (White)
+   - Màu nhấn hover: #3498db (Bright Blue)
+*/
+
+    .sidebar-admin {
+        width: 250px;
+        height: 100%;
+        min-height: 100vh;
+        /* Chiều cao đầy đủ của khung nhìn */
+        background-color: #2c3e50;
+        /* Màu nền tối */
+        color: #ecf0f1;
+        /* Màu chữ mặc định */
+        padding-top: 20px;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+        /* Thêm chuyển động mượt mà cho hiệu ứng */
+        font-family: Arial, sans-serif;
+        /* Chọn font dễ đọc */
+    }
+
+    /* Tiêu đề "Trang quản trị" */
+    .sidebar-header {
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-align: center;
+        padding: 15px 0 25px 0;
+        letter-spacing: 1px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 15px;
+    }
+
+    /* Thiết lập cơ bản cho Menu */
+    .sidebar-menu .nav {
+        list-style: none;
+        padding: 0;
+    }
+
+    .sidebar-menu .nav-item {
+        margin: 5px 0;
+    }
+
+    /* Kiểu cho thẻ <a> (liên kết) */
+    .sidebar-menu a {
+        display: flex;
+        /* Dùng flexbox để căn chỉnh icon và text */
+        align-items: center;
+        padding: 12px 20px;
+        color: #ecf0f1;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        /* Chuyển đổi mượt mà */
+        border-left: 5px solid transparent;
+        /* Tạo không gian cho hiệu ứng border trái */
+    }
+
+    /* Hiệu ứng hover cho liên kết */
+    .sidebar-menu a:hover {
+        background-color: #34495e;
+        /* Màu nền hơi sáng hơn khi hover */
+        color: #ffffff;
+        /* Màu chữ trắng khi hover */
+        border-left-color: #3498db;
+        /* Hiệu ứng đường viền màu xanh */
+    }
+
+    /* Kiểu cho Icon */
+    .sidebar-menu a i {
+        font-size: 1.1rem;
+        margin-right: 15px;
+        /* Khoảng cách giữa icon và chữ */
+        width: 20px;
+        /* Đảm bảo icon có cùng chiều rộng */
+        text-align: center;
+    }
+
+    /* Kiểu cho chữ */
+    .sidebar-menu a span {
+        flex-grow: 1;
+        /* Cho phép chữ lấp đầy phần còn lại */
+    }
+</style>

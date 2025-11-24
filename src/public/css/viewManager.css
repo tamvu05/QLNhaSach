@@ -1,0 +1,374 @@
+/**
+    CSS cho viewManager.ejs
+*/
+
+/* Tiêu đề trang */
+.header-section {
+    border-bottom: 2px solid #e9ecef;
+    /* Đường kẻ phân cách */
+    margin-bottom: 2rem !important;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #343a40;
+}
+
+/* Nút Thêm Thể loại (Nút chính) */
+.btn-add-primary {
+    /* Màu xanh dương tươi hơn */
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    /* Bo góc mềm mại */
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    /* Bóng đổ nổi bật */
+    transition: all 0.2s ease;
+}
+
+.btn-add-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
+    color: white;
+    /* Đảm bảo màu chữ không đổi */
+}
+
+/* Nút Xuất Excel (Nút phụ) */
+.export-button {
+    font-weight: 500;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    border: 1px solid #28a745;
+    color: #28a745;
+    transition: all 0.2s ease;
+}
+
+.export-button:hover {
+    background-color: #28a745;
+    color: white;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+/* Thanh tìm kiếm */
+.search-card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    /* Bóng đổ rõ ràng hơn */
+}
+
+.search-input-group .form-control {
+    border-radius: 8px 0 0 8px;
+    border-right: none;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+.search-button {
+    /* Giữ màu tím như cũ nhưng với style hiện đại hơn */
+    background-color: #6f42c1 !important;
+    color: white;
+    border-radius: 0 8px 8px 0;
+    transition: background-color 0.2s ease;
+}
+
+.search-button:hover {
+    background-color: #5d36a3 !important;
+}
+
+/* Điều chỉnh khoảng cách giữa các cột trong hàng hành động trên màn hình nhỏ */
+@media (max-width: 767.98px) {
+    .action-buttons-row {
+        justify-content: start !important;
+        /* Đẩy các nút sang trái trên di động */
+        margin-top: 1rem;
+    }
+
+    .action-buttons-row>div {
+        margin-right: 0.75rem !important;
+    }
+}
+
+
+
+/**
+    CSS cho partial table
+*/
+
+/* --- BASE STYLES & LAYOUT IMPROVEMENTS --- */
+
+.table-responsive-wrapper {
+    /* Thêm shadow nhẹ cho bảng */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Đổi tên class nếu bạn đã đổi tên nó */
+.table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    /* Loại bỏ border Bootstrap mặc định */
+    border: none !important;
+}
+
+/* --- HEADER STYLES --- */
+
+.table thead th {
+    /* Nền đậm, hiện đại cho Header */
+    background-color: #f7f9fc;
+    color: #495057;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 1rem 1.25rem;
+    /* Tăng padding */
+    border-bottom: 2px solid #e9ecef;
+    /* Thuộc tính quan trọng: Ngăn chặn việc tô chọn văn bản */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Làm tròn góc trên của bảng */
+.table thead tr:first-child th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.table thead tr:first-child th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* --- BODY ROW STYLES --- */
+
+.table tbody tr {
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.table tbody tr:hover {
+    background-color: #eef3f8 !important;
+    /* Hiệu ứng hover nổi bật hơn */
+    box-shadow: inset 3px 0 0 0 #3498db;
+    /* Thanh highlight màu xanh bên trái */
+}
+
+.table tbody tr td {
+    padding: 1rem 1.25rem;
+    /* Padding đồng nhất */
+    border-top: 1px solid #f0f0f0;
+}
+
+/* Giữ style striped/zebra của Bootstrap nhưng tinh tế hơn */
+.table.table-striped>tbody>tr:nth-of-type(odd)>* {
+    background-color: #fafafa;
+}
+
+.table.table-striped>tbody>tr:nth-of-type(odd):hover>* {
+    background-color: #eef3f8 !important;
+    /* Đảm bảo hover vẫn hoạt động trên sọc */
+}
+
+/* --- COLUMN SPECIFIC STYLES --- */
+
+.table .stt-col {
+    width: 5%;
+    font-weight: 500;
+    color: #888;
+}
+
+.table .name {
+    color: #212529;
+    /* Màu đậm cho tên thể loại */
+    font-weight: 600;
+}
+
+.table .desc {
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.table .action-col {
+    width: 15%;
+}
+
+/* --- ACTION BUTTON STYLES --- */
+
+.action-btn {
+    /* Nút hiện đại, bo góc tròn hơn */
+    border-radius: 50%;
+    /* Làm tròn thành hình tròn */
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: none;
+    margin: 0 3px;
+}
+
+.edit-btn {
+    background-color: #3498db;
+    /* Màu xanh dương hiện đại (Blue) */
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+}
+
+.delete-btn {
+    background-color: #e74c3c;
+    /* Màu đỏ nổi bật (Red) */
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+}
+
+/* --- SORTABLE ICON STYLES (Giữ nguyên logic của bạn) --- */
+
+th i.sortable {
+    font-style: normal;
+    position: relative;
+    cursor: pointer;
+    padding-right: 25px;
+    transition: color 0.2s ease;
+}
+
+/* 3. Icon cho trạng thái MẶC ĐỊNH */
+th i.sortable::after {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: "\f0dc";
+    /* Unicode cho fa-sort (biểu tượng mặc định) */
+    color: #ced4da;
+    /* Màu xám nhạt, tinh tế hơn */
+    font-size: 0.8rem;
+    /* Giảm kích thước icon */
+
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* 3. Icon cho trạng thái SẮP XẾP TĂNG DẦN (ASC) */
+th i.sortable[data-order="asc"]::after {
+    content: "\f0de";
+    /* Unicode cho fa-sort-up */
+    color: #3f3f3f;
+    /* Màu highlight */
+}
+
+/* 4. Icon cho trạng thái SẮP XẾP GIẢM DẦN (DESC) */
+th i.sortable[data-order="desc"]::after {
+    content: "\f0dd";
+    /* Unicode cho fa-sort-down */
+    color: #3f3f3f;
+    /* Màu highlight */
+}
+
+
+/**
+    CSS cho partial modal
+*/
+
+/* --- Cấu trúc Modal --- */
+.modal-content {
+    border-radius: 10px;
+    /* Bo góc mềm mại hơn */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    /* Đổ bóng sâu hơn, chuyên nghiệp */
+}
+
+/* --- Modal Header --- */
+.modal-header {
+    background-color: #f8f9fa;
+    /* Nền nhẹ nhàng cho header */
+    border-bottom: 1px solid #e1e4e8;
+    padding: 18px 25px;
+}
+
+.modal-title {
+    font-weight: 600;
+    color: #34495e;
+}
+
+/* --- Modal Body & Input Fields --- */
+.modal-body {
+    padding: 25px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+}
+
+/* Tinh chỉnh cho input và textarea */
+.form-control {
+    border: 1px solid #dcdfe6;
+    border-radius: 6px;
+    padding: 10px 12px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    outline: none;
+}
+
+/* --- Modal Footer & Buttons --- */
+.modal-footer {
+    border-top: 1px solid #e1e4e8;
+    padding: 15px 25px;
+    justify-content: flex-end;
+}
+
+/* Hiệu ứng Nút */
+.modal-footer .btn {
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+}
+
+.modal-footer .btn-secondary {
+    background-color: #95a5a6;
+    border-color: #95a5a6;
+}
+
+.modal-footer .btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+}
+
+.modal-footer .btn-secondary:hover {
+    background-color: #7f8c8d;
+    border-color: #7f8c8d;
+    transform: translateY(-1px);
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+    transform: translateY(-1px);
+}

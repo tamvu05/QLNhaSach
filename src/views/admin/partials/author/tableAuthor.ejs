@@ -8,7 +8,7 @@
             <tr>
                 <th>STT</th>
                 <th>
-                    <i class="sortable" data-sort="TenTL">Tên thể loại</i>
+                    <i class="sortable" data-sort="TenTG">Tên tác giả</i>
                 </th>
                 <th>
                     <i class="sortable" data-sort="MoTa">Mô tả</i>
@@ -18,19 +18,19 @@
         </thead>
         <tbody>
 
-            <% if (categories.length> 0) { %>
+            <% if (authors.length> 0) { %>
 
-                <% categories.forEach((category, index)=> { %>
+                <% authors.forEach((author, index)=> { %>
 
-                    <tr data-id="<%= category.MaTL %>">
+                    <tr data-id="<%= author.MaTG %>">
                         <td class="stt-col">
                             <%= index + 1 %>
                         </td>
                         <td class="name font-weight-bold">
-                            <%= category.TenTL %>
+                            <%= author.TenTG %>
                         </td>
                         <td class="desc text-muted">
-                            <%= category.MoTa %>
+                            <%= author.MoTa %>
                         </td>
                         <td class="action-col text-center">
                             <button class="btn-show-modal-update btn action-btn edit-btn" title="Chỉnh sửa">

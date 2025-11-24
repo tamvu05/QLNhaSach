@@ -1,28 +1,32 @@
 <!-- Modal Add -->
-<div class="modal fade" id="add-category-modal" tabindex="-1" aria-labelledby="add-category-modal-label" aria-hidden="true">
+<div class="modal fade" id="<%= modalAddId %>" tabindex="-1" aria-labelledby="<%= modalAddId %>-label"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="add-category-modal-label">Thêm thể loại</h1>
+                <h1 class="modal-title fs-5" id="<%= modalAddId %>-label">Thêm thể loại</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>      
+            </div>
             <div class="modal-body">
                 <form autocomplete="off">
                     <div class="mb-3">
-                        <label for="new-category-name" class="form-label">Tên thể loại</label>
-                        <input type="text" class="form-control" id="new-category-name">
+                        <label for="entity-name-input" class="form-label">Tên thể loại</label>
+                        <input type="text" class="form-control" id="entity-name-input">
                         <div class="invalid-value empty-name">Vui lòng nhập tên thể loại!</div>
                         <div class="invalid-value not-unique-name">Trùng tên thể loại!</div>
                     </div>
                     <div class="mb-3">
-                        <label for="new-category-desc" class="form-label">Mô tả</label>
-                        <textarea class="form-control" id="new-category-desc" rows="4"></textarea>
+                        <label for="entity-desc-input" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="entity-desc-input" rows="4"></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary  btn-add-category-name">Lưu lại</button>
+
+                <button type="button" class="btn btn-primary btn-save-entity">
+                    <i class="fas fa-save me-2"></i>Lưu lại
+                </button>
             </div>
         </div>
     </div>

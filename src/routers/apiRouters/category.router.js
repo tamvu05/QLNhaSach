@@ -5,6 +5,8 @@ const router = express.Router()
 
 router.get('/partials', CategoryController.getPartials)
 
+router.get('/export', CategoryController.export)
+
 router.get('/:id', CategoryController.getById)
 
 router.post('/', CategoryController.create)

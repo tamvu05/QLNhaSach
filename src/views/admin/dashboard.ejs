@@ -1,0 +1,124 @@
+<%
+// Dữ liệu mẫu (Sample Data) - Trong ứng dụng thực tế, dữ liệu này sẽ được truyền từ Server (Node.js/Express)
+const stats = {
+    totalBooks: 4520,
+    totalAuthors: 580,
+    totalCategories: 45,
+    totalPublishers: 120,
+    newUsersToday: 15
+};
+
+const recentBooks = [
+    { title: "Lịch Sử Việt Nam Toàn Tập", author: "Trần Trọng Kim", dateAdded: "20/11/2025" },
+    { title: "Marketing Căn Bản", author: "Philip Kotler", dateAdded: "19/11/2025" },
+    { title: "Thuật Đắc Nhân Tâm", author: "Dale Carnegie", dateAdded: "18/11/2025" },
+];
+
+const alerts = [
+    { type: "warning", message: "Cuốn 'Kiến trúc phần mềm' chỉ còn 10 bản tồn kho." },
+    { type: "info", message: "Có 5 yêu cầu đăng ký tác giả mới chờ duyệt." },
+];
+%>
+
+<h1 class="mb-4">🏠 HOME - Bảng Điều Khiển Tổng Quan</h1>
+<p class="text-muted">Chào mừng trở lại! Xem nhanh các chỉ số quan trọng của hệ thống.</p>
+
+<hr>
+
+<section class="row mb-5">
+    <h2>📈 Thống Kê Chính</h2>
+    
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body">
+                <h5 class="card-title">Tổng số Sách</h5>
+                <p class="card-text fs-2 fw-bold"><%= stats.totalBooks %></p>
+                <small>Đầu sách hiện có</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card bg-success text-white shadow">
+            <div class="card-body">
+                <h5 class="card-title">Tổng số Tác giả</h5>
+                <p class="card-text fs-2 fw-bold"><%= stats.totalAuthors %></p>
+                <small>Đã đăng ký</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card bg-info text-white shadow">
+            <div class="card-body">
+                <h5 class="card-title">Tổng số Thể loại</h5>
+                <p class="card-text fs-2 fw-bold"><%= stats.totalCategories %></p>
+                <small>Khác nhau</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card bg-warning text-dark shadow">
+            <div class="card-body">
+                <h5 class="card-title">Người dùng mới (Hôm nay)</h5>
+                <p class="card-text fs-2 fw-bold"><%= stats.newUsersToday %></p>
+                <small>Cần xác nhận</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="row">
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                ⚠️ Cảnh báo & Công việc Cần làm
+            </div>
+            <ul class="list-group list-group-flush">
+                <% if (alerts.length > 0) { %>
+                    <% alerts.forEach(alert => { %>
+                        <li class="list-group-item list-group-item-<%= alert.type %>">
+                            <%= alert.message %>
+                            <a href="#" class="float-end btn btn-sm btn-outline-<%= (alert.type === 'warning' ? 'danger' : 'secondary') %>">Xử lý</a>
+                        </li>
+                    <% }); %>
+                <% } else { %>
+                    <li class="list-group-item text-success">
+                        <i class="fas fa-check-circle"></i> Hệ thống ổn định. Không có cảnh báo.
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header bg-secondary text-white">
+                📚 Sách Được Thêm Gần Đây
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Tên Sách</th>
+                            <th>Tác Giả</th>
+                            <th>Ngày Thêm</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% recentBooks.forEach(book => { %>
+                            <tr>
+                                <td><%= book.title %></td>
+                                <td><%= book.author %></td>
+                                <td><%= book.dateAdded %></td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+                <a href="/admin/books" class="btn btn-sm btn-outline-primary float-end">Xem tất cả Sách</a>
+            </div>
+        </div>
+    </div>
+</section>

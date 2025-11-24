@@ -25,6 +25,21 @@ const AuthorModel = {
         const [result] = await pool.query('DELETE FROM TacGia WHERE MaTG = ?', [id])
         return result.affectedRows > 0
     },
+
+    async getWithParam(limit, offset, sortBy = 'MaTG', sortOrder = 'DESC') {
+        const [rows] = await pool.query(
+            `SELECT * FROM TacGia ORDER BY ${sortBy} ${sortOrder} LIMIT ? OFFSET ?`,
+            [limit, offset]
+        )
+        return rows
+    },
+
+    async getTotal() {
+        const [result] = await pool.query(
+            'SELECT COUNT(*) AS total FROM TacGia'
+        )
+        return result[0].total
+    },
 }
 
 export default AuthorModel

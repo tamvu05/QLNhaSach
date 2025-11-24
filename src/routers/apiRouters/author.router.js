@@ -3,6 +3,10 @@ import AuthorController from '../../controllers/author.controller.js'
 
 const router = express.Router()
 
+router.get('/partials', AuthorController.getPartials)
+
+router.get('/:id', AuthorController.getById)
+
 router.post('/', AuthorController.create)
 
 router.put('/:id', AuthorController.update)
