@@ -273,13 +273,21 @@ export function initializeManager(config) {
     }
 
     // Hàm Update View (phân trang, sắp xếp)
-    async function updateView(page = 1, sort, order) {
+    async function updateView(
+        page = 1,
+        sort,
+        order,
+        keyword,
+        shouldPushState = true,
+        shouldReplaceState = false
+    ) {
         try {
             if (isNaN(page) || Number(page) < 1) page = 1
 
             let query = `page=${page}`
             if (sort) query += `&sort=${sort}`
             if (order) query += `&order=${order}`
+            if (keyword) query += `&keyword=${keyword}`
 
             const res = await fetch(`${apiBaseUrl}/partials?${query}`)
             const data = await res.json()
@@ -296,9 +304,20 @@ export function initializeManager(config) {
             updateSortIcon(sort, order)
 
             // Cập nhật lại URL trình duyệt mà kh reload trang
-            //const currentUrl = new URL(window.location.href)
-            //currentUrl.searchParams.set('page', page)
-            //history.pushState(null, '', currentUrl.toString())
+            if (shouldPushState || shouldReplaceState) {
+                const currentUrl = new URL(window.location.href)
+                currentUrl.search = ''
+                currentUrl.searchParams.set('page', page)
+                if (sort) currentUrl.searchParams.set('sort', sort)
+                if (order) currentUrl.searchParams.set('order', order)
+                if (keyword) currentUrl.searchParams.set('keyword', keyword)
+
+                if (shouldReplaceState) {
+                    history.replaceState(null, '', currentUrl.toString())
+                } else {
+                    history.pushState(null, '', currentUrl.toString())
+                }
+            }
         } catch (error) {
             showToast(error.message, 'danger')
         }
@@ -332,8 +351,43 @@ export function initializeManager(config) {
             tableWrapper.querySelector('#data-attribute').dataset.currentPage
         const sort = currentHeader.dataset.sort
 
-        updateView(currentPage, sort, newOrder)
+        const inputSearch = document.querySelector(
+            '.manager-container .search-value'
+        )
+        let keyword = null
+        if (inputSearch) keyword = inputSearch.value.trim()
+
+        updateView(currentPage, sort, newOrder, keyword)
     }
+
+    // Hàm tìm kiếm
+    const btnSearch = document.querySelector(
+        '.manager-container .search-button'
+    )
+    const inputSearch = document.querySelector(
+        '.manager-container .search-value'
+    )
+
+    if (!btnSearch || !inputSearch) return
+
+    btnSearch.onclick = () => {
+        const keyword = inputSearch.value.trim()
+
+        const sortableHeader = tableWrapper.querySelector(
+            'tr i.sortable[data-order]'
+        )
+        let sort = null,
+            order = null
+        if (sortableHeader) {
+            sort = sortableHeader.dataset.sort
+            order = sortableHeader.dataset.order
+        }
+        updateView(1, sort, order, keyword)
+    }
+
+    inputSearch.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') btnSearch.click()
+    })
 
     function updateSortIcon(sortKey, sortOrder) {
         const sortableHeaders = tableWrapper.querySelectorAll('tr i.sortable')
@@ -382,4 +436,45 @@ export function initializeManager(config) {
             }
         }
     }
+
+
+    // --- 4. XỬ LÝ TIẾN/LÙI TRÊN TRÌNH DUYỆT ---
+    // Hàm xử lý sự kiện Back/Forward
+    function handlePopState() {
+        const urlParams = new URLSearchParams(window.location.search)
+
+        const page = urlParams.get('page')
+        const sort = urlParams.get('sort')
+        const order = urlParams.get('order')
+        const keyword = urlParams.get('keyword')
+
+        const currentPage = page ? Number(page) : 1
+
+        updateView(currentPage, sort, order, keyword, false)
+    }
+
+    // Hàm Khởi tạo trạng thái ban đầu (LOAD TRANG)
+    function loadInitialState() {
+        const urlParams = new URLSearchParams(window.location.search)
+
+        const page = urlParams.get('page')
+        const sort = urlParams.get('sort')
+        const order = urlParams.get('order')
+        const keyword = urlParams.get('keyword')
+
+        // Cập nhật ô input tìm kiếm
+        if (inputSearch && keyword) {
+            inputSearch.value = keyword
+        }
+
+        const currentPage = page ? Number(page) : 1
+
+        // Gọi updateView lần đầu tiên
+        // Không cần đẩy trạng thái, hoặc để mặc định là true để chuẩn hóa URL
+        updateView(currentPage, sort, order, keyword, false, true)
+    }
+
+    window.addEventListener('popstate', handlePopState)
+
+    loadInitialState()
 }

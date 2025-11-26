@@ -10,6 +10,42 @@ const PublisherService = {
         return await PublisherModel.getAll()
     },
 
+    async getWithParam(query) {
+        let {page, sort, order, keyword} = query
+
+        let currentPage = Number(page)
+        let limit = Number(PAGE_LIMIT)
+
+        if (isNaN(limit) || limit < 2 || limit > 20) limit = 10
+
+        if(!keyword) keyword = ''
+
+        const total = await PublisherModel.getTotal(keyword)
+        const totalPage = Math.ceil(total / limit)
+
+        if (isNaN(currentPage) || currentPage > totalPage) currentPage = 1
+        else if (currentPage < 1) currentPage = totalPage
+
+        const offset = (currentPage - 1) * limit
+
+        const validParam = ['MaNXB', 'TenNXB', 'MoTa', 'ASC', 'asc', 'DESC', 'desc']
+
+        const sortBy = validParam.includes(sort) ? sort : 'MaNXB'
+        const sortOrder = validParam.includes(order) ? order : 'DESC'
+
+        const publishers = await PublisherModel.getWithParam(limit, offset, sortBy, sortOrder, keyword)
+
+        return {
+            publishers,
+            currentPage,
+            limit,
+            totalPage,
+            total,
+            totalItem: total,
+            PAGE_LIMIT,
+        }
+    },
+
     async getById(id) {
         if (!id) throw new Error('Thiếu mã nhà xuất bản')
 
@@ -73,39 +109,7 @@ const PublisherService = {
         return true
     },
 
-    async getWithParam(query) {
-        const {page, sort, order} = query
-
-        let currentPage = Number(page)
-        let limit = Number(PAGE_LIMIT)
-
-        if (isNaN(limit) || limit < 2 || limit > 20) limit = 10
-
-        const total = await PublisherModel.getTotal()
-        const totalPage = Math.ceil(total / limit)
-
-        if (isNaN(currentPage) || currentPage > totalPage) currentPage = 1
-        else if (currentPage < 1) currentPage = totalPage
-
-        const offset = (currentPage - 1) * limit
-
-        const validParam = ['MaNXB', 'TenNXB', 'MoTa', 'ASC', 'asc', 'DESC', 'desc']
-
-        const sortBy = validParam.includes(sort) ? sort : 'MaNXB'
-        const sortOrder = validParam.includes(order) ? order : 'DESC'
-        
-        const publishers = await PublisherModel.getWithParam(limit, offset, sortBy, sortOrder)
-
-        return {
-            publishers,
-            currentPage,
-            limit,
-            totalPage,
-            total,
-            totalItem: total,
-            PAGE_LIMIT,
-        }
-    },
+    
 }
 
 export default PublisherService
