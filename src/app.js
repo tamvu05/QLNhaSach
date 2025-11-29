@@ -17,7 +17,7 @@ const app = express()
 const __dirname = import.meta.dirname
 
 // 1. Middleware cơ bản
-app.use(express.json()) 
+app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(morgan('dev'))
@@ -31,19 +31,19 @@ app.use(helmet({
 
 // 3. Cấu hình Session (Quan trọng: Đặt trước middleware check user)
 app.use(session({
-    secret: 'secret-key-cua-du-an-nay', 
+    secret: 'secret-key-cua-du-an-nay',
     resave: false,
     saveUninitialized: true, // Nên để true để tạo session ngay khi vào
-    cookie: { 
-        secure: false, 
-        maxAge: 24 * 60 * 60 * 1000 
+    cookie: {
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
 
 // 4. Middleware toàn cục: Check User & Đếm Giỏ hàng
 app.use(async (req, res, next) => {
     // Gán user cho View
-    res.locals.user = req.session.user || null; 
+    res.locals.user = req.session.user || null;
 
     // Mặc định giỏ hàng là 0
     res.locals.totalQuantity = 0;
@@ -68,7 +68,7 @@ app.use(async (req, res, next) => {
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 app.use(expressEjsLayouts)
-app.set('layout', 'layouts/adminLayout') 
+app.set('layout', 'layouts/adminLayout')
 
 // 6. Router
 app.use(router)

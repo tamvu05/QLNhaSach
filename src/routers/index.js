@@ -23,13 +23,13 @@ router.use('/cart', cartRouter)
 // -> Đường dẫn cho API (Trả về JSON)
 router.use('/api', apiRouter)
 
-// -> Đường dẫn cho Khách hàng (Trang chủ, Sách...) - Để cuối cùng
-router.use('/', userRouter)
-
 // -> Đường dẫn cho thanh toán
 router.use('/checkout', checkoutRouter)
 // -> Đường dẫn cho đơn hàng
 router.use('/order', orderRouter);
+
+// -> Đường dẫn cho Khách hàng (Trang chủ, Sách...) - Để cuối cùng
+router.use('/', userRouter)
 
 // 4. Xử lý lỗi tập trung (Error Handling)
 router.use((err, req, res, next) => {
