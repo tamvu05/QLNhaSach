@@ -6,7 +6,7 @@
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm rounded-3 p-4">
                     <h5 class="mb-3 text-primary fw-bold">Người nhận hàng</h5>
-                    
+
                     <div class="mb-3">
                         <label class="form-label fw-bold">Họ và tên</label>
                         <input type="text" class="form-control" name="nguoiNhan" value="<%= user.fullname %>" required>
@@ -19,12 +19,14 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Địa chỉ nhận hàng</label>
-                        <textarea class="form-control" name="diaChi" rows="2" placeholder="Số nhà, tên đường, phường xã..." required></textarea>
+                        <textarea class="form-control" name="diaChi" rows="2"
+                            placeholder="Số nhà, tên đường, phường xã..." required></textarea>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Ghi chú đơn hàng (Tùy chọn)</label>
-                        <textarea class="form-control" name="ghiChu" rows="2" placeholder="Ví dụ: Giao giờ hành chính..."></textarea>
+                        <textarea class="form-control" name="ghiChu" rows="2"
+                            placeholder="Ví dụ: Giao giờ hành chính..."></textarea>
                     </div>
                 </div>
             </div>
@@ -33,26 +35,33 @@
                 <div class="card border-0 shadow-sm rounded-3 bg-light">
                     <div class="card-body p-4">
                         <h5 class="fw-bold mb-3">Đơn Hàng Của Bạn</h5>
-                        
+
                         <div class="list-group list-group-flush mb-3 rounded border-0">
-                            <% cartItems.forEach(item => { %>
-                                <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 px-0 border-bottom">
+                            <% cartItems.forEach(item=> { %>
+                                <div
+                                    class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-3 px-0 border-bottom">
                                     <div class="d-flex align-items-center">
-                                        <span class="badge bg-secondary rounded-pill me-2"><%= item.SoLuong %></span>
+                                        <span class="badge bg-secondary rounded-pill me-2">
+                                            <%= item.SoLuong %>
+                                        </span>
                                         <div class="text-truncate" style="max-width: 180px;">
                                             <%= item.TenSach %>
                                         </div>
                                     </div>
                                     <span class="fw-bold text-dark">
-                                        <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.ThanhTien) %>
+                                        <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND'
+                                            }).format(item.ThanhTien) %>
                                     </span>
                                 </div>
-                            <% }) %>
+                                <% }) %>
                         </div>
 
                         <div class="d-flex justify-content-between mb-2">
                             <span>Tạm tính</span>
-                            <span class="fw-bold"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(grandTotal) %></span>
+                            <span class="fw-bold">
+                                <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND'
+                                    }).format(grandTotal) %>
+                            </span>
                         </div>
                         <div class="d-flex justify-content-between mb-4">
                             <span>Phí vận chuyển</span>
@@ -61,22 +70,27 @@
                         <div class="d-flex justify-content-between border-top pt-3 mb-4">
                             <span class="h5 fw-bold">Tổng thanh toán</span>
                             <span class="h4 fw-bold text-danger">
-                                <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(grandTotal) %>
+                                <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND'
+                                    }).format(grandTotal) %>
                             </span>
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label fw-bold">Phương thức thanh toán</label>
                             <div class="form-check p-3 border rounded mb-2 bg-white">
-                                <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD" checked>
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD"
+                                    checked onchange="updateAction(this)">
                                 <label class="form-check-label w-100" for="cod">
                                     <i class="bi bi-cash-stack me-2 text-success"></i> Thanh toán khi nhận hàng (COD)
                                 </label>
                             </div>
-                            <div class="form-check p-3 border rounded bg-white opacity-50">
-                                <input class="form-check-input" type="radio" name="paymentMethod" id="online" disabled>
-                                <label class="form-check-label w-100" for="online">
-                                    <i class="bi bi-credit-card me-2"></i> Thanh toán Online (Đang bảo trì)
+                            <div class="form-check p-3 border rounded bg-white">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="momo" value="MOMO"
+                                    onchange="updateAction(this)">
+                                <label class="form-check-label w-100" for="momo">
+                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo"
+                                        style="height: 20px; margin-right: 8px;">
+                                    Thanh toán qua Ví MoMo
                                 </label>
                             </div>
                         </div>
@@ -90,3 +104,14 @@
         </div>
     </form>
 </div>
+
+<script>
+    function updateAction(radio) {
+        const form = radio.closest('form');
+        if (radio.value === 'MOMO') {
+            form.action = '/checkout/momo';
+        } else {
+            form.action = '/checkout/order';
+        }
+    }
+</script>

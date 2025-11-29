@@ -1,33 +1,37 @@
 <section class="hero-section">
     <div class="container position-relative z-index-2">
         <div class="row align-items-center py-4">
-            
+
             <div class="col-md-6 text-center text-md-start mb-4 mb-md-0">
-                <span class="badge bg-white text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill mb-3 fw-bold shadow-sm">
+                <span
+                    class="badge bg-white text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill mb-3 fw-bold shadow-sm">
                     <i class="bi bi-stars text-warning"></i> Không gian tri thức
                 </span>
-                
+
                 <h1 class="display-5 fw-bolder mb-3 text-dark" style="line-height: 1.2;">
                     Thế Giới Sách <br>
                     <span class="text-primary">Trong Tầm Tay Bạn</span>
                 </h1>
-                
+
                 <p class="lead mb-4 text-secondary pe-lg-5 fs-6">
                     "Khám phá kho tàng tri thức với hàng ngàn ưu đãi hấp dẫn đang chờ đón bạn tại BookStore."
                 </p>
-                
+
                 <div class="d-flex gap-3 justify-content-center justify-content-md-start mb-5">
                     <a href="/book" class="btn btn-primary btn-lg px-4 py-2 rounded-pill fw-bold shadow hover-up">
                         Mua Ngay
                     </a>
-                    <a href="/category" class="btn btn-white border btn-lg px-4 py-2 rounded-pill fw-bold hover-up bg-white text-dark">
+                    <a href="/category"
+                        class="btn btn-white border btn-lg px-4 py-2 rounded-pill fw-bold hover-up bg-white text-dark">
                         Danh mục
                     </a>
                 </div>
 
-                <div class="row g-3 justify-content-center justify-content-md-start pt-2 border-top border-secondary border-opacity-10 me-lg-5">
+                <div
+                    class="row g-3 justify-content-center justify-content-md-start pt-2 border-top border-secondary border-opacity-10 me-lg-5">
                     <div class="col-auto">
-                        <div class="d-flex align-items-center gap-2 bg-white px-3 py-2 rounded-4 shadow-sm border border-light">
+                        <div
+                            class="d-flex align-items-center gap-2 bg-white px-3 py-2 rounded-4 shadow-sm border border-light">
                             <div class="text-primary"><i class="bi bi-truck fs-5"></i></div>
                             <div class="lh-1 text-start">
                                 <div class="fw-bold text-dark small">Giao nhanh</div>
@@ -36,7 +40,8 @@
                         </div>
                     </div>
                     <div class="col-auto">
-                        <div class="d-flex align-items-center gap-2 bg-white px-3 py-2 rounded-4 shadow-sm border border-light">
+                        <div
+                            class="d-flex align-items-center gap-2 bg-white px-3 py-2 rounded-4 shadow-sm border border-light">
                             <div class="text-success"><i class="bi bi-shield-check fs-5"></i></div>
                             <div class="lh-1 text-start">
                                 <div class="fw-bold text-dark small">100% Thật</div>
@@ -45,7 +50,8 @@
                         </div>
                     </div>
                     <div class="col-auto">
-                        <div class="d-flex align-items-center gap-2 bg-white px-3 py-2 rounded-4 shadow-sm border border-light">
+                        <div
+                            class="d-flex align-items-center gap-2 bg-white px-3 py-2 rounded-4 shadow-sm border border-light">
                             <div class="text-warning"><i class="bi bi-arrow-repeat fs-5"></i></div>
                             <div class="lh-1 text-start">
                                 <div class="fw-bold text-dark small">Đổi trả</div>
@@ -59,7 +65,8 @@
             <div class="col-md-6">
                 <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
                     <div class="carousel-indicators">
-                        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+                        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0"
+                            class="active"></button>
                         <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
                         <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
                     </div>
@@ -76,10 +83,12 @@
                         </div>
                     </div>
 
-                    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel"
+                        data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel"
+                        data-bs-slide="next">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     </button>
                 </div>
@@ -100,53 +109,61 @@
     </div>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-        <% if (books && books.length > 0) { %>
-            <% books.forEach(book => { %>
+        <% if (books && books.length> 0) { %>
+            <% books.forEach(book=> { %>
                 <div class="col">
                     <div class="card h-100 border-0 shadow-sm book-card-hover">
                         <div class="position-relative text-center p-3 bg-white rounded-top" style="height: 260px;">
                             <a href="/book/<%= book.id %>">
                                 <% if (book.HinhAnh) { %>
-                                    <img src="<%= book.HinhAnh %>" class="img-fluid h-100 object-fit-contain hover-zoom" alt="<%= book.TenSach %>">
-                                <% } else { %>
-                                    <div class="d-flex align-items-center justify-content-center h-100 bg-light rounded text-muted">
-                                        <i class="bi bi-image fs-1"></i>
-                                    </div>
-                                <% } %>
+                                    <img src="<%= book.HinhAnh %>" class="img-fluid h-100 object-fit-contain hover-zoom"
+                                        alt="<%= book.TenSach %>">
+                                    <% } else { %>
+                                        <div
+                                            class="d-flex align-items-center justify-content-center h-100 bg-light rounded text-muted">
+                                            <i class="bi bi-image fs-1"></i>
+                                        </div>
+                                        <% } %>
                             </a>
                             <% if (book.DonGia < 100000) { %>
-                                <span class="position-absolute top-0 start-0 m-2 badge bg-danger rounded-pill shadow-sm">Hot</span>
-                            <% } %>
+                                <span
+                                    class="position-absolute top-0 start-0 m-2 badge bg-danger rounded-pill shadow-sm">Hot</span>
+                                <% } %>
                         </div>
 
                         <div class="card-body pt-0">
-                            <small class="text-muted d-block mb-1"><%= book.TheLoai || 'Tổng hợp' %></small>
+                            <small class="text-muted d-block mb-1">
+                                <%= book.TheLoai || 'Tổng hợp' %>
+                            </small>
                             <h6 class="card-title text-truncate fw-bold mb-1">
                                 <a href="/book/<%= book.id %>" class="text-decoration-none text-dark stretched-link">
                                     <%= book.TenSach %>
                                 </a>
                             </h6>
-                            <p class="text-muted small mb-2"><%= book.TacGia || 'Đang cập nhật' %></p>
-                            
+                            <p class="text-muted small mb-2">
+                                <%= book.TacGia || 'Đang cập nhật' %>
+                            </p>
+
                             <div class="d-flex justify-content-between align-items-end mt-3">
                                 <span class="text-primary fw-bold fs-5">
-                                    <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.DonGia) %>
+                                    <%= new Intl.NumberFormat('vi-VN', { style: 'currency' , currency: 'VND'
+                                        }).format(book.DonGia) %>
                                 </span>
-                                <button class="btn btn-light text-primary btn-sm border rounded-circle hover-bg-primary btn-add-cart position-relative z-3" 
-                                        data-id="<%= book.id %>" 
-                                        style="width: 35px; height: 35px;">
+                                <button
+                                    class="btn btn-light text-primary btn-sm border rounded-circle hover-bg-primary btn-add-cart position-relative z-3"
+                                    data-id="<%= book.id %>" style="width: 35px; height: 35px;">
                                     <i class="bi bi-bag-plus-fill"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
-            <% }) %>
-        <% } else { %>
-            <div class="col-12 text-center py-5 text-muted">
-                <p>Chưa có dữ liệu hiển thị.</p>
-            </div>
-        <% } %>
+                <% }) %>
+                    <% } else { %>
+                        <div class="col-12 text-center py-5 text-muted">
+                            <p>Chưa có dữ liệu hiển thị.</p>
+                        </div>
+                        <% } %>
     </div>
 </div>
 
@@ -164,3 +181,12 @@
         </div>
     </div>
 </section>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment') === 'success') {
+        alert('Thanh toán thành công! Cảm ơn bạn đã mua hàng.');
+        // Clean URL
+        window.history.replaceState({}, document.title, "/");
+    }
+</script>
