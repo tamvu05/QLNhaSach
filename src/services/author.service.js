@@ -67,14 +67,16 @@ const AuthorService = {
     },
 
     async getWithParam(query) {
-        const {page, sort, order} = query
+        let {page, sort, order, keyword} = query
 
         let currentPage = Number(page)
         let limit = Number(PAGE_LIMIT)
 
         if (isNaN(limit) || limit < 2 || limit > 20) limit = 10
 
-        const total = await AuthorModel.getTotal()
+        if(!keyword) keyword = ''
+
+        const total = await AuthorModel.getTotal(keyword)
         const totalPage = Math.ceil(total / limit)
 
         if (isNaN(currentPage) || currentPage > totalPage) currentPage = 1
@@ -86,8 +88,8 @@ const AuthorService = {
 
         const sortBy = validParam.includes(sort) ? sort : 'MaTG'
         const sortOrder = validParam.includes(order) ? order : 'DESC'
-        
-        const authors = await AuthorModel.getWithParam(limit, offset, sortBy, sortOrder)
+
+        const authors = await AuthorModel.getWithParam(limit, offset, sortBy, sortOrder, keyword)
 
         return {
             authors,

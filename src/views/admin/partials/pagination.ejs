@@ -1,5 +1,5 @@
 <%  
-    const PAGE_WINDOW = 5
+    const PAGE_WINDOW = 3
     const prevPage = currentPage - 1 < 1 ? totalPage : currentPage - 1
     const nextPage = currentPage + 1 > totalPage ? 1 : currentPage + 1
     let startPage = Math.max(currentPage - Math.floor(PAGE_WINDOW / 2), 1)
