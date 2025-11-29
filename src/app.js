@@ -13,6 +13,8 @@ import helmet from 'helmet' // Import Helmet
 // Import Service Giỏ hàng
 import CartService from './services/cart.service.js'
 
+// Payment
+import paymentRouter from './routers/payment.router.js'
 
 const app = express()
 const __dirname = import.meta.dirname
@@ -73,5 +75,6 @@ app.set('layout', 'layouts/adminLayout')
 
 // 6. Router
 app.use(router)
+app.use('/', paymentRouter)
 
 export default app

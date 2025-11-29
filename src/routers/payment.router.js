@@ -3,8 +3,8 @@ import { createPaymentMoMo, momoReturn } from '../controllers/payment.controller
 
 const router = express.Router();
 
-router.get('/momo/checkout', createPaymentMoMo);
+router.get('/create_payment_url_momo', createPaymentMoMo);
 
-router.get('/momo/return', momoReturn);
+router.get('/payment/momo_return', momoReturn);
 
 export default router;
