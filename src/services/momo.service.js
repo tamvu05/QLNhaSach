@@ -8,10 +8,8 @@ const MomoService = {
 
         const requestId = String(orderId) + new Date().getTime();
 
-        // Raw signature string
         const rawSignature = `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=${requestType}`;
 
-        // Create signature
         const signature = crypto.createHmac('sha256', secretKey)
             .update(rawSignature)
             .digest('hex');
@@ -33,7 +31,6 @@ const MomoService = {
 
         console.log('MoMo Request Body:', requestBody);
 
-        // Send request to MoMo
         return new Promise((resolve, reject) => {
             const url = new URL(endpoint);
             const options = {
