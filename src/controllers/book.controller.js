@@ -97,7 +97,6 @@ const BookController = {
             const categories = await CategoryService.getAll()
             const authors = await AuthorService.getAll()
             const publishers = await PublisherService.getAll()
-            console.log(data.books);
             res.render('admin/viewManager', {
                 books: data.books,
                 authors,
@@ -113,7 +112,7 @@ const BookController = {
                 tablePartial: bookConfig.tablePartial,
                 modalAddSelector: bookConfig.modalAddSelector,
                 modalAddPartial: bookConfig.modalAddPartial,
-                modalUpdatePartial: bookConfig.modalUpdatePartial,
+                // modalUpdatePartial: bookConfig.modalUpdatePartial,
                 hrefBase: bookConfig.hrefBase,
                 apiBase: bookConfig.apiBase,
                 modalAddId: bookConfig.modalAddId,

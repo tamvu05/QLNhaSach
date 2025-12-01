@@ -8,9 +8,12 @@
     if(totalPage >= PAGE_WINDOW && endPage - startPage < PAGE_WINDOW) {
         startPage -= PAGE_WINDOW - (endPage - startPage + 1)
     }
+
 %>
 
-<div id="attribute-api-base" data-api-base="<%= apiBase %>"></div>
+<% if (typeof apiBase !== 'undefined') { %>
+  <div id="attribute-api-base" data-api-base="<%= apiBase %>"></div>
+<% } %>
 
 <!-- Nếu chỉ có 1 page thì kh trả html phân trang -->
 <% if (totalPage < 2) { %>

@@ -10,28 +10,70 @@
             </li>
 
             <li class="nav-item">
-                <a href="/admin/author">
-                    <i class="fas fa-pen-nib"></i> <span>Danh mục tác giả</span>
+                <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#categorySubmenu"
+                    aria-expanded="true" aria-controls="categorySubmenu">
+                    <i class="fas fa-folder"></i>
+                    <span>Quản lý danh mục</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
                 </a>
+
+                <div class="collapse submenu show" id="categorySubmenu">
+                    <ul class="nav flex-column sub-ul">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/author">
+                                <i class="fas fa-pen-nib"></i> <span>Tác giả</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/category">
+                                <i class="fas fa-layer-group"></i> <span>Thể loại</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/publisher">
+                                <i class="fas fa-building"></i> <span>Nhà xuất bản</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/book">
+                                <i class="fas fa-book"></i> <span>Đầu sách</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
 
-            <li class="nav-item">
-                <a href="/admin/category">
-                    <i class="fas fa-layer-group"></i> <span>Danh mục thể loại</span>
-                </a>
-            </li>
 
             <li class="nav-item">
-                <a href="/admin/publisher">
-                    <i class="fas fa-building"></i> <span>Danh mục nhà xuất bản</span>
+                <a class="nav-link dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#inventorySubMenu"
+                    aria-expanded="true" aria-controls="inventorySubMenu">
+                    <i class="fa-solid fa-warehouse"></i>
+                    <span>Quản lý kho hàng</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
                 </a>
+
+                <div class="collapse submenu show" id="inventorySubMenu">
+                    <ul class="nav flex-column sub-ul">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/supplier">
+                                <i class="fa-solid fa-truck"></i> <span>Nhà cung cấp</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fa-solid fa-file-import"></i> <span>Nhập hàng</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fa-solid fa-file-export"></i> <span>Xuất hàng</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
 
-            <li class="nav-item">
-                <a href="/admin/book">
-                    <i class="fas fa-book"></i> <span>Danh mục sách</span>
-                </a>
-            </li>
+
         </ul>
     </div>
 </div>
@@ -122,5 +164,85 @@
     .sidebar-menu a span {
         flex-grow: 1;
         /* Cho phép chữ lấp đầy phần còn lại */
+    }
+
+    /* --- CSS BỔ SUNG HOẶC CHỈNH SỬA --- */
+
+    /* Điều chỉnh lại kiểu cho thẻ <a> để áp dụng nav-link của BS */
+    .sidebar-menu a.nav-link {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: #ecf0f1;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        border-left: 5px solid transparent;
+    }
+
+    .sidebar-menu a.nav-link:hover,
+    .sidebar-menu a.nav-link.active {
+        /* Thêm active state */
+        background-color: #34495e;
+        color: #ffffff;
+        border-left-color: #3498db;
+    }
+
+    /* Kiểu cho icon mũi tên (dropdown-icon) */
+    .sidebar-menu .dropdown-toggle {
+        position: relative;
+        /* Đảm bảo icon nằm trong thẻ a */
+        padding-right: 50px;
+    }
+
+    .sidebar-menu .dropdown-icon {
+        position: absolute;
+        right: 20px;
+        margin-right: 0 !important;
+        transition: transform 0.3s ease;
+        /* Thay đổi kích thước icon mũi tên nếu cần */
+        font-size: 0.85rem;
+    }
+
+    /* Khi dropdown đang mở (Bootstrap tự thêm class 'collapsed' khi đóng) */
+    .sidebar-menu .dropdown-toggle:not(.collapsed) .dropdown-icon {
+        transform: rotate(-180deg);
+    }
+
+    /* Kiểu cho Submenu (menu con) */
+    .sidebar-menu .submenu {
+        background-color: #2c3e50;
+        /* Giữ màu nền tối */
+    }
+
+    .sidebar-menu .submenu .sub-ul {
+        padding-left: 0;
+        /* Loại bỏ padding mặc định của ul lồng */
+    }
+
+    /* Tạo độ thụt vào cho các mục con */
+    .sidebar-menu .submenu .nav-item a.nav-link {
+        padding: 10px 20px 10px 45px;
+        /* Thụt vào 45px */
+        font-size: 0.95rem;
+        border-left: none;
+        /* Bỏ border trái để phân biệt với mục cha */
+    }
+
+    /* Điều chỉnh lại icon trong submenu, có thể làm mờ hơn */
+    .sidebar-menu .submenu .nav-item a.nav-link i {
+        opacity: 0.7;
+    }
+
+    /* Hiệu ứng hover cho mục con */
+    .sidebar-menu .submenu .nav-item a.nav-link:hover {
+        background-color: #34495e;
+        color: #ffffff;
+        /* Có thể thêm border trái nhỏ nếu muốn nhấn mạnh */
+        border-left: 3px solid #3498db;
+    }
+
+    .dropdown-toggle::after {
+        content: none !important;
     }
 </style>

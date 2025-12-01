@@ -1,0 +1,49 @@
+<!-- Modal Add -->
+<div class="modal fade" id="<%= modalAddId %>" tabindex="-1" aria-labelledby="<%= modalAddId %>-label"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="<%= modalAddId %>-label">Thêm nhà cung cấp</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form autocomplete="off">
+                    <div class="mb-3">
+                        <label for="entity-name-input" class="form-label">Tên nhà cung cấp <span
+                                        class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="entity-name-input">
+                        <div class="value-error d-none empty-name">Vui lòng nhập tên nhà cung cấp!</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="entity-addresss-input" class="form-label">Địa chỉ <span
+                                        class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="entity-addresss-input" rows="4"></input>
+                        <div class="value-error d-none empty-address">Vui lòng nhập địa chỉ nhà cung cấp!</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="entity-phone-input" class="form-label">Số điện thoại <span
+                                        class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="entity-phone-input" rows="4"></input>
+                        <div class="value-error d-none empty-phone">Vui lòng nhập số điện thoại nhà cung cấp!</div>
+                        <div class="value-error d-none invalid-phone">Số điện thoại không hợp lệ!</div>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+
+                <button type="button" class="btn btn-primary btn-save-entity">
+                    <i class="fas fa-save me-2"></i>Lưu lại
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .value-error {
+        color: red;
+    }
+</style>

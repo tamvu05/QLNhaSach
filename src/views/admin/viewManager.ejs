@@ -47,8 +47,10 @@
 <!-- Modal Add -->
 <%- include(modalAddPartial) %>
 
-<!-- Modal Update -->
-<%- include(modalUpdatePartial) %>
+<% if (typeof modalUpdatePartial !== 'undefined') { %>
+    <!-- Modal Update -->
+    <%- include(modalUpdatePartial) %>
+<% } %>
 
 <script type="module" src="/js/paginationViewManager.js"></script>
 <link rel="stylesheet" href="/css/viewManager.css">

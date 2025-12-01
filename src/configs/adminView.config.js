@@ -50,4 +50,17 @@ const bookConfig = {
     modalUpdateId: 'update-book-modal',
 }
 
-export { categoryConfig, authorConfig, publisherConfig, bookConfig }
+const supplierConfig = {
+    scripts: ['/js/supplier.admin.js'],
+    entityName: 'nhà cung cấp',
+    tablePartial: 'partials/supplier/tableSupplier',
+    modalAddPartial: 'partials/supplier/modalSupplier',
+    // modalUpdatePartial: 'partials/supplier/modalUpdateSupplier',
+    hrefBase: '/admin/supplier/',
+    apiBase: '/api/supplier',
+    modalAddSelector: '#add-supplier-modal',
+    modalAddId: 'add-supplier-modal',
+    modalUpdateId: 'update-supplier-modal',
+}
+
+export { categoryConfig, authorConfig, publisherConfig, bookConfig, supplierConfig }
