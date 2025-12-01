@@ -97,16 +97,6 @@ const AuthorController = {
         }
     },
 
-    // GET /api/author
-    // async getAll(req, res, next) {
-    //     try {
-    //         const data = await AuthorService.getAll()
-    //         return res.json(data)
-    //     } catch (err) {
-    //         next(err)
-    //     }
-    // },
-
     // POST /api/author
     async create(req, res, next) {
         try {

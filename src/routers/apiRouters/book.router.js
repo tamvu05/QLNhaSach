@@ -1,12 +1,18 @@
 import express from 'express'
 import BookController from '../../controllers/book.controller.js'
+import { createUploadMiddleware } from '../../middlewares/upload.js';
 
 const router = express.Router()
 
+router.get('/partials', BookController.getPartials)
 
-router.post('/', BookController.create);
+router.get('/export', BookController.export)
 
-router.put('/:id', BookController.update);
+router.get('/:id', BookController.getById)
+
+router.post('/', createUploadMiddleware('HinhAnh'), BookController.create);
+
+router.put('/:id', createUploadMiddleware('HinhAnh'), BookController.update);
 
 router.delete('/:id', BookController.delete);
 

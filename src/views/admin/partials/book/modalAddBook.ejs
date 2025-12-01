@@ -1,0 +1,307 @@
+<div class="modal fade" id="<%= modalAddId %>" tabindex="-1" aria-labelledby="<%= modalAddId %>-label"
+    aria-hidden="true">
+    <div class="modal-dialog **modal-xl**">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="<%= modalAddId %>-label">
+                    Thêm đầu sách
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form autocomplete="off" id="book-add-form">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <label for="book-name-input" class="form-label">Tên sách <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="book-name-input" required>
+                                <div class="value-error name-error d-none">Vui lòng nhập tên sách!</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="book-isbn-input" class="form-label">ISBN <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="book-isbn-input"
+                                    placeholder="10 hoặc 13 chữ số">
+                                <div class="value-error isbn-error d-none">Vui lòng nhập ISBN!</div>
+                                <div class="value-error isbn-error-length d-none">Mã ISBN gồm 10 hoặc 13 chữ số!</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="book-price-input" class="form-label">Giá bán <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="book-price-input" min="0" step="1000"
+                                    required>
+                                <div class="value-error price-error d-none">Vui lòng nhập giá bán!</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="book-image-input" class="form-label" id="book-image-label">Chèn hình ảnh bìa</label>
+
+                                <div class="custom-file-upload-wrapper">
+                                    <input type="file" id="book-image-input" accept="image/*">
+                                </div>
+
+                                <div class="mt-2" id="wrapper-imafe-preview">
+                                    <img id="book-image-preview" src="" alt="Ảnh bìa" class="img-thumbnail"
+                                        style="max-height: 150px; width: 130px; object-fit: cover; display: none;">
+                                        <i class="fas fa-times" id="btn-remove-image" style="display: none;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <label for="book-author-select" class="form-label">Tác giả <span
+                                        class="text-danger">*</span></label>
+                                <div><select class="form-select" id="book-author-select" required>
+                                        <option></option>
+                                        <% authors.forEach(author=> { %>
+                                            <option value="<%= author.MaTG %>">
+                                                <%= author.TenTG %>
+                                            </option>
+                                            <% }) %>
+                                    </select></div>
+                                <div class="value-error author-error d-none">Vui lòng chọn tác giả!</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="book-category-select" class="form-label">Thể loại <span
+                                        class="text-danger">*</span></label>
+                                <div><select class="form-select" id="book-category-select" required>
+                                        <option></option>
+                                        <% categories.forEach(category=> { %>
+                                            <option value="<%= category.MaTL %>">
+                                                <%= category.TenTL %>
+                                            </option>
+                                            <% }) %>
+                                    </select></div>
+                                <div class="value-error category-error d-none">Vui lòng chọn thể loại!</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="book-publisher-select" class="form-label">Nhà Xuất Bản <span
+                                        class="text-danger">*</span></label>
+                                <div><select class="form-select" id="book-publisher-select" required>
+                                        <option></option>
+                                        <% publishers.forEach(publisher=> { %>
+                                            <option value="<%= publisher.MaNXB %>">
+                                                <%= publisher.TenNXB %>
+                                            </option>
+                                            <% }) %>
+                                    </select></div>
+                                <div class="value-error publisher-error d-none">Vui lòng chọn nhà xuất bản!</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="book-desc-input" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="book-desc-input" rows="6"></textarea>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Đóng
+                </button>
+                <button type="button" class="btn btn-primary btn-save-book">
+                    <i class="fas fa-plus me-2"></i>Thêm sách
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    /* --- 1. Z-INDEX & MODAL DIALOG (Cố định Kích thước và Vị trí) --- */
+
+    .modal-dialog {
+        /* ✨ Tối ưu: Ghi đè max-width của modal-xl thành 800px (như bạn đã đặt) ✨ */
+        max-width: 800px !important;
+        /* Có thể đặt margin: 1rem auto; nếu muốn căn giữa tốt hơn */
+    }
+
+    .select2-container--open {
+        /* Đảm bảo Select2 luôn nằm trên Modal */
+        z-index: 999999 !important;
+    }
+
+    /* --- 2. GLOBAL INPUT/SELECT STYLING (Đồng bộ Chiều cao 48px) --- */
+
+    /* Input Text, Number, Select thường */
+    .modal-body .form-control,
+    .modal-body .form-select {
+        height: 48px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        line-height: 1.5;
+
+        /* Tinh chỉnh thẩm mỹ */
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .modal-body .form-control:focus,
+    .modal-body .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    /* Căn giữa chữ trong Select (chỉ áp dụng cho select thường) */
+    .modal-body select.form-select {
+        text-align: center;
+        text-align-last: center;
+        padding-right: 25px;
+        /* Giữ chỗ mũi tên */
+    }
+
+    .modal-body select.form-select option {
+        text-align: center;
+    }
+
+
+    /* --- 3. SELECT2 SPECIFIC STYLING (Đồng bộ 48px và Layout) --- */
+
+    /* Select2 Container (Ô nhập liệu chính) */
+    .select2-container--default .select2-selection--single {
+        height: 48px;
+        min-width: 200px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+
+        padding: 0 1rem;
+        /* Padding ngang */
+
+        display: flex;
+        /* Cho phép căn giữa nội dung */
+        align-items: center;
+    }
+
+    /* Text hiển thị bên trong Select2 */
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #495057;
+        line-height: 1.5;
+        padding-left: 0;
+        padding-right: 0;
+        flex-grow: 1;
+    }
+
+    /* Placeholder của Select2 */
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #6c757d;
+    }
+
+    /* Nút mũi tên & Xóa lựa chọn (Alignment) */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100%;
+        position: relative;
+        top: auto;
+        transform: none;
+        right: 0;
+        width: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border-top-color: #6c757d !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__clear {
+        margin-right: 5px;
+    }
+
+
+    /* --- 4. LABEL STYLING --- */
+    .modal-body .form-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        display: block;
+        width: 100%;
+    }
+
+
+    /* --- 5. FILE INPUT & PREVIEW --- */
+    .custom-file-upload-wrapper {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    #book-image-input:hover {
+        cursor: pointer;
+    }
+
+    /* Ảnh preview */
+    .img-thumbnail {
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    #wrapper-imafe-preview {
+        position: relative;
+    }
+
+    #book-image-preview:hover {
+        cursor: pointer;
+    }
+
+    #btn-remove-image {
+        position: absolute;
+        left: 100px;
+        top: 9px;
+        color: red;
+        font-size: 14px;
+    }
+
+    #btn-remove-image:hover {
+        cursor: pointer;
+        transform: scale(1.1);
+    }
+
+    /* --- 6. VALIDATION & MISC --- */
+    .value-error {
+        color: red;
+        /* Áp dụng position: absolute nếu muốn tránh lỗi bố cục */
+    }
+
+    .modal-body .row {
+        margin-bottom: 0.5rem;
+    }
+
+    .modal-body textarea {
+        resize: vertical;
+    }
+
+    .modal-footer .btn-primary {
+        /* Giữ nguyên màu xanh lá cho hành động Thêm */
+        background-color: #28a745;
+        border-color: #28a745;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .modal-footer .btn-primary:hover {
+        background-color: #1e7e34;
+        border-color: #1c7430;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    }
+
+    .modal-footer .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        font-weight: 500;
+    }
+</style>

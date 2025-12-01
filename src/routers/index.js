@@ -33,8 +33,7 @@ router.use('/order', orderRouter);
 
 // 4. Xử lý lỗi tập trung (Error Handling)
 router.use((err, req, res, next) => {
-    console.error('Lỗi hệ thống:', err); // In lỗi ra Terminal để cậu sửa
-
+    console.error('Lỗi hệ thống:', err);
     const status = err.status || 500;
     const message = err.message || 'Lỗi hệ thống không xác định';
 

@@ -37,4 +37,17 @@ const publisherConfig = {
     modalUpdateId: 'update-publisher-modal',
 }
 
-export { categoryConfig, authorConfig, publisherConfig }
+const bookConfig = {
+    scripts: ['/js/book.admin.js'],
+    entityName: 'sách',
+    tablePartial: 'partials/book/tableBook',
+    modalAddPartial: 'partials/book/modalAddBook',
+    modalUpdatePartial: 'partials/book/modalUpdateBook',
+    hrefBase: '/admin/book/',
+    apiBase: '/api/book',
+    modalAddSelector: '#add-book-modal',
+    modalAddId: 'add-book-modal',
+    modalUpdateId: 'update-book-modal',
+}
+
+export { categoryConfig, authorConfig, publisherConfig, bookConfig }

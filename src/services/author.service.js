@@ -7,7 +7,6 @@ const {PAGE_LIMIT} = config
 const AuthorService = {
     async getAll() {
         const authors = await AuthorModel.getAll()
-        console.log(authors);
         return authors
     },
 
