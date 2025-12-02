@@ -1,0 +1,17 @@
+.env:
+
+
+# app
+PORT=3000
+
+# database
+DB_HOST=mysql-36190955-tamvuthe05-de3c.f.aivencloud.com
+DB_PORT=13952
+DB_USER=avnadmin
+DB_PASS=AVNS_D9AV8Wq3iGajrL0FHw2
+DB_NAME=QLNhaSach
+
+# cloudinary
+CLOUD_NAME=dul87gokc
+CLOUD_API_KEY=789655468667328
+CLOUD_API_SECRET=v9_GbMLAvI0x9XlaRTCBiqBLCZo 
