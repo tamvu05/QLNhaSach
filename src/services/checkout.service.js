@@ -18,9 +18,9 @@ const CheckoutService = {
 
             // 3. Tạo Đơn hàng (PhieuXuat)
             const [orderResult] = await connection.query(
-                `INSERT INTO DonHang (MaKH, NgayDat, TongTien, TenNguoiNhan, DiaChiNhan, SDT, MucDich, TrangThai) 
-                 VALUES (?, NOW(), ?, ?, ?, ?, ?, 'CHO_XAC_NHAN')`,
-                [customerId, cartData.grandTotal, nguoiNhan, diaChi, sdt, ghiChu || 'Mua online']
+                `INSERT INTO DonHang (MaKH, NgayDat, TongTien, TenNguoiNhan, DiaChiNhan, SDT, GhiChu, TrangThai) 
+                VALUES (?, NOW(), ?, ?, ?, ?, ?, 'CHO_XAC_NHAN')`,
+                [customerId, cartData.grandTotal, nguoiNhan, diaChi, sdt, ghiChu] 
             );
             const orderId = orderResult.insertId; // Lấy mã đơn hàng vừa tạo
 

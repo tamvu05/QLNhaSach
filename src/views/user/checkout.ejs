@@ -9,24 +9,24 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Họ và tên</label>
-                        <input type="text" class="form-control" name="nguoiNhan" value="<%= user.fullname %>" required>
+                        <input type="text" class="form-control" name="nguoiNhan" value="<%= user.HoTen %>" required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Số điện thoại</label>
-                        <input type="text" class="form-control" name="sdt" placeholder="Nhập số điện thoại..." required>
+                        <input type="text" class="form-control" name="sdt" value="<%= user.SDT || '' %>" placeholder="Nhập số điện thoại..." required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Địa chỉ nhận hàng</label>
                         <textarea class="form-control" name="diaChi" rows="2"
-                            placeholder="Số nhà, tên đường, phường xã..." required></textarea>
+                            placeholder="Số nhà, tên đường, phường xã..." required><%= user.DiaChi || '' %></textarea>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-bold">Ghi chú đơn hàng (Tùy chọn)</label>
                         <textarea class="form-control" name="ghiChu" rows="2"
-                            placeholder="Ví dụ: Giao giờ hành chính..."></textarea>
+                            placeholder="Lưu ý cho người giao hàng (VD: Giao trong giờ hành chính, gọi trước khi đến, gửi bảo vệ...)"></textarea>
                     </div>
                 </div>
             </div>
