@@ -137,6 +137,15 @@ const OrderService = {
         if (!result) throw new Error('Cập nhật trạng thái đơn hàng thất bại')
         return result
     },
+
+    async delete(id) {
+        try {
+            const result = await OrderModel.delete(id)
+            return result
+        } catch (error) {
+            throw error
+        }
+    },
 }
 
 export default OrderService

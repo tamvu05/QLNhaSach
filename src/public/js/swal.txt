@@ -1,0 +1,48 @@
+Form xác nhận
+        const result = await Swal.fire({
+            title: 'Bạn có chắc muốn tiếp tục xóa?',
+            text: "Bạn sẽ không hoàn tác được sau khi xóa!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy bỏ',
+        })
+
+        if(!result.isConfirmed) return
+
+Loading
+        Swal.fire({
+            title: 'Đang xử lý...',
+            text: 'Vui lòng chờ trong giây lát!',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading()
+            },
+        })
+
+
+Thành công
+        Swal.close()
+        Swal.fire({
+            title: ' thành công!',
+            icon: 'success',
+            draggable: true,
+        })
+
+Thất bại
+        Swal.close()
+        Swal.fire({
+            icon: 'error',
+            title: ' thất bại!',
+            text: error.message,
+        })
+
+Cung cấp thông tin
+        Swal.fire({
+            icon: "info",
+            title: "Oops...",
+            text: "Something went wrong!",
+            footer: '<a href="#">Why do I have this issue?</a>'
+        });

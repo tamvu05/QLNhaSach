@@ -61,7 +61,7 @@ const OrderModel = {
     },
 
     async updateState(id, TrangThai = 'CHO_XAC_NHAN') {
-        console.log(id, TrangThai);
+        console.log(id, TrangThai)
         const [result] = await pool.query(
             'UPDATE DonHang SET TrangThai = ? WHERE MaDH = ?',
             [TrangThai, id]
@@ -70,12 +70,44 @@ const OrderModel = {
     },
 
     async updateStateAndBook(id, TrangThai = 'CHO_XAC_NHAN') {
-        console.log(id, TrangThai);
+        console.log(id, TrangThai)
         const [result] = await pool.query(
             'UPDATE DonHang SET TrangThai = ? WHERE MaDH = ?',
             [TrangThai, id]
         )
         return result.affectedRows > 0
+    },
+
+    async delete(id) {
+        const connection = await pool.getConnection()
+
+        try {
+            await connection.beginTransaction()
+
+            const details = await this.getDetailById(id)
+
+            await connection.query('DELETE FROM CTDonHang WHERE MaDH = ?', [id])
+
+            const stockUpdatePromises = details.map((detail) => {
+                return connection.query(
+                    'UPDATE Sach SET SoLuongTon = SoLuongTon + ? WHERE MaSach = ?',
+                    [detail.SoLuong, detail.MaSach]
+                )
+            })
+
+            const deleteOrder = connection.query('DELETE FROM DonHang WHERE MaDH = ?', [id])
+
+            // chạy song song
+            await Promise.all([...stockUpdatePromises, deleteOrder])
+            await connection.commit()
+
+            return true
+        } catch (error) {
+            await connection.rollback()
+            throw error
+        } finally {
+            connection.release()
+        }
     },
 }
 

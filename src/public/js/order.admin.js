@@ -1,5 +1,7 @@
 import showToast from './toast.js'
 
+const DANG_GIAO = 'DA_GIAO_CHO_DON_VI_VAN_CHUYEN'
+
 class OrderModal {
     constructor(orderTableInstance) {
         this.orderTableInstance = orderTableInstance
@@ -10,7 +12,6 @@ class OrderModal {
 
         // Khu vực hiển thị thông tin
         this.labelName = this.modal.querySelector('#view-hoten')
-        this.labelEmail = this.modal.querySelector('#view-email')
         this.labelPhone = this.modal.querySelector('#view-sdt')
         this.labelAdresss = this.modal.querySelector('#view-diachi')
         this.labelNote = this.modal.querySelector('#view-noidung')
@@ -73,6 +74,15 @@ class OrderModal {
         try {
             const newStatus = this.selectStatus.value
 
+            Swal.fire({
+                title: 'Đang xử lý...',
+                text: 'Vui lòng chờ trong giây lát!',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                },
+            })
+
             const res = await fetch(
                 `/api/sale/order/${this.currentOrderId}/status`,
                 {
@@ -91,14 +101,24 @@ class OrderModal {
                 )
             }
 
-            showToast('Đã cập nhật trạng thái đơn hàng', 'success')
+            Swal.close()
+            Swal.fire({
+                title: 'Cập nhật trạng thái đơn hàng thành công!',
+                icon: 'success',
+                draggable: true,
+            })
 
-            // Đóng modal và cập nhật bảng
             this.modal.querySelector('.btn-close').click()
             this.orderTableInstance.updateView(null)
         } catch (error) {
             console.error('Lỗi khi cập nhật trạng thái:', error)
-            showToast(error.message, 'danger')
+
+            Swal.close()
+            Swal.fire({
+                icon: 'error',
+                title: 'Cập nhật trạng thái đơn hàng thất bại!',
+                text: error.message,
+            })
         }
     }
 
@@ -128,7 +148,6 @@ class OrderModal {
             }
 
             this.labelName.textContent = orderData.TenNguoiNhan
-            this.labelEmail.textContent = orderData.Email || 'Không có'
             this.labelPhone.textContent = orderData.SDT
             this.labelAdresss.textContent = orderData.DiaChiNhan
             this.labelNote.textContent = orderData.GhiChu || 'Không có ghi chú'
@@ -240,10 +259,13 @@ class OrderTable {
         // Bắt sự kiện xem/cập nhật chi tiết
         if (this.tableWrapper)
             this.tableWrapper.addEventListener('click', (event) => {
+                const btnDelete = event.target.closest('.btn-delete-entity')
                 const btnDetails = event.target.closest('.btn-show-details')
                 const sortableHeader = event.target.closest('tr i.sortable')
 
-                if (btnDetails) {
+                if (btnDelete) {
+                    this.deleteEntity(btnDelete)
+                } else if (btnDetails) {
                     const id = btnDetails.closest('tr').dataset.id
                     this.orderModalInstance.showModal(id)
                 } else if (sortableHeader) {
@@ -291,6 +313,72 @@ class OrderTable {
         }
     }
 
+    async deleteEntity(btnDelete) {
+        try {
+            const result = await Swal.fire({
+                title: 'Bạn có chắc muốn tiếp tục xóa?',
+                text: 'Bạn sẽ không hoàn tác được sau khi xóa!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Xác nhận',
+                cancelButtonText: 'Hủy bỏ',
+            })
+
+            if (!result.isConfirmed) return
+
+            const status = btnDelete.closest('tr').dataset.status
+            if (status === DANG_GIAO) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Không thể xóa đơn hàng!',
+                    text: 'Đơn hàng đang được vận chuyển!',
+                })
+                return
+            }
+
+            Swal.fire({
+                title: 'Đang xử lý...',
+                text: 'Vui lòng chờ trong giây lát!',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                },
+            })
+
+            const id = btnDelete.closest('tr').dataset.id
+            const res = await fetch('/api/sale/order/' + id, {
+                method: 'DELETE',
+            })
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error(
+                    data.message ||
+                        `Lỗi HTTP ${res.status}: Cập nhật trạng thái thất bại`
+                )
+            }
+
+            Swal.close()
+            Swal.fire({
+                title: 'Xóa đơn đặt hàng thành công!',
+                icon: 'success',
+                draggable: true,
+            })
+
+            const page = this.getCurrentPage()
+            this.updateView(page)
+        } catch (error) {
+            Swal.close()
+            Swal.fire({
+                icon: 'error',
+                title: 'Xóa đơn đặt hàng thất bại!',
+                text: error.message,
+            })
+        }
+    }
+
     setOrderModalInstance(instance) {
         this.orderModalInstance = instance
     }
@@ -319,7 +407,7 @@ class OrderTable {
         sort,
         order,
         keyword,
-        status, 
+        status,
         shouldPushState = true,
         shouldReplaceState = false
     ) {
@@ -380,7 +468,7 @@ class OrderTable {
         const sort = urlParams.get('sort')
         const order = urlParams.get('order')
         const keyword = urlParams.get('keyword')
-        const status = urlParams.get('status') 
+        const status = urlParams.get('status')
 
         this.updateView(Number(targetPage), sort, order, keyword, status)
     }
@@ -392,11 +480,17 @@ class OrderTable {
         const sort = urlParams.get('sort')
         const order = urlParams.get('order')
         const keyword = urlParams.get('keyword')
-        const status = urlParams.get('status') 
+        const status = urlParams.get('status')
 
         const currentPage = page ? Number(page) : 1
 
         this.updateView(currentPage, sort, order, keyword, status, false)
+    }
+
+    getCurrentPage() {
+        const urlParams = new URLSearchParams(window.location.search)
+        const page = urlParams.get('page')
+        return page
     }
 
     debounced(func, delay) {

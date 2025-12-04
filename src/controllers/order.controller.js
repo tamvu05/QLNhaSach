@@ -147,6 +147,17 @@ const OrderController = {
             next(error)
         }
     },
+
+    // DELETE /api/sale/order/:id
+    async delete(req, res, next) {
+        try {
+            const { id } = req.params
+            const data = await OrderService.delete(id)
+            res.json(data)
+        } catch (error) {
+            next(error)
+        }
+    },
 }
 
 export default OrderController
