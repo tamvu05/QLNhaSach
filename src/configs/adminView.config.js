@@ -102,6 +102,19 @@ const orderConfig = {
     modalUpdateId: 'update-order-modal',
 }
 
+const invoiceConfig = {
+    scripts: ['/js/invoice.admin.js'],
+    entityName: 'hóa đơn',
+    tablePartial: 'partials/invoice/tableInvoice',
+    modalAddPartial: 'partials/invoice/modalInvoice',
+    // modalUpdatePartial: 'partials/invoice/modalUpdateInvoice',
+    hrefBase: '/admin/sale/invoice/',
+    apiBase: '/api/sale/invoice',
+    modalAddSelector: '#add-invoice-modal',
+    modalAddId: 'add-invoice-modal',
+    modalUpdateId: 'update-invoice-modal',
+}
+
 export {
     categoryConfig,
     authorConfig,
@@ -110,5 +123,6 @@ export {
     supplierConfig,
     importReceiptConfig,
     exportReceiptConfig,
-    orderConfig
+    orderConfig,
+    invoiceConfig,
 }

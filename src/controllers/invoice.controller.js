@@ -1,37 +1,37 @@
-import { exportReceiptConfig } from "../configs/adminView.config.js"
-import exportFileExcel from '../utils/exportFileExcel.js'
-import BookService from '../services/book.service.js'
-import ExportReceiptService from '../services/exportReceipt.service.js'
+import InvoiceService from '../services/invoice.service.js'
+import { invoiceConfig } from '../configs/adminView.config.js'
 
-const ImportReceiptController = {
-    // GET /admin/export-receipt
+const InvoiceController = {
+    // GET /admin/sale/invoice
     async getViewManager(req, res, next) {
         try {
             const query = req.query
-            const data = await ExportReceiptService.getWithParam(query)
-            res.render('admin/viewManager', {
-                exportReceipts: data.exportReceipts,
+            const data = await InvoiceService.getWithParam(query)
+            console.log(data.invoices);
+            res.render('admin/saleInvoice', {
+                invoices: data.invoices,
                 currentPage: data.currentPage,
                 totalPage: data.totalPage,
                 totalItem: data.totalItem,
-                totalItemPerPage: data.exportReceipts.length,
+                totalItemPerPage: data.invoices.length,
                 PAGE_LIMIT: data.PAGE_LIMIT,
-                scripts: exportReceiptConfig.scripts,
-                entityName: exportReceiptConfig.entityName,
-                tablePartial: exportReceiptConfig.tablePartial,
-                modalAddSelector: exportReceiptConfig.modalAddSelector,
-                modalAddPartial: exportReceiptConfig.modalAddPartial,
-                hrefBase: exportReceiptConfig.hrefBase,
-                apiBase: exportReceiptConfig.apiBase,
-                modalAddId: exportReceiptConfig.modalAddId,
-                modalUpdateId: exportReceiptConfig.modalUpdateId,
+                scripts: invoiceConfig.scripts,
+                entityName: invoiceConfig.entityName,
+                tablePartial: invoiceConfig.tablePartial,
+                modalAddSelector: invoiceConfig.modalAddSelector,
+                modalAddPartial: invoiceConfig.modalAddPartial,
+                // modalUpdatePartial: invoiceConfig.modalUpdatePartial,
+                hrefBase: invoiceConfig.hrefBase,
+                apiBase: invoiceConfig.apiBase,
+                modalAddId: invoiceConfig.modalAddId,
+                modalUpdateId: invoiceConfig.modalUpdateId,
             })
         } catch (err) {
             next(err)
         }
     },
 
-    // GET /api/export-receipt
+    // GET /api/sale/invoice
     async getPartials(req, res, next) {
         const renderPartial = (view, data) => {
             return new Promise((resolve, reject) => {
@@ -47,15 +47,15 @@ const ImportReceiptController = {
 
         try {
             const query = req.query
-            const data = await ExportReceiptService.getWithParam(query)
+            const data = await InvoiceService.getWithParam(query)
             const table = await renderPartial(
-                'admin/partials/exportReceipt/tableExportReceipt',
+                'admin/partials/invoice/tableInvoice',
                 {
-                    exportReceipts: data.exportReceipts,
+                    invoices: data.invoices,
                     currentPage: data.currentPage,
                     totalPage: data.totalPage,
                     totalItem: data.totalItem,
-                    totalItemPerPage: data.exportReceipts.length,
+                    totalItemPerPage: data.invoices.length,
                     PAGE_LIMIT: data.PAGE_LIMIT,
                 }
             )
@@ -65,8 +65,8 @@ const ImportReceiptController = {
                 {
                     currentPage: data.currentPage,
                     totalPage: data.totalPage,
-                    hrefBase: exportReceiptConfig.hrefBase,
-                    apiBase: exportReceiptConfig.apiBase,
+                    hrefBase: invoiceConfig.hrefBase,
+                    apiBase: invoiceConfig.apiBase,
                 }
             )
 
@@ -80,39 +80,38 @@ const ImportReceiptController = {
         }
     },
 
-    // GET /api/export-receipt/:id
+    // GET /api/sale/invoice/:id
     async getById(req, res, next) {
         try {
             const { id } = req.params
-            const data = await ExportReceiptService.getById(id)
+            const data = await InvoiceService.getById(id)
             return res.json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    // GET /api/export-receipt/detail/:id
+    // GET /api/sale/invoice/detail/:id
     async getDetailById(req, res, next) {
         try {
             const { id } = req.params
-            const data = await ExportReceiptService.getDetailById(id)
+            const data = await InvoiceService.getDetailById(id)
             return res.json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    // POST /api/export-receipt
+    // POST /api/sale/invoice
     async create(req, res, next) {
         try {
-            const data = await ExportReceiptService.create(req.body)
+            console.log(req.body)
+            const data = await InvoiceService.create(req.body)
             res.status(201).json(data)
         } catch (err) {
             next(err)
         }
     },
-
-    
 }
 
-export default ImportReceiptController
+export default InvoiceController

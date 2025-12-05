@@ -7,6 +7,7 @@ import SupplierController from '../../controllers/supplier.controller.js'
 import ImportReceiptController from '../../controllers/importReceipt.controller.js'
 import ExportReceiptController from '../../controllers/exportReceipt.controller.js'
 import OrderController from '../../controllers/order.controller.js'
+import InvoiceController from '../../controllers/invoice.controller.js'
 
 const router = express.Router()
 
@@ -18,7 +19,7 @@ router.get('/supplier', SupplierController.getViewManager)
 router.get('/import-receipt', ImportReceiptController.getViewManager)
 router.get('/export-receipt', ExportReceiptController.getViewManager)
 router.get('/sale/order', OrderController.getViewManager)
-router.get('/sale/invoice', (req, res) => {res.json('invoice')})
+router.get('/sale/invoice', InvoiceController.getViewManager)
 
 
 

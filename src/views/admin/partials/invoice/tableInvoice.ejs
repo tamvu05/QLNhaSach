@@ -2,12 +2,14 @@
     const TRANG_THAI = {
         'CHO_XAC_NHAN': 'Chờ xác nhận',
         'DANG_CHUAN_BI_HANG': 'Đang chuẩn bị hàng',
-        'DA_GIAO_CHO_DON_VI_VAN_CHUYEN': 'Đã giao cho đơn vị vận chuyển',
+        'DA_GIAO_CHO_DON_VI_VAN_CHUYEN': 'Đã giao cho đơn vị vận chuyển'
     }
 
     const HINH_THUC_THANH_TOAN = {
         'COD': 'Thanh toán khi nhận hàng',
         'MOMO': 'Thanh toán qua momo',
+        'CASH': 'Thanh toán tiền mặt',
+        'BANK_TRANSFER': 'Thanh toán ngân hàng'
     }
 
     const getPrice = (price) => {
@@ -49,44 +51,37 @@
             <tr>
                 <th>Mã đơn</th>
                 <th>Số điện thoại</th>
-                <th>Ngày đặt</th>
+                <th>Ngày tạo</th>
                 <th>Tổng tiền</th>
                 <th>Hình thức thanh toán</th>
-                <th>Trạng thái</th>
                 <th class="text-center">Thao tác</th>
             </tr>
         </thead>
         <tbody>
 
-            <% if (orders.length> 0) { %>
+            <% if (invoices.length> 0) { %>
 
-                <% orders.forEach((order)=> { %>
+                <% invoices.forEach((invoice)=> { %>
 
-                    <tr data-id="<%= order.MaDH %>" data-status="<%= order.TrangThai %>">
+                    <tr data-id="<%= invoice.MaDH %>" data-status="<%= invoice.TrangThai %>">
                         <td>
-                            <%= order.MaDH %>
+                            <%= invoice.MaDH %>
                         </td>
                         <td>
-                            <%= order.SDT %>
+                            <%= invoice.SDT %>
                         </td>
                         <td class="text-muted">
-                            <%= getTime7(order.NgayDat) %>
+                            <%= getTime7(invoice.NgayTaoHoaDon) %>
                         </td>
                         <td class="text-muted">
-                            <%= getPrice(order.TongTien) %> 
+                            <%= getPrice(invoice.TongTien) %> 
                         </td>
                         <td class="text-muted">
-                            <%= HINH_THUC_THANH_TOAN[order.HinhThucThanhToan] %> 
-                        </td>
-                        <td class="text-muted">
-                            <%= TRANG_THAI[order.TrangThai] %> 
+                            <%= HINH_THUC_THANH_TOAN[invoice.HinhThucThanhToan] %> 
                         </td>
                         <td class="action-col text-center">
-                            <button class="btn-show-details btn action-btn edit-btn" title="Cập nhật">
-                                <i class="fa-regular fa-pen-to-square"></i> 
-                            </button>
-                            <button class="btn-delete-entity btn action-btn delete-btn" title="Xóa">
-                                <i class="fas fa-trash-alt"></i>
+                            <button class="btn-show-details btn action-btn view-btn" title="Xem chi tiết">
+                                <i class="fa-solid fa-eye"></i> 
                             </button>
                         </td>
                     </tr>
@@ -94,7 +89,7 @@
                         <% } else { %>
 
                             <tr class="no-data">
-                                <td colspan="7" class="text-center py-4">
+                                <td colspan="6" class="text-center py-4">
                                     Không có dữ liệu...
                                 </td>
                             </tr>

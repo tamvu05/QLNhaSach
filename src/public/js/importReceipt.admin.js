@@ -698,7 +698,6 @@ class DetailModal {
             }
 
             this.labelDate.textContent = this.formatToVietNamTime(receipt.NgayNhap)
-            console.log(this.formatToVietNamTime(receipt.NgayNhap))
             this.labelEmployee.textContent = receipt.HoTen
             this.labelSupplier.textContent = receipt.TenNCC
             this.labelNote.textContent = receipt.NoiDung

@@ -248,7 +248,6 @@ class ExportReceiptFormModal {
     }
 
     // --- LOGIC GỬI DỮ LIỆU VÀ VALIDATION FORM CHÍNH ---
-
     async createReceipt() {
         try {
             const ok = await this.validateForm()

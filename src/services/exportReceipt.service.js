@@ -23,7 +23,15 @@ const ExportReceiptService = {
 
         const offset = (currentPage - 1) * limit
 
-        const validParam = ['MaPX', 'NgayXuat', 'TenNV', 'ASC', 'asc', 'DESC', 'desc']
+        const validParam = [
+            'MaPX',
+            'NgayXuat',
+            'TenNV',
+            'ASC',
+            'asc',
+            'DESC',
+            'desc',
+        ]
 
         const sortBy = validParam.includes(sort) ? sort : 'MaPX'
         const sortOrder = validParam.includes(order) ? order : 'DESC'
@@ -66,15 +74,25 @@ const ExportReceiptService = {
     },
 
     async create(payload) {
-        const { MaNV, NgayXuat, ChiTietPX } = payload
+        try {
+            const { MaNV, NgayXuat, ChiTietPX } = payload
 
-        if (!MaNV || !NgayXuat || !ChiTietPX || 
-            MaNV === '' || NgayXuat === '' || ChiTietPX.length === 0)
-            throw createHttpError('Thông tin phiếu xuất không hợp lệ', 401)
+            if (
+                !MaNV ||
+                !NgayXuat ||
+                !ChiTietPX ||
+                MaNV === '' ||
+                NgayXuat === '' ||
+                ChiTietPX.length === 0
+            )
+                throw createHttpError('Thông tin phiếu xuất không hợp lệ', 401)
 
-        const insertId = await ExportReceiptModel.create(payload)
+            const insertId = await ExportReceiptModel.create(payload)
 
-        return insertId
+            return insertId
+        } catch (error) {
+            throw error
+        }
     },
 }
 

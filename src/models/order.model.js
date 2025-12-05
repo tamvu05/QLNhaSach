@@ -1,11 +1,6 @@
 import pool from '../configs/db.js'
 
 const OrderModel = {
-    // async getAll() {
-    //     const [rows] = await pool.query('SELECT * FROM NhaCungCap')
-    //     return rows
-    // },
-
     async getWithParam(
         limit,
         offset,
@@ -61,7 +56,6 @@ const OrderModel = {
     },
 
     async updateState(id, TrangThai = 'CHO_XAC_NHAN') {
-        console.log(id, TrangThai)
         const [result] = await pool.query(
             'UPDATE DonHang SET TrangThai = ? WHERE MaDH = ?',
             [TrangThai, id]
@@ -69,11 +63,10 @@ const OrderModel = {
         return result.affectedRows > 0
     },
 
-    async updateStateAndBook(id, TrangThai = 'CHO_XAC_NHAN') {
-        console.log(id, TrangThai)
+    async updateInvoiceDate(id, date) {
         const [result] = await pool.query(
-            'UPDATE DonHang SET TrangThai = ? WHERE MaDH = ?',
-            [TrangThai, id]
+            'UPDATE DonHang SET NgayTaoHoaDon = ? WHERE MaDH = ?',
+            [date, id]
         )
         return result.affectedRows > 0
     },
@@ -95,7 +88,10 @@ const OrderModel = {
                 )
             })
 
-            const deleteOrder = connection.query('DELETE FROM DonHang WHERE MaDH = ?', [id])
+            const deleteOrder = connection.query(
+                'DELETE FROM DonHang WHERE MaDH = ?',
+                [id]
+            )
 
             // chạy song song
             await Promise.all([...stockUpdatePromises, deleteOrder])

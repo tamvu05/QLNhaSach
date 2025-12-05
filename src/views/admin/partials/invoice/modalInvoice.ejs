@@ -1,0 +1,277 @@
+<!-- Modal tạo hóa đơn -->
+<div class="modal fade" id="<%= modalAddId %>" tabindex="-1" aria-labelledby="<%= modalAddId %>-label"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="<%= modalAddId %>-label">Tạo phiếu xuất hàng</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form autocomplete="off" id="import-receipt-form">
+                    <div class="row mb-2">
+                        <h5 class="mb-3 text-primary">Thông tin khách hàng</h5>
+
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <label for="input-hoten" class="form-label">Họ tên</label>
+                                <input type="text" class="form-control" id="input-hoten">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="input-sdt" class="form-label">Số điện thoại</label>
+                                <input type="text" class="form-control" id="input-sdt">
+                                <div class="value-error d-none invalid-phone-number">Số điện thoại không hợp lệ!</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <label for="input-diachi" class="form-label">Địa chỉ</label>
+                                <input type="text" class="form-control" id="input-diachi">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4" id="input-for-add-receipt">
+                        <div class="col-lg-6">
+                            <h5 class="mb-3 text-primary">Ngày tạo hóa đơn</h5>
+                            <div class="mb-3">
+                                <input type="datetime-local" class="form-control" id="receipt-date-input" required>
+                                <div class="value-error d-none empty-date">Vui lòng chọn ngày tạo hóa đơn!</div>
+                                <div class="value-error d-none past-date-error"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <h5 class="mb-3 text-primary">Hình thức thanh toán</h5>
+                            <div class="mb-3">
+                                <select class="form-select" id="payment-method-select">
+                                    <option value="CASH">Tiền mặt</option>
+                                    <option value="BANK_TRANSFER">Chuyển khoản</option>
+                                </select>
+                                <div class="value-error d-none empty-payment">Vui lòng chọn hình thức thanh toán!</div>
+                            </div>
+                        </div>
+
+                        <h5 class="mb-3 text-primary">Thêm chi tiết mặt hàng</h5>
+
+                        <div class="card p-3 border-secondary">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-6">
+                                    <label for="book-select-item" class="form-label mb-0">Sách </label>
+                                    <select class="form-select" id="book-select-item">
+                                        <!-- chèn bằng JS -->
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <label for="input-quantity" class="form-label mb-0">Số lượng </label>
+                                    <input type="number" class="form-control text-end" id="input-quantity" min="1"
+                                        value="1">
+                                </div>
+                                <div class="col-3">
+                                    <label for="input-unit-price" class="form-label mb-0">Đơn giá </span></label>
+                                    <input type="number" class="form-control text-end" id="input-unit-price" min="0"
+                                        value="0" step="1000">
+                                </div>
+                                <div class="col-1 d-flex justify-content-end">
+                                    <button type="button" class="btn btn-success btn-add-item" title="Thêm mặt hàng">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="value-error d-none item-input-error mt-2">Vui lòng chọn sách, nhập số lượng và
+                                đơn giá!</div>
+                            <div class="value-error d-none out-of-stock-error mt-2">Số lượng sách xuất vượt quá số lượng
+                                tồn kho!</div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3 text-primary">Danh sách mặt hàng cần xuất</h5>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm" id="receipt-items-table">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Sách</th>
+                                            <th style="width: 15%;">Số lượng</th>
+                                            <th style="width: 20%;">Đơn giá (VND)</th>
+                                            <th style="width: 10%;" class="text-center">Xóa</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="receipt-items-body">
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-primary">
+                                            <th colspan="2" class="text-end">Tổng tiền</th>
+                                            <th id="receipt-total-amount" colspan="2" class="text-end total-amount">0
+                                                VND</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <div class="value-error d-none items-error">Vui lòng thêm ít nhất một mặt hàng!</div>
+                                <div class="value-error d-none invalid-item-amount">Vui lòng nhập số lượng và đơn giá
+                                    hợp lệ (>0) cho tất cả mặt hàng!</div>
+                                <div class="value-error d-none out-of-stock-error2 mt-2">Số lượng sách xuất vượt quá số
+                                    lượng tồn kho!</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="receipt-notes-textarea" class="form-label">Ghi chú/Nội dung</label>
+                                <textarea class="form-control" id="receipt-notes-textarea" rows="4"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Đóng
+                </button>
+                <button type="button" class="btn btn-primary btn-save-receipt">
+                    <i class="fas fa-file-import me-2"></i>Tạo phiếu xuất
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal chi tiết -->
+<div class="modal fade" id="modal-view-invoice" tabindex="-1" aria-labelledby="modal-view-invoice-label"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modal-view-invoice-label">
+                    Chi tiết hóa đơn<span id="view-mapn-display"></span>
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <h5 class="mb-3 text-primary">Thông tin khách hàng</h5>
+                    <div class="col-lg-6">
+                        <p><strong>Họ tên:</strong> <span id="view-hoten"></span></p>
+                        <p><strong>Số điện thoại:</strong> <span id="view-sdt"></span></p>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <p><strong>Địa chỉ:</strong> <span id="view-diachi"></span></p>
+                        <p><strong>Ngày tạo:</strong> <span id="view-ngaydat"></span></p>
+                    </div>
+                </div>
+
+                <h5 class="mb-3 text-primary mt-3">Danh sách mặt hàng đã bán</h5>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm" id="view-receipt-items-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Sách</th>
+                                        <th>Số lượng</th>
+                                        <th>Đơn giá</th>
+                                        <th>Khuyến mãi</th>
+                                        <th>Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="view-receipt-items-body">
+
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-primary">
+                                        <th colspan="1" class="text-end">Voucher</th>
+                                        <th id="voucher" class="text-end total-amount">0 đ</th>
+
+                                        <th colspan="2" class="text-end">Tổng tiền đơn đặt hàng</th>
+                                        <th id="view-total-amount" class="text-end total-amount"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    select#payment-method-select {
+        padding: 10px 12px;
+    }
+
+    .value-error {
+        color: red;
+    }
+
+    /* Select2 Container (Ô nhập liệu chính) */
+    .select2-container--default .select2-selection--single {
+        height: 48px;
+        min-width: 200px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+
+        padding: 0 1rem;
+
+        display: flex;
+        align-items: center;
+    }
+
+    /* Text hiển thị bên trong Select2 */
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding-left: 0;
+        padding-right: 0;
+        flex-grow: 1;
+    }
+
+    /* Placeholder của Select2 */
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: #6c757d;
+    }
+
+    /* Nút mũi tên & Xóa lựa chọn (Alignment) */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100%;
+        position: relative;
+        top: auto;
+        transform: none;
+        right: 0;
+        width: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border-top-color: #6c757d !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__clear {
+        margin-right: 5px;
+    }
+
+    .table tbody tr td {
+        vertical-align: middle;
+    }
+</style>

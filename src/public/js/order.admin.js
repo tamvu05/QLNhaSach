@@ -2,6 +2,22 @@ import showToast from './toast.js'
 
 const DANG_GIAO = 'DA_GIAO_CHO_DON_VI_VAN_CHUYEN'
 
+function formatToVietNamTime(dateInput) {
+    const dateObject = new Date(dateInput)
+
+    const options = {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+    }
+    return dateObject.toLocaleString('vi-VN', options)
+}
+
 class OrderModal {
     constructor(orderTableInstance) {
         this.orderTableInstance = orderTableInstance
@@ -18,6 +34,7 @@ class OrderModal {
         this.selectStatus = this.modal.querySelector('#order-status-select')
         this.tableDetails = this.modal.querySelector('#view-receipt-items-body')
         this.totalPrice = this.modal.querySelector('#view-total-amount')
+        this.labelDate = this.modal.querySelector('#view-ngaydat')
 
         this.currentOrderId = null
         this.bookItems = null
@@ -151,6 +168,7 @@ class OrderModal {
             this.labelPhone.textContent = orderData.SDT
             this.labelAdresss.textContent = orderData.DiaChiNhan
             this.labelNote.textContent = orderData.GhiChu || 'Không có ghi chú'
+            this.labelDate.textContent = formatToVietNamTime(orderData.NgayDat)
 
             this.selectStatus.value = orderData.TrangThai
 

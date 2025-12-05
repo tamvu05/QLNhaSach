@@ -7,6 +7,7 @@ import supplierRouter from './supplier.router.js'
 import importReceiptRouter from './importReceipt.router.js'
 import exportReceiptRouter from './exportReceipt.router.js'
 import orderRouter from './order.router.js'
+import invoiceRouter from './invoice.router.js'
 
 const router = express.Router()
 
@@ -18,5 +19,6 @@ router.use('/supplier', supplierRouter)
 router.use('/import-receipt', importReceiptRouter)
 router.use('/export-receipt', exportReceiptRouter)
 router.use('/sale/order', orderRouter)
+router.use('/sale/invoice', invoiceRouter)
 
 export default router
