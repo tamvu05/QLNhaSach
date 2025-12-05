@@ -8,6 +8,7 @@ import ImportReceiptController from '../../controllers/importReceipt.controller.
 import ExportReceiptController from '../../controllers/exportReceipt.controller.js'
 import OrderController from '../../controllers/order.controller.js'
 import InvoiceController from '../../controllers/invoice.controller.js'
+import VoucherController from '../../controllers/voucher.controller.js'
 
 const router = express.Router()
 
@@ -20,8 +21,8 @@ router.get('/import-receipt', ImportReceiptController.getViewManager)
 router.get('/export-receipt', ExportReceiptController.getViewManager)
 router.get('/sale/order', OrderController.getViewManager)
 router.get('/sale/invoice', InvoiceController.getViewManager)
-
-
+router.get('/discount', (req, res) => res.json('discount'))
+router.get('/voucher', VoucherController.getViewManager)
 
 router.get('/', (req, res, next) => {
     res.render('admin/dashboard', {

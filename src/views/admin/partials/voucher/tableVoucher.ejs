@@ -1,0 +1,106 @@
+<% 
+    const TRANG_THAI = {
+        'HOAT_DONG': 'Đang hoạt động',
+        'VO_HIEU': 'Đã vô hiệu',
+        'QUA_HAN': 'Đã quá hạn',
+        'HET_SO_LUONG': 'Đã hết số lượng'
+    }
+
+    const getTime7 = (time) => {
+        if(!time) return ''
+        return time.toLocaleString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        })
+    }
+%>
+
+
+<div id="data-attribute"     data-current-page="<%= currentPage %>"     data-total-page="<%= totalPage %>"    
+    data-total-item="<%= totalItem %>"     data-total-item-per-page="<%= totalItemPerPage %>"    
+    data-page-limit="<%= PAGE_LIMIT %>"></div>
+
+<div class="table-responsive-wrapper">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Mã giảm giá</th>
+                <th><i class="sortable" data-sort="NgayBD">Ngày bắt đầu</i></th>
+                <th><i class="sortable" data-sort="NgayKT">Ngày kết thúc</i></th>
+                <th>Khả dụng</th>
+                <th>Trạng thái</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <% if (vouchers.length> 0) { %>
+
+                <% vouchers.forEach((voucher, index)=> { %>
+
+                    <tr data-id="<%= voucher.MaVC %>">
+                        <td>
+                            <%= index + 1 %>
+                        </td>
+                        <td class="name font-weight-bold">
+                            <%= voucher.MaVC %>
+                        </td>
+                        <td class="desc text-muted">
+                            <%= getTime7(voucher.NgayBD) %>
+                        </td>
+                        <td class="desc text-muted">
+                            <%= getTime7(voucher.NgayKT) %>
+                        </td>
+                        <td class="desc text-muted">
+                            <%= voucher.SoLuong - voucher.SLDaDung %>
+                        </td>
+                        <td class="desc text-muted">
+                            <%= TRANG_THAI[voucher.TrangThai] %>
+                        </td>
+                        <td class="action-col text-center">
+                            <button class="btn-show-modal-update btn action-btn edit-btn" title="Chỉnh sửa">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </button>
+                            <button class="btn-delete-entity btn action-btn delete-btn" title="Xóa">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <% }) %>
+
+                        <% } else { %>
+
+                            <tr class="no-data">
+                                <td colspan="7" class="text-center py-4">
+                                    Không có dữ liệu...
+                                </td>
+                            </tr>
+
+                            <% } %>
+
+        </tbody>
+    </table>
+</div>
+
+<style>
+    /* --- Định nghĩa Kích thước Ảnh Bìa --- */
+    .voucher-cover-thumb {
+        width: 80px;
+        /* Chiều rộng cố định */
+        height: 120px;
+        /* Chiều cao cố định */
+
+        /* Đảm bảo ảnh không bị méo và lấp đầy khung hình */
+        object-fit: cover;
+
+        /* Đặt border hoặc box-shadow nhẹ để làm nổi bật (tùy chọn) */
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+</style>

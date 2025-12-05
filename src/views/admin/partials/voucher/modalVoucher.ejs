@@ -1,0 +1,125 @@
+<!-- Modal dùng để tạo mới và chỉnh sửa mã giảm giá -->
+<div class="modal fade" id="voucher-modal" tabindex="-1" aria-labelledby="voucher-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="voucher-modal-label">
+                    Tạo mã giảm giá
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form autocomplete="off" id="voucher-add-form">
+                    <div class="row">
+
+                        <div class="col-lg-6">
+
+                            <div class="mb-3">
+                                <label for="voucher-code-input" class="form-label">Mã voucher <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="voucher-code-input" required
+                                    placeholder="Ví dụ: SUMMER20" name="MaVC">
+                            </div>
+
+                            <div class="mb-3 d-none" id="voucher-count-used">
+                                <label class="form-label">Số lượng đã sử dụng</label>
+                                <input class="form-control" disabled>
+                            </div>
+
+
+
+                            <div class="mb-3">
+                                <label for="voucher-start-date" class="form-label">Ngày bắt đầu <span
+                                        class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control" id="voucher-start-date" required
+                                    name="NgayBD">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="voucher-end-date" class="form-label">Ngày kết thúc <span
+                                        class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control" id="voucher-end-date" required
+                                    name="NgayKT">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="voucher-count-input" class="form-label">Số lượng mã <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" step="1" class="form-control" id="voucher-count-input" min="1"
+                                    required name="SoLuong">
+                            </div>
+
+
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <label for="voucher-type-select" class="form-label">Loại giảm giá <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select" id="voucher-type-select" required name="LoaiVC">
+                                    <option value="">-- Chọn loại giảm giá --</option>
+                                    <option value="SO_TIEN">Giảm theo số tiền (VNĐ)</option>
+                                    <option value="PHAN_TRAM">Giảm theo phần trăm (%)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="voucher-value-input" class="form-label">Giá trị giảm <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" step="any" class="form-control" id="voucher-value-input" min="0"
+                                    required name="GiaTriGiam">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="voucher-max-reduce" class="form-label">Số tiền giảm tối đa (VNĐ)<span
+                                        class="text-danger">*</span></label>
+                                <input type="number" step="any" class="form-control" id="voucher-max-reduce" min="0"
+                                    required name="SoTienGiamMax">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="voucher-min-total-input" class="form-label">Điều kiện tổng tiền tối
+                                    thiểu <span class="text-danger">*</span></label>
+                                <input type="number" step="any" class="form-control" id="voucher-min-total-input"
+                                    min="0" required name="DKTongTien">
+                            </div>
+
+                            <div class="mb-3 d-none" id="status">
+                                <label class="form-label">Trạng thái</label>
+                                <select class="form-select status-filter-select" id="order-status-filter" name="TrangThai">
+                                    <option value="HOAT_DONG">Đang hoạt động</option>
+                                    <option value="VO_HIEU">Đã vô hiệu</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Đóng
+                </button>
+                <button type="submit" class="btn btn-primary btn-save-voucher" form="voucher-add-form">
+                    <i class="fas fa-save me-2"></i>Tạo mã giảm giá
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .value-error {
+        color: red;
+    }
+
+    select#voucher-type-select {
+        padding: 10px 12px;
+    }
+
+    select#order-status-filter {
+        padding: 10px 12px;
+    }
+</style>

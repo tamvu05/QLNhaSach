@@ -115,6 +115,14 @@ const invoiceConfig = {
     modalUpdateId: 'update-invoice-modal',
 }
 
+
+const voucherConfig = {
+    scripts: ['/js/voucher.admin.js'],
+    hrefBase: '/admin/voucher/',
+    apiBase: '/api/voucher',
+    modalId: 'voucher-modal'
+}
+
 export {
     categoryConfig,
     authorConfig,
@@ -125,4 +133,5 @@ export {
     exportReceiptConfig,
     orderConfig,
     invoiceConfig,
+    voucherConfig,
 }

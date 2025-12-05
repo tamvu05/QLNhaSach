@@ -1,0 +1,58 @@
+<div class="container-fluid py-4 manager-container">
+    <div class="header-section mb-4 pb-3">
+        <h1 class="page-title">Quản lý mã giảm giá
+        </h1>
+    </div>
+
+    <div class="row mb-4 align-items-center">
+        <div class="col-lg-8 col-md-7 col-12">
+            <div class="search-card card">
+                <div class="card-body p-3">
+                    <div class="input-group search-input-group">
+                        <input type="text" class="form-control search-value" placeholder="Tìm kiếm theo mã giảm giá">
+                        <button class="btn btn-search search-button" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-5 col-12 d-flex justify-content-end action-buttons-row">
+            <div class="row w-100 g-2 align-items-center"> 
+                <div class="col-6">
+                    <div class="filter-card card">
+                        <div class="card-body p-3">
+                            <select class="form-select status-filter-select" id="order-status-filter">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="HOAT_DONG">Đang hoạt động</option>
+                                <option value="VO_HIEU">Đã vô hiệu</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 d-flex justify-content-end">
+                    <button type="button" class="btn btn-add-primary" data-bs-toggle="modal"
+                        data-bs-target="#voucher-modal">
+                        <i class="fas fa-plus"></i> Tạo mã giảm giá
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive" id="table-view-manager">
+        <%- include('partials/voucher/tableVoucher') %>
+    </div>
+
+    <div id="pagination-view-manager" class="mt-4">
+        <%- include('partials/pagination') %>
+    </div>
+</div>
+
+<%- include('partials/voucher/modalVoucher') %>
+
+
+<script type="module" src="/js/paginationViewManager.js"></script>
+<link rel="stylesheet" href="/css/viewManager.css">

@@ -466,13 +466,12 @@ class InvoiceAddModal {
     }
 
     resetModal() {
-        // ... (Logic reset form) ...
         this.inputDate.value = getCurrentVietNamTime()
         this.textareaNotes.value = ''
         this.inputQuantity.value = 1
         this.inputUnitPrice.value = 0
 
-        this.inputName.value = '' // Reset trường Khách hàng
+        this.inputName.value = '' 
         this.inputPhone.value = ''
         this.inputAddress.value = ''
 

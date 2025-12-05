@@ -1,14 +1,7 @@
 import pool from '../configs/db.js'
 
 const OrderModel = {
-    async getWithParam(
-        limit,
-        offset,
-        sortBy = 'MaDH',
-        sortOrder = 'DESC',
-        keyword = '',
-        status = ''
-    ) {
+    async getWithParam(limit, offset, sortBy = 'MaDH', sortOrder = 'DESC', keyword = '', status = '') {
         const SDT = `%${keyword}%`
         const TrangThai = `%${status}%`
 
@@ -56,18 +49,12 @@ const OrderModel = {
     },
 
     async updateState(id, TrangThai = 'CHO_XAC_NHAN') {
-        const [result] = await pool.query(
-            'UPDATE DonHang SET TrangThai = ? WHERE MaDH = ?',
-            [TrangThai, id]
-        )
+        const [result] = await pool.query('UPDATE DonHang SET TrangThai = ? WHERE MaDH = ?', [TrangThai, id])
         return result.affectedRows > 0
     },
 
     async updateInvoiceDate(id, date) {
-        const [result] = await pool.query(
-            'UPDATE DonHang SET NgayTaoHoaDon = ? WHERE MaDH = ?',
-            [date, id]
-        )
+        const [result] = await pool.query('UPDATE DonHang SET NgayTaoHoaDon = ? WHERE MaDH = ?', [date, id])
         return result.affectedRows > 0
     },
 
@@ -82,16 +69,10 @@ const OrderModel = {
             await connection.query('DELETE FROM CTDonHang WHERE MaDH = ?', [id])
 
             const stockUpdatePromises = details.map((detail) => {
-                return connection.query(
-                    'UPDATE Sach SET SoLuongTon = SoLuongTon + ? WHERE MaSach = ?',
-                    [detail.SoLuong, detail.MaSach]
-                )
+                return connection.query('UPDATE Sach SET SoLuongTon = SoLuongTon + ? WHERE MaSach = ?', [detail.SoLuong, detail.MaSach])
             })
 
-            const deleteOrder = connection.query(
-                'DELETE FROM DonHang WHERE MaDH = ?',
-                [id]
-            )
+            const deleteOrder = connection.query('DELETE FROM DonHang WHERE MaDH = ?', [id])
 
             // chạy song song
             await Promise.all([...stockUpdatePromises, deleteOrder])

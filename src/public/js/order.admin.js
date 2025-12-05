@@ -239,7 +239,7 @@ class OrderTable {
         this.searchInput = document.querySelector(
             '.manager-container .search-value'
         )
-        this.statusFilter = document.querySelector('#order-status-filter') // Bộ lọc trạng thái
+        this.statusFilter = document.querySelector('#order-status-filter') 
         this.sortableHeaders =
             this.tableWrapper?.querySelectorAll('tr .sortable')
 
@@ -274,7 +274,6 @@ class OrderTable {
     }
 
     initEventListeners() {
-        // Bắt sự kiện xem/cập nhật chi tiết
         if (this.tableWrapper)
             this.tableWrapper.addEventListener('click', (event) => {
                 const btnDelete = event.target.closest('.btn-delete-entity')
@@ -291,15 +290,13 @@ class OrderTable {
                 }
             })
 
-        // Bắt sự kiện thay đổi bộ lọc trạng thái
         if (this.statusFilter) {
             this.statusFilter.addEventListener(
                 'change',
-                this.handleSearch.bind(this)
+                this.handleSearchAndSort.bind(this)
             )
         }
 
-        // ... (Listeners Phân trang, Search, Popstate tương tự các file khác) ...
         if (this.paginationWrapper) {
             this.paginationWrapper.addEventListener('click', (e) => {
                 e.preventDefault()
@@ -312,7 +309,7 @@ class OrderTable {
         if (this.btnSearch) {
             this.btnSearch.addEventListener(
                 'click',
-                this.handleSearch.bind(this)
+                this.handleSearchAndSort.bind(this)
             )
         }
 
@@ -322,7 +319,7 @@ class OrderTable {
             })
             this.searchInput.addEventListener('input', () => {
                 const func = () => {
-                    this.handleSearch()
+                    this.handleSearchAndSort()
                 }
                 const delay = 1000
                 const handleDebounced = this.debounced(func, delay)
@@ -402,7 +399,7 @@ class OrderTable {
     }
 
     // Gộp logic tìm kiếm và lọc trạng thái
-    handleSearch() {
+    handleSearchAndSort() {
         const keyword = this.searchInput ? this.searchInput.value.trim() : null
         const status = this.statusFilter ? this.statusFilter.value : null
 
@@ -419,7 +416,6 @@ class OrderTable {
         this.updateView(1, sort, order, keyword, status)
     }
 
-    // Cần truyền thêm status vào updateView
     async updateView(
         page = 1,
         sort,
