@@ -38,7 +38,7 @@ const BookController = {
             const keyword = req.query.keyword || ''
             const categoryId = req.query.categoryId || null // Lấy categoryId nếu có
             const page = parseInt(req.query.page) || 1
-            const limit = 2 // Số sách mỗi trang
+            const limit = 12 // Số sách mỗi trang
 
             // 2. Gọi Service (Truyền đủ 4 tham số)
             const data = await BookService.getAll(
