@@ -1,10 +1,9 @@
 import pool from '../configs/db.js';
 
 const CartService = {
-    // 1. Thêm vào giỏ (Hoặc tăng số lượng nếu đã có)
+    // 1. Thêm vào giỏ
     async addToCart(customerId, bookId) {
         try {
-            // Logic: Thử Insert, nếu trùng khóa chính (MaKH + MaSach) thì tự động tăng SoLuong lên 1
             const query = `
                 INSERT INTO GioHang (MaKH, MaSach, SoLuong) 
                 VALUES (?, ?, 1) 
@@ -18,51 +17,34 @@ const CartService = {
         }
     },
 
-    // 2. Đếm tổng số sách trong giỏ (Để hiện lên Header)
+    // 2. Đếm tổng số sách
     async getCartCount(customerId) {
         try {
-            console.log("🔍 Đang đếm giỏ hàng cho MaKH:", customerId); // Log 1: Xem ID truyền vào là gì
-
             const [rows] = await pool.query(
                 'SELECT SUM(SoLuong) as total FROM GioHang WHERE MaKH = ?', 
                 [customerId]
             );
-            
-            console.log("📦 Kết quả DB trả về:", rows); // Log 2: Xem DB trả về cái gì
-
-            // Chuyển đổi sang số nguyên cho chắc chắn
-            const total = parseInt(rows[0].total) || 0; 
-            
-            console.log("🔢 Tổng số lượng tính được:", total); // Log 3: Kết quả cuối cùng
-            
-            return total;
+            return parseInt(rows[0].total) || 0; 
         } catch (error) {
-            console.error('❌ Lỗi hàm getCartCount:', error); // Log 4: Nếu lỗi thì in đỏ lòm ra
+            console.error('❌ Lỗi hàm getCartCount:', error);
             return 0;
         }
     },
 
-    // 3. Lấy chi tiết giỏ hàng (Để hiển thị trang Cart)
+    // 3. Lấy chi tiết giỏ hàng
     async getCartDetails(customerId) {
         try {
-            // JOIN GioHang với Sach để lấy tên, giá, ảnh
             const query = `
                 SELECT 
-                    gh.MaSach, 
-                    gh.SoLuong, 
-                    s.TenSach, 
-                    s.DonGia, 
-                    s.HinhAnh,
+                    gh.MaSach, gh.SoLuong, 
+                    s.TenSach, s.DonGia, s.HinhAnh,
                     (gh.SoLuong * s.DonGia) AS ThanhTien
                 FROM GioHang gh
                 JOIN Sach s ON gh.MaSach = s.MaSach
                 WHERE gh.MaKH = ?
             `;
             const [items] = await pool.query(query, [customerId]);
-
-            // Tính tổng tiền cả giỏ hàng
             const grandTotal = items.reduce((sum, item) => sum + Number(item.ThanhTien), 0);
-
             return { items, grandTotal };
         } catch (error) {
             console.error('❌ Lỗi lấy chi tiết giỏ:', error);
@@ -70,7 +52,7 @@ const CartService = {
         }
     },
 
-    // 4. Cập nhật số lượng sách ---
+    // 4. Cập nhật số lượng sách
     async updateItem(customerId, bookId, quantity) {
         try {
             await pool.query(
@@ -84,7 +66,7 @@ const CartService = {
         }
     },
 
-    // 5. Xóa sách khỏi giỏ ---
+    // 5. Xóa sách khỏi giỏ
     async removeItem(customerId, bookId) {
         try {
             await pool.query(
@@ -95,6 +77,33 @@ const CartService = {
         } catch (error) {
             console.error('❌ Lỗi xóa sách khỏi giỏ:', error);
             return false;
+        }
+    },
+
+    // 6. Lấy danh sách Voucher hợp lệ (ĐÃ SỬA)
+    // 👉 Thêm tham số customerId để check lịch sử
+    async getEligibleVouchers(currentTotal, customerId) {
+        try {
+            const query = `
+                SELECT * FROM Voucher v
+                WHERE TrangThai = 'HOAT_DONG' 
+                AND SoLuong > 0 
+                AND NgayBD <= NOW()
+                AND NgayKT >= NOW()
+                AND DKTongTien <= ?
+                -- Điều kiện mới: Chưa tồn tại trong bảng Lịch Sử
+                AND NOT EXISTS (
+                    SELECT 1 FROM LichSuDungVoucher ls 
+                    WHERE ls.MaVC = v.MaVC 
+                    AND ls.MaKH = ?
+                )
+                ORDER BY GiaTriGiam DESC
+            `;
+            const [vouchers] = await pool.query(query, [currentTotal, customerId]);
+            return vouchers;
+        } catch (error) {
+            console.error('❌ Lỗi lấy voucher:', error);
+            return [];
         }
     }
 };

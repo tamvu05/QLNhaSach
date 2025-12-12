@@ -29,11 +29,24 @@ const OrderController = {
 
         if (!data) return res.redirect('/order/history') // Không tìm thấy thì về lịch sử
 
+        // 1. Tính Tạm tính (Cộng dồn tiền từng món sách)
+        const subTotal = data.items.reduce((sum, item) => sum + (item.DonGia * item.SoLuong), 0);
+
+        // 2. Tính tiền Voucher đã giảm
+        // Công thức: Giảm giá = Tạm tính - Tổng tiền thực trả (Trong DB)
+        // (Lưu ý: Nếu sau này có phí ship thì: Voucher = Tạm tính + Ship - Tổng thực trả. Hiện tại Ship=0 nên đơn giản)
+        let discountAmount = subTotal - data.order.TongTien;
+        
+        // Xử lý lệch số lẻ (nếu có) để không ra số âm
+        if (discountAmount < 0) discountAmount = 0;
+
         res.render('user/order-detail', {
             title: 'Chi tiết đơn hàng #' + orderId,
             path: '/order',
             order: data.order, // Thông tin chung (Ngày, Người nhận...)
             items: data.items, // Danh sách sách
+            subTotal: subTotal,
+            discountAmount: discountAmount
         })
     },
 

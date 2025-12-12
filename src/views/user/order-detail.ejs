@@ -62,8 +62,29 @@
                         </tbody>
                         <tfoot class="bg-light">
                             <tr>
-                                <td colspan="2" class="text-end py-3 fw-bold text-muted">Tổng tiền:</td>
-                                <td class="text-end pe-4 py-3 text-danger fs-5 fw-bold">
+                                <td colspan="2" class="text-end py-2 fw-bold text-muted border-0">Tạm tính:</td>
+                                <td class="text-end pe-4 py-2 fw-bold border-0">
+                                    <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(subTotal) %>
+                                </td>
+                            </tr>
+
+                            <% if (discountAmount > 0) { %>
+                                <tr>
+                                    <td colspan="2" class="text-end py-2 fw-bold text-success border-0">
+                                        <i class="bi bi-ticket-fill me-1"></i>Voucher giảm giá 
+                                        <% if (order.MaVC) { %> 
+                                            <span class="text-uppercase">(<%= order.MaVC %>)</span>
+                                        <% } %>:
+                                    </td>
+                                    <td class="text-end pe-4 py-2 text-success fw-bold border-0">
+                                        -<%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(discountAmount) %>
+                                    </td>
+                                </tr>
+                            <% } %>
+
+                            <tr>
+                                <td colspan="2" class="text-end py-3 fw-bold text-dark h5 border-top">Tổng cộng:</td>
+                                <td class="text-end pe-4 py-3 text-danger fs-5 fw-bold border-top">
                                     <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.TongTien) %>
                                 </td>
                             </tr>

@@ -27,7 +27,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="text-center text-muted cart-price" data-price="<%= item.DonGia %>">
+                                        <td class="text-center text-muted">
                                             <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.DonGia) %>
                                         </td>
                                         <td class="text-center">
@@ -38,7 +38,7 @@
                                                 <button type="button" class="btn btn-sm btn-light rounded-end-pill px-2 fw-bold btn-increase">+</button>
                                             </div>
                                         </td>
-                                        <td class="text-end pe-4 fw-bold text-primary cart-total">
+                                        <td class="text-end pe-4 fw-bold text-primary">
                                             <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.ThanhTien) %>
                                         </td>
                                         <td class="text-center">
@@ -61,36 +61,231 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card border-0 shadow-sm rounded-3">
+                
+                <div class="card border-0 shadow-sm rounded-3 mb-3 sticky-top" style="top: 20px; z-index: 1;">
                     <div class="card-body p-4">
                         <h5 class="fw-bold mb-4">Cộng Giỏ Hàng</h5>
+                        
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Tạm tính:</span>
-                            <span class="fw-bold cart-subtotal"><%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(grandTotal) %></span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
-                            <span class="text-muted">Phí vận chuyển:</span>
-                            <span class="text-success">Miễn phí</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-4">
-                            <span class="h5 fw-bold">Tổng cộng:</span>
-                            <span class="h4 fw-bold text-danger cart-grand-total">
+                            <span class="fw-bold" id="display-subtotal">
                                 <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(grandTotal) %>
                             </span>
                         </div>
-                        <a href="/checkout" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm hover-up">
+                        
+                        <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
+                            <span class="text-muted">Áp dụng voucher:</span>
+                            <span class="fw-bold text-success" id="display-discount">0 ₫</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="h5 fw-bold">Tổng cộng:</span>
+                            <span class="h4 fw-bold text-danger" id="display-grand-total">
+                                <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(grandTotal) %>
+                            </span>
+                        </div>
+
+                        <a href="/checkout" id="btn-checkout" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm hover-up">
                             Tiến Hành Thanh Toán
                         </a>
                     </div>
                 </div>
+
+                <% if (typeof vouchers !== 'undefined' && vouchers.length > 0) { %>
+                    <div class="card border-0 shadow-sm rounded-3 bg-white mt-3">
+                        <div class="card-header bg-white border-0 pt-3 pb-0">
+                            <h6 class="fw-bold text-primary"><i class="bi bi-ticket-perforated-fill me-2"></i>Mã giảm giá khả dụng</h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="voucher-form" class="d-flex flex-column gap-2">
+                                <% vouchers.forEach((v, index) => { %>
+                                    
+                                    <% 
+                                        let displayAmount = 0;
+                                        let isPercent = (v.LoaiVC === 'PHAN_TRAM' || v.LoaiVC === 'PhanTram');
+                                        
+                                        if (isPercent) {
+                                            let calculated = (v.GiaTriGiam / 100) * grandTotal;
+                                            displayAmount = (v.SoTienGiamMax > 0 && calculated > v.SoTienGiamMax) ? v.SoTienGiamMax : calculated;
+                                        } else {
+                                            displayAmount = v.GiaTriGiam;
+                                        }
+                                    %>
+
+                                    <label class="cursor-pointer border border-warning border-opacity-50 rounded-2 p-2 d-flex align-items-center bg-warning bg-opacity-10 position-relative voucher-card" 
+                                           for="voucher-<%= index %>" style="cursor: pointer;">
+                                        
+                                        <div class="me-3 ps-2">
+                                            <input class="form-check-input p-2 voucher-radio" type="radio" 
+                                                   name="selected_voucher" 
+                                                   id="voucher-<%= index %>"
+                                                   value="<%= v.MaVC %>"
+                                                   data-type="<%= isPercent ? 'percent' : 'fixed' %>"
+                                                   data-value="<%= v.GiaTriGiam %>"
+                                                   data-max="<%= v.SoTienGiamMax %>">
+                                        </div>
+
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold text-dark">
+                                                <i class="bi bi-ticket-fill text-warning me-1"></i><%= v.MaVC %>
+                                            </div>
+
+                                            <% if (v.DKTongTien > 0) { %>
+                                                <div style="font-size: 11px;" class="text-secondary mb-1">
+                                                    Đơn từ: <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v.DKTongTien) %>
+                                                </div>
+                                            <% } %>
+
+                                            <div class="text-danger fw-bold" style="font-size: 14px;">
+                                                Giảm <%= new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayAmount) %>
+                                                <% if (isPercent) { %>
+                                                    <span class="text-muted fw-normal" style="font-size: 12px;">(<%= Number(v.GiaTriGiam) %>%)</span>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </label>
+                                <% }) %>
+                                
+                                <button type="button" class="btn btn-sm btn-light text-muted mt-2 border-0" onclick="resetVoucher()">
+                                    <i class="bi bi-x-circle me-1"></i>Bỏ chọn voucher
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                <% } %>
+
             </div>
         </div>
     <% } else { %>
         <div class="text-center py-5 bg-white rounded-3 shadow-sm">
             <i class="bi bi-cart-x display-1 text-muted opacity-25"></i>
             <h4 class="mt-3 text-muted">Giỏ hàng của bạn đang trống</h4>
-            <p class="text-muted">Hãy chọn thêm sách để lấp đầy nhé!</p>
             <a href="/book" class="btn btn-primary rounded-pill px-4 mt-3">Mua sắm ngay</a>
         </div>
     <% } %>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    console.log("✅ Script tính tiền Voucher đã chạy!");
+
+    // 1. Lấy giá trị tổng gốc an toàn hơn
+    // Ép kiểu Number để tránh lỗi nếu server gửi về chuỗi
+    const originalTotal = Number('<%= grandTotal %>'); 
+    
+    console.log("💰 Tổng tiền gốc:", originalTotal);
+
+    // Format tiền tệ Việt Nam
+    const formatVND = (amount) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    };
+
+    // 2. Lắng nghe sự kiện click cho tất cả radio voucher
+    const radios = document.querySelectorAll('.voucher-radio');
+    
+    if (radios.length === 0) {
+        console.warn("⚠️ Không tìm thấy radio voucher nào (Có thể do chưa có voucher khả dụng).");
+    }
+
+    radios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            console.log("👉 Đã chọn voucher:", this.value);
+            calculateTotal(this);
+        });
+    });
+
+    // 3. Hàm tính toán lại tiền
+    function calculateTotal(selectedRadio) {
+        if (!selectedRadio) return;
+
+        // Lấy dữ liệu từ thẻ input (đã được server render sẵn)
+        const type = selectedRadio.getAttribute('data-type');     // 'percent' hoặc 'fixed'
+        const value = parseFloat(selectedRadio.getAttribute('data-value')) || 0; // Giá trị giảm
+        const max = parseFloat(selectedRadio.getAttribute('data-max')) || 0;     // Tối đa
+        const code = selectedRadio.value; // Mã voucher
+
+        let discountAmount = 0;
+
+        // Logic tính toán
+        if (type === 'percent' || type === 'percent') { // check kỹ cả 2 trường hợp tên
+            discountAmount = (value / 100) * originalTotal;
+            // Nếu có giới hạn tối đa
+            if (max > 0 && discountAmount > max) {
+                discountAmount = max;
+            }
+        } else {
+            // Giảm tiền mặt trực tiếp
+            discountAmount = value;
+        }
+
+        console.log(`📉 Đang giảm: ${discountAmount} (Loại: ${type}, Giá trị: ${value})`);
+
+        // Đảm bảo không giảm quá số tiền hiện có (không để âm tiền)
+        if (discountAmount > originalTotal) {
+            discountAmount = originalTotal;
+        }
+
+        const newTotal = originalTotal - discountAmount;
+
+        // 4. CẬP NHẬT GIAO DIỆN
+        
+        // Cập nhật dòng "Áp dụng voucher"
+        const discountEl = document.getElementById('display-discount');
+        if (discountEl) {
+            discountEl.innerText = '-' + formatVND(discountAmount);
+            discountEl.classList.remove('d-none'); // Hiện lên nếu đang ẩn
+        }
+
+        // Cập nhật dòng "Tổng cộng"
+        const totalEl = document.getElementById('display-grand-total');
+        if (totalEl) {
+            totalEl.innerText = formatVND(newTotal);
+        }
+
+        // 5. HIGHLIGHT UI (Làm đẹp thẻ được chọn)
+        document.querySelectorAll('.voucher-card').forEach(el => {
+            el.classList.remove('border-primary', 'bg-primary');
+            el.classList.add('border-warning', 'bg-warning'); 
+            el.style.backgroundColor = ''; 
+        });
+        
+        const parentLabel = selectedRadio.closest('label');
+        if (parentLabel) {
+            parentLabel.classList.remove('border-warning', 'bg-warning');
+            parentLabel.classList.add('border-primary');
+            parentLabel.style.backgroundColor = '#e7f1ff'; 
+        }
+
+        // 6. Cập nhật link nút thanh toán để gửi mã voucher đi
+        const checkoutBtn = document.getElementById('btn-checkout');
+        if (checkoutBtn) {
+            checkoutBtn.href = `/checkout?voucher=${code}`;
+        }
+    }
+
+    // Hàm bỏ chọn (Reset) - Cần gán vào window để nút bấm gọi được
+    window.resetVoucher = function() {
+        const checked = document.querySelector('input[name="selected_voucher"]:checked');
+        if (checked) checked.checked = false;
+
+        // Reset về 0đ
+        const discountEl = document.getElementById('display-discount');
+        if (discountEl) discountEl.innerText = '0 ₫';
+
+        const totalEl = document.getElementById('display-grand-total');
+        if (totalEl) totalEl.innerText = formatVND(originalTotal);
+
+        const checkoutBtn = document.getElementById('btn-checkout');
+        if (checkoutBtn) checkoutBtn.href = '/checkout';
+
+        // Reset màu sắc
+        document.querySelectorAll('.voucher-card').forEach(el => {
+            el.classList.remove('border-primary');
+            el.classList.add('border-warning');
+            el.style.backgroundColor = '';
+        });
+        
+        console.log("🔄 Đã bỏ chọn voucher");
+    }
+});
+</script>

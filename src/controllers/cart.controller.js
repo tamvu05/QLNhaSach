@@ -31,12 +31,16 @@ const CartController = {
         const data = await CartService.getCartDetails(customerId);
         const currentTotalQty = data.items.reduce((sum, item) => sum + item.SoLuong, 0);
 
+        // Lấy danh sách Voucher phù hợp với tổng tiền hiện tại
+        const vouchers = await CartService.getEligibleVouchers(data.grandTotal, customerId);
+
         res.render('user/cart', {
             title: 'Giỏ hàng của bạn',
             path: '/cart',
             cartItems: data.items,
             grandTotal: data.grandTotal,
-            totalQuantity: currentTotalQty 
+            totalQuantity: currentTotalQty,
+            vouchers: vouchers
         });
     },
 
