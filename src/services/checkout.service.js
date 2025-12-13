@@ -92,7 +92,7 @@ const CheckoutService = {
             if (voucherCode && discountAmount > 0) {
                 // 1. Trừ số lượng Voucher
                 await connection.query(
-                    'UPDATE Voucher SET SoLuong = SoLuong - 1, SLDaDung = SLDaDung + 1 WHERE MaVC = ?', 
+                    'UPDATE Voucher SET SLDaDung = SLDaDung + 1 WHERE MaVC = ?', 
                     [voucherCode]
                 );
 
