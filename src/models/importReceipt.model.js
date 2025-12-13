@@ -1,11 +1,6 @@
 import pool from '../configs/db.js'
 
 const ImportReceiptModel = {
-    // async getAll() {
-    //     const [rows] = await pool.query('SELECT * FROM NhaCungCap')
-    //     return rows
-    // },
-
     async getWithParam(
         limit,
         offset,
@@ -63,14 +58,6 @@ const ImportReceiptModel = {
         return rows
     },
 
-    // async update(id, { TenNCC, DiaChi, SDT }) {
-    //     const [result] = await pool.query(
-    //         'UPDATE NhaCungCap SET TenNCC = ?, DiaChi = ?, SDT = ? WHERE MaNCC = ?',
-    //         [TenNCC, DiaChi, SDT, id]
-    //     )
-    //     return result.affectedRows > 0
-    // },
-
     async create({ MaNCC, MaNV, NgayNhap, NoiDung, ChiTietPN }) {
         const connection = await pool.getConnection()
 
@@ -112,10 +99,15 @@ const ImportReceiptModel = {
         }
     },
 
-    // async delete(id) {
-    //     const [result] = await pool.query('DELETE FROM NhaCungCap WHERE MaNCC = ?', [id])
-    //     return result.affectedRows > 0
-    // },
+    async existBook(id) {
+        const [rows] = await pool.query(
+            `SELECT COUNT(*) AS count FROM CTPhieuNhap WHERE MaSach = ? LIMIT 1`,
+            [id]
+        )
+
+        return rows[0].count > 0
+    },
+
 }
 
 export default ImportReceiptModel

@@ -5,6 +5,8 @@ import { createHttpError } from '../utils/errorUtil.js'
 import OrderDetailModel from '../models/orderDetail.model.js'
 import CartModel from '../models/cart.model.js'
 import { deleteImage } from '../utils/cloudinary.js'
+import ImportReceiptModel from '../models/importReceipt.model.js'
+import ExportReceiptModel from '../models/exportReceipt.model.js'
 
 const { PAGE_LIMIT } = config
 
@@ -157,13 +159,7 @@ const BookService = {
         const sortBy = validParam.includes(sort) ? sort : 'MaSach'
         const sortOrder = validParam.includes(order) ? order : 'DESC'
 
-        const books = await BookModel.getWithParam(
-            limit,
-            offset,
-            sortBy,
-            sortOrder,
-            keyword
-        )
+        const books = await BookModel.getWithParam(limit, offset, sortBy, sortOrder, keyword)
 
         return {
             books,
@@ -177,14 +173,7 @@ const BookService = {
     },
 
     async create(payload) {
-        if (
-            payload.TenSach == '' ||
-            payload.ISBN == '' ||
-            payload.DonGia == '' ||
-            payload.MaTG == '' ||
-            payload.MaTL == '' ||
-            payload.MaNXB == ''
-        )
+        if (payload.TenSach == '' || payload.ISBN == '' || payload.DonGia == '' || payload.MaTG == '' || payload.MaTL == '' || payload.MaNXB == '')
             throw createHttpError('Thông tin sách còn thiếu!', 401)
 
         const isbnExist = await BookModel.getByISBN(payload.ISBN)
@@ -196,14 +185,7 @@ const BookService = {
     },
 
     async update(id, payload) {
-        if (
-            payload.TenSach == '' ||
-            payload.ISBN == '' ||
-            payload.DonGia == '' ||
-            payload.MaTG == '' ||
-            payload.MaTL == '' ||
-            payload.MaNXB == ''
-        )
+        if (payload.TenSach == '' || payload.ISBN == '' || payload.DonGia == '' || payload.MaTG == '' || payload.MaTL == '' || payload.MaNXB == '')
             throw createHttpError('Thông tin sách còn thiếu!', 401)
 
         const exist = await BookModel.getById(id)
@@ -213,8 +195,7 @@ const BookService = {
         if (existOther) throw createHttpError('Trùng mã ISBN!', 409)
 
         const isUpdate = BookModel.update(id, payload)
-        if (!isUpdate)
-            throw createHttpError('Có lỗi khi cập nhật thông tin sách', 500)
+        if (!isUpdate) throw createHttpError('Có lỗi khi cập nhật thông tin sách', 500)
 
         const uploadResult = payload.uploadResult
         if (uploadResult) {
@@ -237,15 +218,19 @@ const BookService = {
 
         // Kiểm tra trong chi tiết hóa đơn
         const existInOrder = await OrderDetailModel.existBook(id)
-        if (existInOrder)
-            throw createHttpError('Sách đã có lịch sử giao dịch', 409)
+        if (existInOrder) throw createHttpError('Sách đã có lịch sử giao dịch!', 409)
 
         // Kiểm tra trong giỏ hàng
         const existInCart = await CartModel.existBook(id)
-        if (existInCart)
-            throw createHttpError('Sách đã có lịch sử giao dịch', 409)
+        if (existInCart) throw createHttpError('Sách đã có lịch sử giao dịch!', 409)
 
-        // Kiểm tra trong chi tiết phiếu nhập/xuất
+        // Kiểm tra trong chi tiết phiếu nhập
+        const existInImportDetail = await ImportReceiptModel.existBook(id)
+        if (existInImportDetail) throw createHttpError('Sách đã có lịch sử nhập hàng!', 409)
+
+        // Kiểm tra trong chi tiết phiếu xuất
+        const existInExportDetail = await ExportReceiptModel.existBook(id)
+        if (existInExportDetail) throw createHttpError('Sách đã có lịch sử xuất hàng!', 409)
 
         const imageId = exist.HinhAnhID
         if (imageId) await deleteImage(imageId)

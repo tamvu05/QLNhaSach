@@ -1,0 +1,91 @@
+<!-- Modal dùng để tạo mới và chỉnh sửa mã giảm giá -->
+<div class="modal fade" id="employee-modal" tabindex="-1" aria-labelledby="employee-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="employee-modal-label">
+                    Thêm nhân viên mới
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form autocomplete="off" id="voucher-add-form">
+                    <div class="row">
+
+                        <div class="col-lg-6">
+
+                            <div class="mb-3">
+                                <label for="name-input" class="form-label">Tên nhân viên <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name-input" required name="HoTen">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="birthday-input" class="form-label">Ngày sinh <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="birthday-input" required name="NgaySinh">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="day-of-work-input" class="form-label">Ngày vào làm <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="day-of-work-input" required
+                                    name="NgayVaoLam">
+                            </div>
+
+                            <div class="mb-3 d-none" id="cont-state-select">
+                                <label for="state-select" class="form-label">Trạng thái</label>
+                                <select class="form-select" id="state-select" name="TrangThai">
+                                    <option value="ACTIVE">Hoạt động</option>
+                                    <option value="LOCKED">Vô hiệu</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <label for="phone-input" class="form-label">Số điện thoại <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="phone-input" required name="SDT">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email-input" class="form-label">Email đăng nhập <span
+                                        class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email-input" required name="Email">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password-input" class="form-label">Mật khẩu đăng nhập <span
+                                        class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="password-input" required name="MatKhau">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Đóng
+                </button>
+                <button type="submit" class="btn btn-primary btn-save-voucher" form="voucher-add-form">
+                    <i class="fas fa-save me-2"></i>Thêm nhân viên mới
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .value-error {
+        color: red;
+    }
+
+    select#state-select {
+        padding: 10px 12px;
+    }
+</style>

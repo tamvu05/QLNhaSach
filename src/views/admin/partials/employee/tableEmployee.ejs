@@ -1,0 +1,83 @@
+<% 
+    const TRANG_THAI = {
+        'ACTIVE': 'Đang hoạt động',
+        'LOCKED': 'Đã bị khóa',
+    }
+
+    const getTime7 = (time) => {
+        if(!time) return ''
+        return time.toLocaleString('vi-VN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        })
+    }
+%>
+
+
+<div id="data-attribute"     data-current-page="<%= currentPage %>"     data-total-page="<%= totalPage %>"    
+    data-total-item="<%= totalItem %>"     data-total-item-per-page="<%= totalItemPerPage %>"    
+    data-page-limit="<%= PAGE_LIMIT %>"></div>
+
+<div class="table-responsive-wrapper">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                <th>STT</th>
+                <th>Tên nhân viên</th>
+                <th>Số điện thoại</th>
+                <th>Email</th>
+                <th>Trạng thái</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            <% if (employees.length> 0) { %>
+
+                <% employees.forEach((employee, index)=> { %>
+
+                    <tr data-id="<%= employee.MaNV %>">
+                        <td>
+                            <%= index + 1 %>
+                        </td>
+                        <td class="name font-weight-bold">
+                            <%= employee.TenNV %>
+                        </td>
+                        <td class="desc text-muted">
+                            <%= employee.SDT %>
+                        </td>
+                        <td class="desc text-muted">
+                            <%= employee.Email %>
+                        </td>
+                        <td class="desc text-muted">
+                            <%= TRANG_THAI[employee.TrangThai] %>
+                        </td>
+                        <td class="action-col text-center">
+                            <button class="btn-show-modal-update btn action-btn edit-btn" title="Chỉnh sửa">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </button>
+                            <!-- <button class="btn-delete-entity btn action-btn delete-btn" title="Xóa">
+                                <i class="fas fa-trash-alt"></i>
+                            </button> -->
+                        </td>
+                    </tr>
+                    <% }) %>
+
+                        <% } else { %>
+
+                            <tr class="no-data">
+                                <td colspan="7" class="text-center py-4">
+                                    Không có dữ liệu...
+                                </td>
+                            </tr>
+
+                            <% } %>
+
+        </tbody>
+    </table>
+</div>

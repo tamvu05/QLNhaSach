@@ -123,6 +123,13 @@ const voucherConfig = {
     modalId: 'voucher-modal'
 }
 
+const employeeConfig = {
+    scripts: ['/js/employee.admin.js'],
+    hrefBase: '/admin/employee/',
+    apiBase: '/api/employee',
+    modalId: 'employee-modal'
+}
+
 export {
     categoryConfig,
     authorConfig,
@@ -134,4 +141,5 @@ export {
     orderConfig,
     invoiceConfig,
     voucherConfig,
+    employeeConfig
 }

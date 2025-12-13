@@ -1,11 +1,6 @@
 import pool from '../configs/db.js'
 
 const ExportReceiptModel = {
-    // async getAll() {
-    //     const [rows] = await pool.query('SELECT * FROM NhaCungCap')
-    //     return rows
-    // },
-
     async getWithParam(
         limit,
         offset,
@@ -98,6 +93,15 @@ const ExportReceiptModel = {
         } finally {
             connection.release()
         }
+    },
+
+    async existBook(id) {
+        const [rows] = await pool.query(
+            `SELECT COUNT(*) AS count FROM CTPhieuXuat WHERE MaSach = ? LIMIT 1`,
+            [id]
+        )
+
+        return rows[0].count > 0
     },
 }
 
