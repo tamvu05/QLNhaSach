@@ -1,82 +1,99 @@
-import pool from '../configs/db.js';
-import bcrypt from 'bcrypt';
-import crypto from 'crypto'; // Import để tạo mã token ngẫu nhiên
-import { sendMail } from '../utils/mailer.js'; // Import hàm gửi mail 
+import pool from '../configs/db.js'
+import bcrypt from 'bcrypt'
+import crypto from 'crypto' // Import để tạo mã token ngẫu nhiên
+import { sendMail } from '../utils/mailer.js' // Import hàm gửi mail
 
 const AuthService = {
     // --- ĐĂNG KÝ (Giữ nguyên) ---
     async register({ fullname, email, password }) {
-        let connection;
+        let connection
         try {
-            const [existingUser] = await pool.query('SELECT * FROM TaiKhoan WHERE TenDangNhap = ?', [email]);
+            const [existingUser] = await pool.query('SELECT * FROM TaiKhoan WHERE TenDangNhap = ?', [email])
             if (existingUser.length > 0) {
-                throw new Error('Email này đã được sử dụng!');
+                throw new Error('Email này đã được sử dụng!')
             }
 
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
+            const salt = await bcrypt.genSalt(10)
+            const hashedPassword = await bcrypt.hash(password, salt)
 
-            connection = await pool.getConnection();
-            await connection.beginTransaction();
+            connection = await pool.getConnection()
+            await connection.beginTransaction()
 
             const [userResult] = await connection.query(
                 `INSERT INTO TaiKhoan (TenDangNhap, MatKhauHash, TrangThai, MaVT) 
                  VALUES (?, ?, 'ACTIVE', 2)`,
                 [email, hashedPassword]
-            );
-            const newUserId = userResult.insertId;
+            )
+            const newUserId = userResult.insertId
 
-            await connection.query(
-                `INSERT INTO KhachHang (HoTen, Email, MaTK) VALUES (?, ?, ?)`,
-                [fullname, email, newUserId]
-            );
+            await connection.query(`INSERT INTO KhachHang (HoTen, Email, MaTK) VALUES (?, ?, ?)`, [fullname, email, newUserId])
 
-            await connection.commit();
-            return true;
-
+            await connection.commit()
+            return true
         } catch (error) {
-            if (connection) await connection.rollback();
-            throw error;
+            if (connection) await connection.rollback()
+            throw error
         } finally {
-            if (connection) connection.release();
+            if (connection) connection.release()
         }
     },
 
     // --- ĐĂNG NHẬP (Giữ nguyên) ---
     async login(email, password) {
-        const [users] = await pool.query('SELECT * FROM TaiKhoan WHERE TenDangNhap = ?', [email]);
-        const user = users[0];
+        const [users] = await pool.query('SELECT * FROM TaiKhoan WHERE TenDangNhap = ?', [email])
+        const user = users[0]
 
-        if (!user) throw new Error('Tài khoản không tồn tại');
-        if (user.TrangThai !== 'ACTIVE') throw new Error('Tài khoản đã bị khóa');
+        if (!user) throw new Error('Tài khoản không tồn tại')
 
-        const isMatch = await bcrypt.compare(password, user.MatKhauHash);
-        if (!isMatch) throw new Error('Mật khẩu không đúng');
+        const isMatch = await bcrypt.compare(password, user.MatKhauHash)
+        if (!isMatch) throw new Error('Mật khẩu không đúng')
 
-        const [customers] = await pool.query('SELECT * FROM KhachHang WHERE MaTK = ?', [user.MaTK]);
-        const customer = customers[0];
+        if (user.TrangThai !== 'ACTIVE') throw new Error('Tài khoản đã bị khóa')
+
+        const [customers] = await pool.query('SELECT * FROM KhachHang WHERE MaTK = ?', [user.MaTK])
+        const customer = customers[0]
 
         return {
-            id: user.MaTK,          // ID Tài khoản
+            id: user.MaTK,
             email: user.TenDangNhap,
             roleId: user.MaVT,
-            customerId: customer ? customer.MaKH : null, 
-            fullname: customer ? customer.HoTen : 'Khách hàng'
-        };
+            customerId: customer ? customer.MaKH : null,
+            fullname: customer ? customer.HoTen : 'Khách hàng',
+        }
+    },
+
+    async loginAdmin(email, password) {
+        const [users] = await pool.query('SELECT * FROM TaiKhoan WHERE VaiTro > 2 AND TenDangNhap = ?', [email])
+        const user = users[0]
+
+        if (!user) throw new Error('Tài khoản hoặc mật khẩu không chính xác!')
+
+        const isMatch = await bcrypt.compare(password, user.MatKhauHash)
+        if (!isMatch) throw new Error('Tài khoản hoặc mật khẩu không chính xác!')
+
+        if (user.TrangThai !== 'ACTIVE') throw new Error('Tài khoản đã bị khóa')
+
+        // const [admin] = await pool.query('SELECT * FROM NhanVien WHERE MaTK = ?', [user.MaTK])
+        // const account = admin[0]
+
+        return {
+            MaTK: user.MaTK,
+            email: user.TenDangNhap,
+            VaiTro: user.VaiTro
+        }
     },
 
     // 1. GỬI MÃ OTP (Thay vì gửi Link)
     async sendOtp(email) {
-        const [users] = await pool.query('SELECT * FROM TaiKhoan WHERE TenDangNhap = ?', [email]);
-        if (users.length === 0) throw new Error('Email không tồn tại');
+        const [users] = await pool.query('SELECT * FROM TaiKhoan WHERE TenDangNhap = ?', [email])
+        if (users.length === 0) throw new Error('Email không tồn tại')
 
         // Sinh mã 6 số ngẫu nhiên
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const expireTime = new Date(Date.now() + 5 * 60 * 1000); // Hết hạn sau 5 phút
+        const otp = Math.floor(100000 + Math.random() * 900000).toString()
+        const expireTime = new Date(Date.now() + 5 * 60 * 1000) // Hết hạn sau 5 phút
 
         // Lưu OTP vào DB
-        await pool.query('UPDATE TaiKhoan SET ResetToken = ?, TokenExp = ? WHERE TenDangNhap = ?', 
-            [otp, expireTime, email]);
+        await pool.query('UPDATE TaiKhoan SET ResetToken = ?, TokenExp = ? WHERE TenDangNhap = ?', [otp, expireTime, email])
 
         // Gửi Email chứa mã
         const htmlContent = `
@@ -87,31 +104,29 @@ const AuthService = {
                 <h1 style="letter-spacing: 5px; color: #333; background: #f8f9fa; padding: 10px; display: inline-block; border-radius: 5px;">${otp}</h1>
                 <p style="color: red;">Mã này sẽ hết hạn sau 5 phút.</p>
             </div>
-        `;
+        `
 
-        await sendMail(email, 'Mã xác minh BookStore', htmlContent);
-        return true;
+        await sendMail(email, 'Mã xác minh BookStore', htmlContent)
+        return true
     },
 
     // 2. KIỂM TRA MÃ OTP
     async verifyOtp(email, otp) {
-        const [users] = await pool.query('SELECT * FROM TaiKhoan WHERE TenDangNhap = ? AND ResetToken = ? AND TokenExp > NOW()', 
-            [email, otp]);
-        
-        if (users.length === 0) return false;
-        return true;
+        const [users] = await pool.query('SELECT * FROM TaiKhoan WHERE TenDangNhap = ? AND ResetToken = ? AND TokenExp > NOW()', [email, otp])
+
+        if (users.length === 0) return false
+        return true
     },
 
     // 3. ĐỔI MẬT KHẨU (Dùng email để xác định)
     async resetPassword(email, newPassword) {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(newPassword, salt)
 
         // Update pass và xóa OTP
-        await pool.query('UPDATE TaiKhoan SET MatKhauHash = ?, ResetToken = NULL, TokenExp = NULL WHERE TenDangNhap = ?', 
-            [hashedPassword, email]);
-        return true;
-    }
-};
+        await pool.query('UPDATE TaiKhoan SET MatKhauHash = ?, ResetToken = NULL, TokenExp = NULL WHERE TenDangNhap = ?', [hashedPassword, email])
+        return true
+    },
+}
 
-export default AuthService;
+export default AuthService

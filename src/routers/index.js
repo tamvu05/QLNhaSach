@@ -1,18 +1,19 @@
 import express from 'express'
 
-// 1. Import trực tiếp các Router giao diện (Thay vì qua file trung gian)
 import adminRouter from './viewRouters/admin.router.js'
 import userRouter from './viewRouters/user.router.js'
 import cartRouter from './viewRouters/cart.router.js'
 import checkoutRouter from './viewRouters/checkout.router.js'
 import orderRouter from './viewRouters/order.router.js';
+import commonRouter from './viewRouters/login.router.js'
 
-// 2. Import Router API (Giữ nguyên cái này vì thư mục apiRouters vẫn còn)
 import apiRouter from './apiRouters/index.js'
 
 const router = express.Router()
 
 // 3. Định nghĩa các luồng đi (Routes)
+
+router.use('/login', commonRouter)
 
 // -> Đường dẫn cho Admin
 router.use('/admin', adminRouter)
