@@ -1,4 +1,4 @@
-import showToast from './toast.js'
+import BaseTable from './base.table.js'
 
 // Hàm chuyển đổi thời gian sang giờ Việt Nam (UTC+7)
 function getCurrentVietNamTime() {
@@ -292,12 +292,12 @@ class VoucherFormModal {
 }
 
 // --- Class 2: VoucherTable (Quản lý Bảng, Phân trang, Sự kiện) ---
-class VoucherTable {
+class VoucherTable extends BaseTable {
     constructor() {
-        this.config = {
+        super({
             apiBaseUrl: '/api/voucher',
             entityName: 'mã giảm giá',
-        }
+        })
         this.tableWrapper = document.querySelector('#table-view-manager')
         this.paginationWrapper = document.querySelector('#pagination-view-manager')
         this.btnSearch = document.querySelector('.manager-container .btn-search')
@@ -306,6 +306,19 @@ class VoucherTable {
         this.statusFilter = document.querySelector('#order-status-filter')
 
         this.voucherFormModalInstance = null
+
+        // Collect filter values for status
+        this.collectFilters = () => ({
+            status: this.statusFilter?.value || null,
+        })
+
+        // Apply filters from URL
+        this.applyFiltersFromUrl = (urlParams) => {
+            if (this.statusFilter) {
+                const status = urlParams.get('status')
+                if (status) this.statusFilter.value = status
+            }
+        }
 
         this.loadInitialState()
         this.initEventListeners()
@@ -319,20 +332,16 @@ class VoucherTable {
             if (keyword) this.searchInput.value = keyword
         }
 
-        if (this.statusFilter) {
-            const status = urlParams.get('status')
-            if (status) this.statusFilter.value = status
-        }
+        this.applyFiltersFromUrl(urlParams)
 
         const page = urlParams.get('page')
         const sort = urlParams.get('sort')
         const order = urlParams.get('order')
         const keyword = urlParams.get('keyword')
-        const status = urlParams.get('status')
 
         const currentPage = page ? Number(page) : 1
 
-        this.updateView(currentPage, sort, order, keyword, status, false, true)
+        this.updateView(currentPage, sort, order, keyword, false, true)
     }
 
     initEventListeners() {
@@ -363,25 +372,21 @@ class VoucherTable {
         window.addEventListener('popstate', this.handlePopState.bind(this))
 
         if (this.btnSearch) {
-            this.btnSearch.addEventListener('click', this.handleSearchAndSort.bind(this))
+            this.btnSearch.addEventListener('click', this.handleSearch.bind(this))
         }
 
         if (this.searchInput) {
             this.searchInput.addEventListener('keyup', (event) => {
                 if (event.key === 'Enter') this.btnSearch.click()
             })
-            this.searchInput.addEventListener('input', () => {
-                const func = () => {
-                    this.handleSearchAndSort()
-                }
-                const delay = 1000
-                const handleDebounced = this.debounced(func, delay)
-                handleDebounced()
-            })
+            this.searchInput.addEventListener(
+                'input',
+                this.debounced(() => this.handleSearch(), 1000)
+            )
         }
 
         if (this.statusFilter) {
-            this.statusFilter.addEventListener('change', this.handleSearchAndSort.bind(this))
+            this.statusFilter.addEventListener('change', this.handleSearch.bind(this))
         }
     }
 
@@ -389,29 +394,20 @@ class VoucherTable {
         this.voucherFormModalInstance = instance
     }
 
+    // updateView, handlePageChange, handlePopState, handleSearch,
+    // sortData, updateSortIcon, debounced
+    // đều dùng từ BaseTable
+
     async deleteEntity(id) {
+        const confirmed = await this.confirm({
+            title: 'Bạn có chắc muốn tiếp tục xóa?',
+            text: 'Bạn sẽ không hoàn tác được sau khi xóa!',
+        })
+
+        if (!confirmed) return
+
         try {
-            const result = await Swal.fire({
-                title: 'Bạn có chắc muốn tiếp tục xóa?',
-                text: 'Bạn sẽ không hoàn tác được sau khi xóa!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Xác nhận',
-                cancelButtonText: 'Hủy bỏ',
-            })
-
-            if (!result.isConfirmed) return
-
-            Swal.fire({
-                title: 'Đang xử lý...',
-                text: 'Vui lòng chờ trong giây lát!',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading()
-                },
-            })
+            this.showLoading()
 
             const res = await fetch(`${this.config.apiBaseUrl}/${id}`, {
                 method: 'DELETE',
@@ -422,153 +418,18 @@ class VoucherTable {
                 throw new Error(data.message || `Lỗi HTTP ${res.status}: Xóa voucher thất bại.`)
             }
 
-            Swal.close()
-            Swal.fire({
-                title: 'Xóa mã giảm giá thành công!',
-                icon: 'success',
-                draggable: true,
-            })
-
+            this.hideLoading()
+            this.notifySuccess('Xóa mã giảm giá thành công!')
             this.updateView(null)
         } catch (error) {
-            Swal.close()
-            Swal.fire({
-                icon: 'error',
-                title: 'Xóa mã giảm giá thất bại!',
-                text: error.message,
-            })
+            this.hideLoading()
+            this.notifyError(error.message, 'Xóa mã giảm giá thất bại!')
         }
     }
 
-    async updateView(page = 1, sort, order, keyword, status, shouldPushState = true, shouldReplaceState = false) {
-        try {
-            if (isNaN(page) || Number(page) < 1) page = 1
-
-            let query = `page=${page}`
-            if (sort) query += `&sort=${sort}`
-            if (order) query += `&order=${order}`
-            if (keyword) query += `&keyword=${keyword}`
-            if (status) query += `&status=${status}`
-
-            const res = await fetch(`${this.config.apiBaseUrl}/partials?${query}`)
-            const data = await res.json()
-
-            if (!res.ok) {
-                throw new Error(data.message || `Lỗi không xác định: ${res.status}`)
-            }
-
-            if (this.tableWrapper) this.tableWrapper.innerHTML = data.table
-            if (this.paginationWrapper) this.paginationWrapper.innerHTML = data.pagination
-
-            // Cập nhật lại URL trình duyệt
-            if (shouldPushState || shouldReplaceState) {
-                const currentUrl = new URL(window.location.href)
-                currentUrl.search = ''
-                currentUrl.searchParams.set('page', page)
-                if (sort) currentUrl.searchParams.set('sort', sort)
-                if (order) currentUrl.searchParams.set('order', order)
-                if (keyword) currentUrl.searchParams.set('keyword', keyword)
-                if (status) currentUrl.searchParams.set('status', status) // Thêm status vào URL
-
-                const urlString = currentUrl.toString()
-                if (shouldReplaceState) {
-                    history.replaceState(null, '', urlString)
-                } else {
-                    history.pushState(null, '', urlString)
-                }
-            }
-        } catch (error) {
-            showToast(error.message, 'danger')
-        }
-    }
-
-    handleSearchAndSort() {
-        const keyword = this.searchInput ? this.searchInput.value.trim() : null
-        const status = this.statusFilter ? this.statusFilter.value : null
-
-        const sortableHeader = this.tableWrapper?.querySelector('tr i.sortable[data-order]')
-        let sort = null,
-            order = null
-        if (sortableHeader) {
-            sort = sortableHeader.dataset.sort
-            order = sortableHeader.dataset.order
-        }
-        // Luôn quay về trang 1 khi tìm kiếm hoặc lọc
-        this.updateView(1, sort, order, keyword, status)
-    }
-
-    handlePageChange(targetElement) {
-        const pageLink = targetElement.closest('.page-link')
-        if (!pageLink) return
-
-        let targetPage = pageLink.dataset.page
-        if (!targetPage) return
-
-        const urlParams = new URLSearchParams(window.location.search)
-        const sort = urlParams.get('sort')
-        const order = urlParams.get('order')
-        const keyword = urlParams.get('keyword')
-
-        this.updateView(Number(targetPage), sort, order, keyword)
-    }
-
-    handlePopState() {
-        const urlParams = new URLSearchParams(window.location.search)
-
-        const page = urlParams.get('page')
-        const sort = urlParams.get('sort')
-        const order = urlParams.get('order')
-        const keyword = urlParams.get('keyword')
-
-        const currentPage = page ? Number(page) : 1
-
-        this.updateView(currentPage, sort, order, keyword, false)
-    }
-
-    sortData(currentHeader) {
-        if (!this.sortableHeaders) return
-
-        this.sortableHeaders.forEach((h) => {
-            if (h !== currentHeader) {
-                h.removeAttribute('data-order')
-            }
-        })
-
-        let currentOrder = currentHeader.getAttribute('data-order')
-        let newOrder = currentOrder === 'asc' ? 'desc' : currentOrder === 'desc' ? 'asc' : 'desc'
-
-        currentHeader.setAttribute('data-order', newOrder)
-
-        const currentPage = this.tableWrapper.querySelector('#data-attribute').dataset.currentPage
-        const sort = currentHeader.dataset.sort
-
-        const inputSearch = document.querySelector('.manager-container .search-value')
-        let keyword = inputSearch ? inputSearch.value.trim() : null
-
-        this.updateView(currentPage, sort, newOrder, keyword)
-    }
-
-    updateSortIcon(sortKey, sortOrder) {
-        const sortableHeaders = this.tableWrapper?.querySelectorAll('tr i.sortable')
-        if (!sortableHeaders) return
-
-        sortableHeaders.forEach((h) => {
-            if (h.dataset.sort === sortKey) {
-                h.setAttribute('data-order', sortOrder)
-                return
-            }
-        })
-    }
-
-    debounced(func, delay) {
-        let timerID
-        return function () {
-            clearTimeout(timerID)
-            timerID = setTimeout(() => {
-                func.apply(this, arguments)
-            }, delay)
-        }
-    }
+    // updateView, handlePageChange, handlePopState, handleSearch,
+    // sortData, updateSortIcon, debounced
+    // đều dùng từ BaseTable
 }
 
 document.addEventListener('DOMContentLoaded', () => {
