@@ -61,3 +61,19 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<% if (typeof alert !== 'undefined' && alert) { %>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: '<%= alert.type %>',
+                title: '<%= alert.title %>',
+                text: '<%= alert.message %>',
+                confirmButtonText: 'Đồng ý',
+                confirmButtonColor: '#0d6efd'
+            });
+        });
+    </script>
+<% } %>

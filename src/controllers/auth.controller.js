@@ -1,7 +1,7 @@
 import AuthService from '../services/auth.service.js'
 
 const AuthController = {
-    // --- LOGIN / REGISTER (Giữ nguyên) ---
+    // --- LOGIN / REGISTER ---
     loginPage(req, res) {
         if (req.session.user) return res.redirect('/')
         res.render('user/login', {
@@ -20,13 +20,25 @@ const AuthController = {
         })
     },
 
+    // CẬP NHẬT HÀM NÀY ĐỂ HIỂN THỊ POPUP THÀNH CÔNG
     async handleRegister(req, res) {
         try {
             const { fullname, email, password, confirmPassword } = req.body
             if (password !== confirmPassword) throw new Error('Mật khẩu nhập lại không khớp!')
 
             await AuthService.register({ fullname, email, password })
-            res.redirect('/login')
+            
+            // Thay vì redirect ngay, ta render trang Login kèm thông báo
+            res.render('user/login', {
+                title: 'Đăng nhập - BookStore',
+                path: '/login',
+                error: null,
+                alert: {
+                    type: 'success',
+                    title: 'Đăng ký thành công!',
+                    message: 'Tài khoản của bạn đã được tạo. Vui lòng đăng nhập.'
+                }
+            })
         } catch (err) {
             res.render('user/register', {
                 title: 'Đăng ký - BookStore',
@@ -38,24 +50,17 @@ const AuthController = {
 
     async handleLogin(req, res) {
         try {
-            // Lấy thêm biến remember từ form
             const { email, password, remember } = req.body
-
             const user = await AuthService.login(email, password)
 
-            // Lưu thông tin vào session
             req.session.user = user
 
-            // --- LOGIC GHI NHỚ ĐĂNG NHẬP ---
+            // Logic ghi nhớ đăng nhập
             if (remember === 'on') {
-                // Nếu tích: Gia hạn cookie lên 30 ngày
                 req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000
             } else {
-                // Không tích: Để mặc định (theo cấu hình app.js là 24h)
-                // Hoặc muốn tắt trình duyệt là mất thì set = null
                 req.session.cookie.expires = null
             }
-            // -------------------------------
 
             res.redirect('/')
         } catch (err) {
@@ -85,8 +90,7 @@ const AuthController = {
         })
     },
 
-    // --- [MỚI] QUÊN MẬT KHẨU ---
-    // BƯỚC 1: Trang Nhập Email
+    // --- QUÊN MẬT KHẨU ---
     forgotPasswordPage(req, res) {
         res.render('user/forgot-password', { title: 'Quên mật khẩu', path: '/login', error: null })
     },
@@ -96,7 +100,6 @@ const AuthController = {
             const { email } = req.body
             await AuthService.sendOtp(email)
 
-            // Gửi thành công -> Chuyển sang trang nhập mã (Truyền email theo để biết mã của ai)
             res.render('user/verify-code', {
                 title: 'Nhập mã xác minh',
                 path: '/login',
@@ -108,14 +111,12 @@ const AuthController = {
         }
     },
 
-    // BƯỚC 2: Xử lý mã OTP
     async handleVerifyCode(req, res) {
         const { email, otp } = req.body
         try {
             const isValid = await AuthService.verifyOtp(email, otp)
             if (!isValid) throw new Error('Mã xác minh không đúng hoặc đã hết hạn')
 
-            // Mã đúng -> Chuyển sang trang đặt mật khẩu mới (Kèm email để biết đổi cho ai)
             res.render('user/reset-password', {
                 title: 'Đặt lại mật khẩu',
                 path: '/login',
@@ -123,7 +124,6 @@ const AuthController = {
                 error: null,
             })
         } catch (error) {
-            // Sai mã -> Ở lại trang nhập mã
             res.render('user/verify-code', {
                 title: 'Nhập mã xác minh',
                 path: '/login',
@@ -133,14 +133,24 @@ const AuthController = {
         }
     },
 
-    // BƯỚC 3: Đổi mật khẩu
     async handleResetPassword(req, res) {
         const { email, password, confirmPassword } = req.body
         try {
             if (password !== confirmPassword) throw new Error('Mật khẩu không khớp')
 
             await AuthService.resetPassword(email, password)
-            res.redirect('/login') // Xong -> Về Login
+            
+            // Đổi mật khẩu thành công cũng hiện popup luôn cho xịn
+            res.render('user/login', {
+                title: 'Đăng nhập - BookStore',
+                path: '/login',
+                error: null,
+                alert: {
+                    type: 'success',
+                    title: 'Đổi mật khẩu thành công!',
+                    message: 'Vui lòng đăng nhập bằng mật khẩu mới.'
+                }
+            })
         } catch (error) {
             res.render('user/reset-password', {
                 title: 'Đặt lại mật khẩu',
@@ -151,7 +161,7 @@ const AuthController = {
         }
     },
 
-    // GET /admin/login
+    // ADMIN LOGIN
     async loginAdminPage(req, res, next) {
         try {
             res.render('admin/login', {
@@ -162,14 +172,11 @@ const AuthController = {
         }
     },
 
-    // POST /api/auth/login-admin
     async loginAdmin(req, res, next) {
         try {
             const { email, password } = req.body
             const account = await AuthService.loginAdmin(email, password)
-
             if (account) req.session.account = account
-
             res.json(account)
         } catch (error) {
             next(error)

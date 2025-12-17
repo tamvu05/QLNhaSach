@@ -20,7 +20,7 @@ const AuthService = {
             await connection.beginTransaction()
 
             const [userResult] = await connection.query(
-                `INSERT INTO TaiKhoan (TenDangNhap, MatKhauHash, TrangThai, MaVT) 
+                `INSERT INTO TaiKhoan (TenDangNhap, MatKhauHash, TrangThai, VaiTro) 
                  VALUES (?, ?, 'ACTIVE', 2)`,
                 [email, hashedPassword]
             )
