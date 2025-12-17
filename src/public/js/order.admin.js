@@ -1,4 +1,4 @@
-import showToast from './toast.js'
+import BaseTable from './base.table.js'
 
 const DANG_GIAO = 'DA_GIAO_CHO_DON_VI_VAN_CHUYEN'
 
@@ -201,7 +201,11 @@ class OrderModal {
             this.bookItems = orderDetail
         } catch (error) {
             console.error('Lỗi khi hiển thị chi tiết đơn hàng:', error)
-            showToast(error.message, 'danger')
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi hiển thị chi tiết đơn hàng!',
+                text: error.message,
+            })
         }
     }
 
@@ -223,12 +227,12 @@ class OrderModal {
     }
 }
 
-class OrderTable {
+class OrderTable extends BaseTable {
     constructor() {
-        this.config = {
+        super({
             apiBaseUrl: '/api/sale/order',
             entityName: 'đơn đặt hàng',
-        }
+        })
         this.tableWrapper = document.querySelector('#table-view-manager')
         this.paginationWrapper = document.querySelector(
             '#pagination-view-manager'
@@ -245,6 +249,19 @@ class OrderTable {
 
         this.orderModalInstance = null
 
+        // Collect filter values for status
+        this.collectFilters = () => ({
+            status: this.statusFilter?.value || null,
+        })
+
+        // Apply filters from URL
+        this.applyFiltersFromUrl = (urlParams) => {
+            if (this.statusFilter) {
+                const status = urlParams.get('status')
+                if (status) this.statusFilter.value = status
+            }
+        }
+
         this.loadInitialState()
         this.initEventListeners()
     }
@@ -257,20 +274,16 @@ class OrderTable {
             if (keyword) this.searchInput.value = keyword
         }
 
-        if (this.statusFilter) {
-            const status = urlParams.get('status')
-            if (status) this.statusFilter.value = status
-        }
+        this.applyFiltersFromUrl(urlParams)
 
         const page = urlParams.get('page')
         const sort = urlParams.get('sort')
         const order = urlParams.get('order')
         const keyword = urlParams.get('keyword')
-        const status = urlParams.get('status')
 
         const currentPage = page ? Number(page) : 1
 
-        this.updateView(currentPage, sort, order, keyword, status, false, true)
+        this.updateView(currentPage, sort, order, keyword, false, true)
     }
 
     initEventListeners() {
@@ -293,7 +306,7 @@ class OrderTable {
         if (this.statusFilter) {
             this.statusFilter.addEventListener(
                 'change',
-                this.handleSearchAndSort.bind(this)
+                this.handleSearch.bind(this)
             )
         }
 
@@ -307,24 +320,17 @@ class OrderTable {
         window.addEventListener('popstate', this.handlePopState.bind(this))
 
         if (this.btnSearch) {
-            this.btnSearch.addEventListener(
-                'click',
-                this.handleSearchAndSort.bind(this)
-            )
+            this.btnSearch.addEventListener('click', this.handleSearch.bind(this))
         }
 
         if (this.searchInput) {
             this.searchInput.addEventListener('keyup', (event) => {
                 if (event.key === 'Enter') this.btnSearch.click()
             })
-            this.searchInput.addEventListener('input', () => {
-                const func = () => {
-                    this.handleSearchAndSort()
-                }
-                const delay = 1000
-                const handleDebounced = this.debounced(func, delay)
-                handleDebounced()
-            })
+            this.searchInput.addEventListener(
+                'input',
+                this.debounced(() => this.handleSearch(), 1000)
+            )
         }
     }
 
@@ -398,123 +404,14 @@ class OrderTable {
         this.orderModalInstance = instance
     }
 
-    // Gộp logic tìm kiếm và lọc trạng thái
-    handleSearchAndSort() {
-        const keyword = this.searchInput ? this.searchInput.value.trim() : null
-        const status = this.statusFilter ? this.statusFilter.value : null
-
-        const sortableHeader = this.tableWrapper?.querySelector(
-            'tr i.sortable[data-order]'
-        )
-        let sort = null,
-            order = null
-        if (sortableHeader) {
-            sort = sortableHeader.dataset.sort
-            order = sortableHeader.dataset.order
-        }
-        // Luôn quay về trang 1 khi tìm kiếm hoặc lọc
-        this.updateView(1, sort, order, keyword, status)
-    }
-
-    async updateView(
-        page = 1,
-        sort,
-        order,
-        keyword,
-        status,
-        shouldPushState = true,
-        shouldReplaceState = false
-    ) {
-        try {
-            if (isNaN(page) || Number(page) < 1) page = 1
-
-            let query = `page=${page}`
-            if (sort) query += `&sort=${sort}`
-            if (order) query += `&order=${order}`
-            if (keyword) query += `&keyword=${keyword}`
-            if (status) query += `&status=${status}`
-
-            const res = await fetch(
-                `${this.config.apiBaseUrl}/partials?${query}`
-            )
-            const data = await res.json()
-
-            if (!res.ok) {
-                throw new Error(
-                    data.message || `Lỗi không xác định: ${res.status}`
-                )
-            }
-
-            if (this.tableWrapper) this.tableWrapper.innerHTML = data.table
-            if (this.paginationWrapper)
-                this.paginationWrapper.innerHTML = data.pagination
-
-            // Cập nhật lại URL trình duyệt
-            if (shouldPushState || shouldReplaceState) {
-                const currentUrl = new URL(window.location.href)
-                currentUrl.search = ''
-                currentUrl.searchParams.set('page', page)
-                if (sort) currentUrl.searchParams.set('sort', sort)
-                if (order) currentUrl.searchParams.set('order', order)
-                if (keyword) currentUrl.searchParams.set('keyword', keyword)
-                if (status) currentUrl.searchParams.set('status', status) // Thêm status vào URL
-
-                const urlString = currentUrl.toString()
-                if (shouldReplaceState) {
-                    history.replaceState(null, '', urlString)
-                } else {
-                    history.pushState(null, '', urlString)
-                }
-            }
-        } catch (error) {
-            showToast(error.message, 'danger')
-        }
-    }
-
-    handlePageChange(targetElement) {
-        const pageLink = targetElement.closest('.page-link')
-        if (!pageLink) return
-
-        let targetPage = pageLink.dataset.page
-        if (!targetPage) return
-
-        const urlParams = new URLSearchParams(window.location.search)
-        const sort = urlParams.get('sort')
-        const order = urlParams.get('order')
-        const keyword = urlParams.get('keyword')
-        const status = urlParams.get('status')
-
-        this.updateView(Number(targetPage), sort, order, keyword, status)
-    }
-
-    handlePopState() {
-        const urlParams = new URLSearchParams(window.location.search)
-
-        const page = urlParams.get('page')
-        const sort = urlParams.get('sort')
-        const order = urlParams.get('order')
-        const keyword = urlParams.get('keyword')
-        const status = urlParams.get('status')
-
-        const currentPage = page ? Number(page) : 1
-
-        this.updateView(currentPage, sort, order, keyword, status, false)
-    }
+    // updateView, handlePageChange, handlePopState, handleSearch,
+    // sortData, updateSortIcon, debounced
+    // đều dùng từ BaseTable
 
     getCurrentPage() {
         const urlParams = new URLSearchParams(window.location.search)
         const page = urlParams.get('page')
         return page
-    }
-
-    debounced(func, delay) {
-        let timerID
-        return function () {
-            clearTimeout(timerID)
-            timerID = setTimeout(() => {
-                func.apply(this, arguments)
-            }, delay)
-        }
     }
 }
 

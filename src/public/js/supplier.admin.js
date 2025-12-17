@@ -1,4 +1,4 @@
-import showToast from './toast.js'
+import BaseTable from './base.table.js'
 
 // --- Class 1: SupplierFormModal (Quản lý Modal Thêm/Sửa) ---
 class SupplierFormModal {
@@ -61,7 +61,11 @@ class SupplierFormModal {
             this.inputPhone.value = supplier.SDT
         } catch (error) {
             console.error('Lỗi khi nạp dữ liệu nhà cung cấp:', error)
-            showToast(error.message, 'danger')
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi tải dữ liệu!',
+                text: error.message,
+            })
         }
     }
 
@@ -99,14 +103,21 @@ class SupplierFormModal {
                 throw new Error(errorMessage)
             }
 
-            showToast('Đã thêm nhà cung cấp', 'success')
+            Swal.fire({
+                icon: 'success',
+                title: 'Đã thêm nhà cung cấp',
+            })
             this.modal.querySelector('.btn-close').click()
 
             // Cập nhật lại trang 1
             this.supplierTableInstance.updateView(1)
         } catch (error) {
             console.error('Lỗi khi thêm nhà cung cấp:', error)
-            showToast(error.message, 'danger')
+            Swal.fire({
+                icon: 'error',
+                title: 'Thêm nhà cung cấp thất bại!',
+                text: error.message,
+            })
         }
     }
 
@@ -137,7 +148,10 @@ class SupplierFormModal {
                 throw new Error(errorMessage)
             }
 
-            showToast('Đã cập nhật nhà cung cấp', 'success')
+            Swal.fire({
+                icon: 'success',
+                title: 'Đã cập nhật nhà cung cấp',
+            })
             this.modal.querySelector('.btn-close').click()
 
             // Cập nhật lại trang hiện tại sau khi sửa
@@ -147,7 +161,11 @@ class SupplierFormModal {
             this.supplierTableInstance.updateView(page)
         } catch (error) {
             console.error('Lỗi khi cập nhật nhà cung cấp:', error)
-            showToast(error.message, 'danger')
+            Swal.fire({
+                icon: 'error',
+                title: 'Cập nhật nhà cung cấp thất bại!',
+                text: error.message,
+            })
         }
     }
 
@@ -233,12 +251,13 @@ class SupplierFormModal {
 }
 
 // --- Class 2: SupplierTable (Quản lý Bảng, Phân trang, Sự kiện) ---
-class SupplierTable {
+class SupplierTable extends BaseTable {
     constructor() {
-        this.config = {
+        super({
             apiBaseUrl: '/api/supplier',
             entityName: 'nhà cung cấp',
-        }
+            exportFilename: 'DanhMucNhaCungCap.xlsx',
+        })
         this.tableWrapper = document.querySelector('#table-view-manager')
         this.paginationWrapper = document.querySelector(
             '#pagination-view-manager'
@@ -257,6 +276,9 @@ class SupplierTable {
         this.btnExport = document.querySelector(
             '.manager-container .export-button'
         )
+
+        // Optional filters (none for Supplier for now)
+        this.collectFilters = () => ({})
 
         this.loadInitialState()
         this.initEventListener()
@@ -322,21 +344,17 @@ class SupplierTable {
                 if (event.key === 'Enter') this.btnSearch.click()
             })
 
-            this.searchInput.addEventListener('input', () => {
-                const func = () => {
-                    this.handleSearch()
-                }
-                const delay = 1000
-                const handleDebounced = this.debounced(func, delay)
-                handleDebounced()
-            })
+            this.searchInput.addEventListener(
+                'input',
+                this.debounced(() => this.handleSearch(), 1000)
+            )
         }
 
         // Export (Nếu có)
         if (this.btnExport) {
             this.btnExport.addEventListener(
                 'click',
-                this.exportExcel.bind(this)
+                () => this.exportExcel()
             )
         }
     }
@@ -345,76 +363,9 @@ class SupplierTable {
         this.supplierFormModalInstance = instance
     }
 
-    // Logic xử lý khi click vào nút phân trang
-    handlePageChange(targetElement) {
-        const pageLink = targetElement.closest('.page-link')
-        if (!pageLink) return
-
-        let targetPage = pageLink.dataset.page
-        if (!targetPage) return // Bỏ qua nếu không có data-page
-
-        // Lấy các tham số hiện tại từ URL để giữ lại trạng thái tìm kiếm/sắp xếp
-        const urlParams = new URLSearchParams(window.location.search)
-        const sort = urlParams.get('sort')
-        const order = urlParams.get('order')
-        const keyword = urlParams.get('keyword')
-
-        this.updateView(Number(targetPage), sort, order, keyword)
-    }
-
-    async updateView(
-        page = 1,
-        sort,
-        order,
-        keyword,
-        shouldPushState = true,
-        shouldReplaceState = false
-    ) {
-        try {
-            if (isNaN(page) || Number(page) < 1) page = 1
-
-            let query = `page=${page}`
-            if (sort) query += `&sort=${sort}`
-            if (order) query += `&order=${order}`
-            if (keyword) query += `&keyword=${keyword}`
-
-            const res = await fetch(
-                `${this.config.apiBaseUrl}/partials?${query}`
-            )
-            const data = await res.json()
-
-            if (!res.ok) {
-                throw new Error(
-                    data.message || `Lỗi không xác định: ${res.status}`
-                )
-            }
-
-            if (this.tableWrapper) this.tableWrapper.innerHTML = data.table
-            if (this.paginationWrapper)
-                this.paginationWrapper.innerHTML = data.pagination
-
-            this.updateSortIcon(sort, order)
-
-            // Cập nhật lại URL trình duyệt
-            if (shouldPushState || shouldReplaceState) {
-                const currentUrl = new URL(window.location.href)
-                currentUrl.search = ''
-                currentUrl.searchParams.set('page', page)
-                if (sort) currentUrl.searchParams.set('sort', sort)
-                if (order) currentUrl.searchParams.set('order', order)
-                if (keyword) currentUrl.searchParams.set('keyword', keyword)
-
-                const urlString = currentUrl.toString()
-                if (shouldReplaceState) {
-                    history.replaceState(null, '', urlString)
-                } else {
-                    history.pushState(null, '', urlString)
-                }
-            }
-        } catch (error) {
-            showToast(error.message, 'danger')
-        }
-    }
+    // updateView, handlePageChange, handlePopState, handleSearch,
+    // sortData, updateSortIcon, debounced, exportExcel
+    // đều dùng từ BaseTable
 
     async deleteEntity(btnDelete) {
         const rowElement = btnDelete.closest('tr')
@@ -422,7 +373,16 @@ class SupplierTable {
 
         if (!entityId) return
 
+        const confirmed = await this.confirm({
+            title: 'Bạn có chắc muốn tiếp tục xóa?',
+            text: 'Bạn sẽ không hoàn tác được sau khi xóa!',
+        })
+
+        if (!confirmed) return
+
         try {
+            this.showLoading()
+
             const res = await fetch(`${this.config.apiBaseUrl}/${entityId}`, {
                 method: 'DELETE',
             })
@@ -444,129 +404,16 @@ class SupplierTable {
             if (dataAttributeElement.dataset.totalItemPerPage < 2)
                 targetPage -= 1
 
+            this.hideLoading()
+            this.notifySuccess(`Đã xóa ${this.config.entityName}`)
             this.updateView(targetPage)
-            showToast(`Đã xóa ${this.config.entityName}`, 'success')
         } catch (error) {
-            showToast(error.message, 'danger')
+            this.hideLoading()
+            this.notifyError(error.message, `Xóa ${this.config.entityName} thất bại!`)
         }
     }
 
-    sortData(currentHeader) {
-        // ... (Logic sắp xếp tương tự BookTable)
-        this.sortableHeaders.forEach((h) => {
-            if (h !== currentHeader) {
-                h.removeAttribute('data-order')
-            }
-        })
-
-        let currentOrder = currentHeader.getAttribute('data-order')
-        let newOrder =
-            currentOrder === 'asc'
-                ? 'desc'
-                : currentOrder === 'desc'
-                ? 'asc'
-                : 'desc'
-
-        currentHeader.setAttribute('data-order', newOrder)
-
-        const currentPage =
-            this.tableWrapper.querySelector('#data-attribute').dataset
-                .currentPage
-        const sort = currentHeader.dataset.sort
-
-        const inputSearch = document.querySelector(
-            '.manager-container .search-value'
-        )
-        let keyword = inputSearch ? inputSearch.value.trim() : null
-
-        this.updateView(currentPage, sort, newOrder, keyword)
-    }
-
-    updateSortIcon(sortKey, sortOrder) {
-        // ... (Logic cập nhật icon sắp xếp tương tự BookTable)
-        const sortableHeaders =
-            this.tableWrapper.querySelectorAll('tr i.sortable')
-        sortableHeaders.forEach((h) => {
-            if (h.dataset.sort === sortKey) {
-                h.setAttribute('data-order', sortOrder)
-                return
-            }
-        })
-    }
-
-    handlePopState() {
-        // ... (Logic xử lý back/forward tương tự BookTable)
-        const urlParams = new URLSearchParams(window.location.search)
-
-        const page = urlParams.get('page')
-        const sort = urlParams.get('sort')
-        const order = urlParams.get('order')
-        const keyword = urlParams.get('keyword')
-
-        const currentPage = page ? Number(page) : 1
-
-        this.updateView(currentPage, sort, order, keyword, false)
-    }
-
-    handleSearch() {
-        // ... (Logic tìm kiếm tương tự BookTable)
-        const keyword = document
-            .querySelector('.manager-container .search-value')
-            .value.trim()
-
-        const sortableHeader = this.tableWrapper.querySelector(
-            'tr i.sortable[data-order]'
-        )
-
-        let sort = null,
-            order = null
-        if (sortableHeader) {
-            sort = sortableHeader.dataset.sort
-            order = sortableHeader.dataset.order
-        }
-        this.updateView(1, sort, order, keyword)
-    }
-
-    debounced(func, delay) {
-        // ... (Logic debounced tương tự BookTable)
-        let timerID
-        return function () {
-            clearTimeout(timerID)
-            timerID = setTimeout(() => {
-                func.apply(this, arguments)
-            }, delay)
-        }
-    }
-
-    async exportExcel() {
-        // ... (Logic export Excel tương tự BookTable, cần thay đổi endpoint)
-        try {
-            const res = await fetch(`${this.config.apiBaseUrl}/export`)
-            if (!res.ok)
-                throw new Error(`Lỗi HTTP ${res.status}: Không thể tải file.`)
-
-            const blob = await res.blob()
-            const url = window.URL.createObjectURL(blob)
-
-            const a = document.createElement('a')
-            a.href = url
-
-            const disposition = res.headers.get('content-disposition')
-            let filename = 'DanhMucNhaCungCap.xlsx'
-            if (disposition && disposition.indexOf('filename=') !== -1) {
-                filename = disposition.split('filename=')[1].replace(/"/g, '')
-            }
-            a.download = filename
-
-            document.body.appendChild(a)
-            a.click()
-
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
-        } catch (error) {
-            showToast(error, 'danger')
-        }
-    }
+    
 }
 
 // --- Khởi tạo ---

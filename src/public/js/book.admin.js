@@ -1,4 +1,5 @@
-import showToast from './toast.js'
+// showToast replaced with Swal
+import BaseTable from './base.table.js'
 
 class BookFormModal {
     constructor(bookTableInstance) {
@@ -104,8 +105,8 @@ class BookFormModal {
             const book = await res.json()
             if (!res.ok) {
                 const errorMessage =
-                    data.message ||
-                    data.error ||
+                    book.message ||
+                    book.error ||
                     `Lỗi HTTP ${res.status}: Thao tác thất bại.`
                 throw new Error(errorMessage)
             }
@@ -387,7 +388,11 @@ class BookFormModal {
             this.currentImageURL = URL.createObjectURL(file)
         } else {
             this.resetImageField()
-            showToast('Chỉ chấp nhận các tệp hình ảnh hợp lệ.', 'danger')
+            Swal.fire({
+                icon: 'error',
+                title: 'Tệp không hợp lệ!',
+                text: 'Chỉ chấp nhận các tệp hình ảnh hợp lệ.',
+            })
         }
     }
 
@@ -433,12 +438,13 @@ class BookFormModal {
     }
 }
 
-class BookTable {
+class BookTable extends BaseTable {
     constructor() {
-        this.config = {
+        super({
             apiBaseUrl: '/api/book',
             entityName: 'đầu sách',
-        }
+            exportFilename: 'DanhMucSach.xlsx',
+        })
         this.tableWrapper = document.querySelector('#table-view-manager')
         this.paginationWrapper = document.querySelector(
             '#pagination-view-manager'
@@ -455,6 +461,9 @@ class BookTable {
         this.sortableHeaders =
             this.tableWrapper.querySelectorAll('tr .sortable')
         this.bookFormModalInstance = null
+
+        // No extra filters for books right now
+        this.collectFilters = () => ({})
 
         this.loadInitialState()
         this.initEventListener()
@@ -498,10 +507,7 @@ class BookTable {
 
         // search
         if (this.btnSearch) {
-            this.btnSearch.addEventListener(
-                'click',
-                this.handleSearch.bind(this)
-            )
+            this.btnSearch.addEventListener('click', this.handleSearch.bind(this))
         }
 
         if (this.searchInput) {
@@ -509,22 +515,15 @@ class BookTable {
                 if (event.key === 'Enter') this.btnSearch.click()
             })
 
-            this.searchInput.addEventListener('input', (event) => {
-                const func = () => {
-                    this.handleSearch()
-                }
-                const delay = 1000
-                const handleDebounced = this.debounced(func, delay)
-                handleDebounced()
-            })
+            this.searchInput.addEventListener(
+                'input',
+                this.debounced(() => this.handleSearch(), 1000)
+            )
         }
 
         // Export
         if (this.btnExport) {
-            this.btnExport.addEventListener(
-                'click',
-                this.exportExcel.bind(this)
-            )
+            this.btnExport.addEventListener('click', () => this.exportExcel())
         }
     }
 
@@ -532,64 +531,8 @@ class BookTable {
         this.bookFormModalInstance = instance
     }
 
-    async updateView(
-        page = 1,
-        sort,
-        order,
-        keyword,
-        shouldPushState = true,
-        shouldReplaceState = false
-    ) {
-        try {
-            if (isNaN(page) || Number(page) < 1) page = 1
-
-            let query = `page=${page}`
-            if (sort) query += `&sort=${sort}`
-            if (order) query += `&order=${order}`
-            if (keyword) query += `&keyword=${keyword}`
-
-            const res = await fetch(
-                `${this.config.apiBaseUrl}/partials?${query}`
-            )
-            const data = await res.json()
-
-            if (!res.ok) {
-                throw new Error(
-                    data.message || `Lỗi không xác định: ${res.status}`
-                )
-            }
-
-            if (this.tableWrapper) this.tableWrapper.innerHTML = data.table
-            if (this.paginationWrapper)
-                this.paginationWrapper.innerHTML = data.pagination
-
-            this.updateSortIcon(sort, order)
-
-            // Cập nhật lại URL trình duyệt
-            if (shouldPushState || shouldReplaceState) {
-                const currentUrl = new URL(window.location.href)
-                currentUrl.search = ''
-                currentUrl.searchParams.set('page', page)
-                if (sort) currentUrl.searchParams.set('sort', sort)
-                if (order) currentUrl.searchParams.set('order', order)
-                if (keyword) currentUrl.searchParams.set('keyword', keyword)
-
-                const urlString = currentUrl.toString()
-                if (shouldReplaceState) {
-                    history.replaceState(null, '', urlString)
-                } else {
-                    history.pushState(null, '', urlString)
-                }
-            }
-        } catch (error) {
-            Swal.close()
-            Swal.fire({
-                icon: 'error',
-                title: 'Cập nhật giao diện thất bại!',
-                text: error.message,
-            })
-        }
-    }
+    // updateView, handlePopState, handleSearch, sortData, updateSortIcon,
+    // debounced, exportExcel đều dùng từ BaseTable
 
     async deleteEntity(btnDelete) {
         const result = await Swal.fire({
@@ -690,92 +633,7 @@ class BookTable {
         this.updateView(currentPage, sort, newOrder, keyword)
     }
 
-    updateSortIcon(sortKey, sortOrder) {
-        const sortableHeaders =
-            this.tableWrapper.querySelectorAll('tr i.sortable')
-        sortableHeaders.forEach((h) => {
-            if (h.dataset.sort === sortKey) {
-                h.setAttribute('data-order', sortOrder)
-                return
-            }
-        })
-    }
-
-    // Xử lý Back/Forward (Popstate)
-    handlePopState() {
-        const urlParams = new URLSearchParams(window.location.search)
-
-        const page = urlParams.get('page')
-        const sort = urlParams.get('sort')
-        const order = urlParams.get('order')
-        const keyword = urlParams.get('keyword')
-
-        const currentPage = page ? Number(page) : 1
-
-        this.updateView(currentPage, sort, order, keyword, false)
-    }
-
-    handleSearch() {
-        const keyword = document
-            .querySelector('.manager-container .search-value')
-            .value.trim()
-
-        const sortableHeader = this.tableWrapper.querySelector(
-            'tr i.sortable[data-order]'
-        )
-
-        let sort = null,
-            order = null
-        if (sortableHeader) {
-            sort = sortableHeader.dataset.sort
-            order = sortableHeader.dataset.order
-        }
-        this.updateView(1, sort, order, keyword)
-    }
-
-    debounced(func, delay) {
-        let timerID
-        return function () {
-            clearTimeout(timerID)
-            timerID = setTimeout(() => {
-                func.apply(this, arguments)
-            }, delay)
-        }
-    }
-
-    async exportExcel() {
-        try {
-            const res = await fetch(`${this.config.apiBaseUrl}/export`)
-            if (!res.ok)
-                throw new Error(`Lỗi HTTP ${res.status}: Không thể tải file.`)
-
-            const blob = await res.blob()
-            const url = window.URL.createObjectURL(blob)
-
-            const a = document.createElement('a')
-            a.href = url
-
-            const disposition = res.headers.get('content-disposition')
-            let filename = 'DanhMucSach.xlsx'
-            if (disposition && disposition.indexOf('filename=') !== -1) {
-                filename = disposition.split('filename=')[1].replace(/"/g, '')
-            }
-            a.download = filename
-
-            document.body.appendChild(a)
-            a.click()
-
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
-        } catch (error) {
-            Swal.close()
-            Swal.fire({
-                icon: 'error',
-                title: 'Xuất file thất bại!',
-                text: error.message,
-            })
-        }
-    }
+    
 }
 
 document.addEventListener('DOMContentLoaded', () => {

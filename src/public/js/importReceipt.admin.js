@@ -1,4 +1,4 @@
-import showToast from './toast.js'
+import BaseTable from './base.table.js'
 import getCurrentVietNamTime from './getCurrentVietNamTime.js'
 
 class ImportReceiptFormModal {
@@ -146,10 +146,11 @@ class ImportReceiptFormModal {
         this.modal.querySelector('.item-input-error').classList.add('d-none')
 
         if (this.selectedItems.has(bookId)) {
-            showToast(
-                'Sách này đã được thêm. Vui lòng chỉnh sửa số lượng trong bảng.',
-                'warning'
-            )
+            Swal.fire({
+                icon: 'warning',
+                title: 'Sách đã tồn tại!',
+                text: 'Sách này đã được thêm. Vui lòng chỉnh sửa số lượng trong bảng.',
+            })
             return
         }
 
@@ -255,13 +256,21 @@ class ImportReceiptFormModal {
                 throw new Error(errorMessage)
             }
 
-            showToast('Đã tạo phiếu nhập hàng', 'success')
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Đã tạo phiếu nhập hàng',
+            })
             this.modal.querySelector('.btn-close').click()
 
             this.importReceiptTableInstance.updateView(1)
         } catch (error) {
             console.error('Lỗi khi tạo phiếu nhập:', error)
-            showToast(error.message, 'danger')
+            Swal.fire({
+                icon: 'error',
+                title: 'Tạo phiếu nhập hàng thất bại!',
+                text: error.message,
+            })
         }
     }
 
@@ -357,12 +366,12 @@ class ImportReceiptFormModal {
     }
 }
 
-class ImportReceiptTable {
+class ImportReceiptTable extends BaseTable {
     constructor() {
-        this.config = {
+        super({
             apiBaseUrl: '/api/import-receipt',
             entityName: 'phiếu nhập hàng',
-        }
+        })
         this.tableWrapper = document.querySelector('#table-view-manager')
         this.paginationWrapper = document.querySelector(
             '#pagination-view-manager'
@@ -378,6 +387,10 @@ class ImportReceiptTable {
             this.tableWrapper?.querySelectorAll('tr .sortable')
 
         this.importDetailModalInstance = null
+
+        // No filters
+        this.collectFilters = () => ({})
+        this.applyFiltersFromUrl = () => {}
 
         this.loadInitialState()
         this.initEventListener()
@@ -443,14 +456,10 @@ class ImportReceiptTable {
                 if (event.key === 'Enter') this.btnSearch.click()
             })
 
-            this.searchInput.addEventListener('input', () => {
-                const func = () => {
-                    this.handleSearch()
-                }
-                const delay = 1000
-                const handleDebounced = this.debounced(func, delay)
-                handleDebounced()
-            })
+            this.searchInput.addEventListener(
+                'input',
+                this.debounced(() => this.handleSearch(), 1000)
+            )
         }
     }
 
@@ -473,66 +482,22 @@ class ImportReceiptTable {
         this.updateView(Number(targetPage), sort, order, keyword)
     }
 
-    async updateView(
-        page = 1,
-        sort,
-        order,
-        keyword,
-        shouldPushState = true,
-        shouldReplaceState = false
-    ) {
-        try {
-            if (isNaN(page) || Number(page) < 1) page = 1
-
-            let query = `page=${page}`
-            if (sort) query += `&sort=${sort}`
-            if (order) query += `&order=${order}`
-            if (keyword) query += `&keyword=${keyword}`
-
-            const res = await fetch(
-                `${this.config.apiBaseUrl}/partials?${query}`
-            )
-            const data = await res.json()
-
-            if (!res.ok) {
-                throw new Error(
-                    data.message || `Lỗi không xác định: ${res.status}`
-                )
-            }
-
-            if (this.tableWrapper) this.tableWrapper.innerHTML = data.table
-            if (this.paginationWrapper)
-                this.paginationWrapper.innerHTML = data.pagination
-
-            this.updateSortIcon(sort, order)
-
-            if (shouldPushState || shouldReplaceState) {
-                const currentUrl = new URL(window.location.href)
-                currentUrl.search = ''
-                currentUrl.searchParams.set('page', page)
-                if (sort) currentUrl.searchParams.set('sort', sort)
-                if (order) currentUrl.searchParams.set('order', order)
-                if (keyword) currentUrl.searchParams.set('keyword', keyword)
-
-                const urlString = currentUrl.toString()
-                if (shouldReplaceState) {
-                    history.replaceState(null, '', urlString)
-                } else {
-                    history.pushState(null, '', urlString)
-                }
-            }
-        } catch (error) {
-            showToast(error.message, 'danger')
-        }
-    }
-
     async deleteEntity(btnDelete) {
         const rowElement = btnDelete.closest('tr')
         const entityId = rowElement.dataset.id
 
         if (!entityId) return
 
+        const confirmed = await this.confirm({
+            title: 'Bạn có chắc muốn xóa?',
+            text: 'Bạn sẽ không hoàn tác được sau khi xóa!',
+        })
+
+        if (!confirmed) return
+
         try {
+            this.showLoading()
+
             const res = await fetch(`${this.config.apiBaseUrl}/${entityId}`, {
                 method: 'DELETE',
             })
@@ -553,100 +518,18 @@ class ImportReceiptTable {
             if (dataAttributeElement.dataset.totalItemPerPage < 2)
                 targetPage -= 1
 
+            this.hideLoading()
+            this.notifySuccess(`Đã xóa ${this.config.entityName}`)
             this.updateView(targetPage)
-            showToast(`Đã xóa ${this.config.entityName}`, 'success')
         } catch (error) {
-            showToast(error.message, 'danger')
+            this.hideLoading()
+            this.notifyError(error.message)
         }
     }
 
-    sortData(currentHeader) {
-        if (!this.sortableHeaders) return
-
-        this.sortableHeaders.forEach((h) => {
-            if (h !== currentHeader) {
-                h.removeAttribute('data-order')
-            }
-        })
-
-        let currentOrder = currentHeader.getAttribute('data-order')
-        let newOrder =
-            currentOrder === 'asc'
-                ? 'desc'
-                : currentOrder === 'desc'
-                ? 'asc'
-                : 'desc'
-
-        currentHeader.setAttribute('data-order', newOrder)
-
-        const currentPage =
-            this.tableWrapper.querySelector('#data-attribute').dataset
-                .currentPage
-        const sort = currentHeader.dataset.sort
-
-        const inputSearch = document.querySelector(
-            '.manager-container .search-value'
-        )
-        let keyword = inputSearch ? inputSearch.value.trim() : null
-
-        this.updateView(currentPage, sort, newOrder, keyword)
-    }
-
-    updateSortIcon(sortKey, sortOrder) {
-        const sortableHeaders =
-            this.tableWrapper?.querySelectorAll('tr i.sortable')
-        if (!sortableHeaders) return
-
-        sortableHeaders.forEach((h) => {
-            if (h.dataset.sort === sortKey) {
-                h.setAttribute('data-order', sortOrder)
-                return
-            }
-        })
-    }
-
-    handlePopState() {
-        const urlParams = new URLSearchParams(window.location.search)
-
-        const page = urlParams.get('page')
-        const sort = urlParams.get('sort')
-        const order = urlParams.get('order')
-        const keyword = urlParams.get('keyword')
-
-        const currentPage = page ? Number(page) : 1
-
-        this.updateView(currentPage, sort, order, keyword, false)
-    }
-
-    handleSearch() {
-        const keyword = document
-            .querySelector('.manager-container .search-value')
-            .value.trim()
-
-        const sortableHeader = this.tableWrapper?.querySelector(
-            'tr i.sortable[data-order]'
-        )
-
-        let sort = null,
-            order = null
-        if (sortableHeader) {
-            sort = sortableHeader.dataset.sort
-            order = sortableHeader.dataset.order
-        }
-        this.updateView(1, sort, order, keyword)
-    }
-
-    debounced(func, delay) {
-        let timerID
-        return function () {
-            clearTimeout(timerID)
-            timerID = setTimeout(() => {
-                func.apply(this, arguments)
-            }, delay)
-        }
-    }
-
-   
+    // updateView, handlePageChange, handlePopState, handleSearch,
+    // sortData, updateSortIcon, debounced
+    // đều dùng từ BaseTable
 }
 
 class DetailModal {
@@ -727,7 +610,11 @@ class DetailModal {
             this.totalPrice.textContent = totalPrice.toLocaleString('vi-VN')
         } catch (error) {
             console.error('Lỗi khi hiển thị chi tiết phiếu nhập:', error)
-            showToast(error.message, 'danger')
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi khi hiển thị chi tiết phiếu nhập!',
+                text: error.message,
+            })
         }
     }
 
