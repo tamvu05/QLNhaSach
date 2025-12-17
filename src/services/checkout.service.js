@@ -86,6 +86,11 @@ const CheckoutService = {
                      VALUES (?, ?, ?, ?)`,
                     [orderId, item.MaSach, item.SoLuong, item.DonGia]
                 );
+
+                await connection.query(
+                    'UPDATE Sach SET SoLuongTon = SoLuongTon - ? WHERE MaSach = ?',
+                    [item.SoLuong, item.MaSach]
+                );
             }
 
             // [MỚI] Xử lý Voucher: Trừ tồn kho & Ghi lịch sử
