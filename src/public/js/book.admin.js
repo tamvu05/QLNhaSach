@@ -139,7 +139,7 @@ class BookFormModal {
 
     removeInitValueForUpdate() {
         this.type = 'add'
-        this.headerModal.textContent = 'Thêm đầu sách'
+        this.headerModal.textContent = 'Thêm sách'
         this.updateId = null
         document.querySelector('#book-image-label').textContent =
             'Chọn hình ảnh bìa'

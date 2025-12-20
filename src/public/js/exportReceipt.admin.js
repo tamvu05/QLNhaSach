@@ -110,7 +110,6 @@ class ExportReceiptFormModal {
         this.inputDate.setAttribute('value', helpers.getCurTime7())
     }
 
-
     handleItemAction(event) {
         const btnDelete = event.target.closest('.btn-remove-item')
         if (btnDelete) {

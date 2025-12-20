@@ -101,7 +101,7 @@ const PublisherService = {
         if (!exist) throw new Error('Nhà xuất bản không tồn tại')
 
         const countBook = await BookModel.countByPublisher(id)
-        if(countBook > 0) throw createHttpError('Không thể xóa nhà xuất bản vì đang có sách tham chiếu', 409)
+        if(countBook > 0) throw createHttpError('Nhà xuất bản này đã có sách trong hệ thống', 409)
 
         const success = await PublisherModel.delete(id)
         if (!success) throw new Error('Xóa thất bại')

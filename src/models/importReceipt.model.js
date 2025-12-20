@@ -1,13 +1,7 @@
 import pool from '../configs/db.js'
 
 const ImportReceiptModel = {
-    async getWithParam(
-        limit,
-        offset,
-        sortBy = 'MaPN',
-        sortOrder = 'DESC',
-        keyword = ''
-    ) {
+    async getWithParam(limit, offset, sortBy = 'MaPN', sortOrder = 'DESC', keyword = '') {
         const searchKeyword = `%${keyword}%`
         const [rows] = await pool.query(
             `SELECT MaPN, NgayNhap, TenNCC, HoTen, NhaCungCap.SDT, NhanVien.MaNV, NhaCungCap.MaNCC, NoiDung
@@ -58,29 +52,25 @@ const ImportReceiptModel = {
         return rows
     },
 
+    async hasSupplier(id) {
+        const [rows] = await pool.query('SELECT * FROM PhieuNhap WHERE MaNCC = ? LIMIT 1', [id])
+        return rows[0] || null
+    },
+
     async create({ MaNCC, MaNV, NgayNhap, NoiDung, ChiTietPN }) {
         const connection = await pool.getConnection()
 
         try {
             await connection.beginTransaction()
 
-            const [result] = await connection.query(
-                'INSERT INTO PhieuNhap(MaNCC, MaNV, NgayNhap, NoiDung) VALUES (?, ?, ?, ?)',
-                [MaNCC, MaNV, NgayNhap, NoiDung]
-            )
+            const [result] = await connection.query('INSERT INTO PhieuNhap(MaNCC, MaNV, NgayNhap, NoiDung) VALUES (?, ?, ?, ?)', [MaNCC, MaNV, NgayNhap, NoiDung])
 
             const MaPN = result.insertId
 
             const detailPromise = ChiTietPN.map(async (chiTiet) => {
-                const insertCTPromise = connection.query(
-                    `INSERT INTO CTPhieuNhap(MaPN, MaSach, SoLuong, DonGiaNhap) VALUES (?, ?, ?, ?)`,
-                    [MaPN, chiTiet.MaSach, chiTiet.SoLuong, chiTiet.DonGia]
-                )
+                const insertCTPromise = connection.query(`INSERT INTO CTPhieuNhap(MaPN, MaSach, SoLuong, DonGiaNhap) VALUES (?, ?, ?, ?)`, [MaPN, chiTiet.MaSach, chiTiet.SoLuong, chiTiet.DonGia])
 
-                const updateSachPromise = connection.query(
-                    'UPDATE Sach SET SoLuongTon = SoLuongTon + ? WHERE MaSach = ?',
-                    [chiTiet.SoLuong, chiTiet.MaSach]
-                )
+                const updateSachPromise = connection.query('UPDATE Sach SET SoLuongTon = SoLuongTon + ? WHERE MaSach = ?', [chiTiet.SoLuong, chiTiet.MaSach])
 
                 await Promise.all([insertCTPromise, updateSachPromise])
                 return true
@@ -93,21 +83,17 @@ const ImportReceiptModel = {
             return MaPN
         } catch (error) {
             await connection.rollback()
-            throw error 
+            throw error
         } finally {
             connection.release()
         }
     },
 
     async existBook(id) {
-        const [rows] = await pool.query(
-            `SELECT COUNT(*) AS count FROM CTPhieuNhap WHERE MaSach = ? LIMIT 1`,
-            [id]
-        )
+        const [rows] = await pool.query(`SELECT COUNT(*) AS count FROM CTPhieuNhap WHERE MaSach = ? LIMIT 1`, [id])
 
         return rows[0].count > 0
     },
-
 }
 
 export default ImportReceiptModel

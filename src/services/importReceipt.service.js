@@ -5,10 +5,6 @@ import ImportReceiptModel from '../models/importReceipt.model.js'
 const { PAGE_LIMIT } = config
 
 const ImportReceiptService = {
-    // async getAll() {
-    //     return await ImportReceiptModel.getAll()
-    // },
-
     async getWithParam(query) {
         let { page, sort, order, keyword } = query
 

@@ -155,6 +155,9 @@ const OrderService = {
 
     async delete(id) {
         try {
+            // Kiểm tra trạng thái đơn hàng
+
+            
             const result = await OrderModel.delete(id)
             return result
         } catch (error) {

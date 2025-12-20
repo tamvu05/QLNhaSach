@@ -3,20 +3,54 @@ import showToast from './toast.js'
 const tableWrapper = document.querySelector('#table-view-manager')
 const paginationWrapper = document.querySelector('#pagination-view-manager')
 
+function notifySuccess(message) {
+    if (window.Swal) Swal.fire({ icon: 'success', title: message })
+    else alert(message)
+}
+
+function notifyError(message, title = 'Lỗi') {
+    if (window.Swal) Swal.fire({ icon: 'error', title, text: message })
+    else alert(`${title}: ${message}`)
+}
+
+function confirm(options = {}) {
+    const { title = 'Xác nhận', text = '' } = options
+    if (window.Swal) {
+        return Swal.fire({
+            title,
+            text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy bỏ',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+        }).then((r) => r.isConfirmed)
+    }
+    return Promise.resolve(window.confirm(`${title}\n${text}`))
+}
+
+function showLoading() {
+    if (window.Swal) {
+        Swal.fire({
+            title: 'Đang xử lý...',
+            text: 'Vui lòng chờ trong giây lát!',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+        })
+    }
+}
+
+function hideLoading() {
+    if (window.Swal) Swal.close()
+}
+
 /**
  * Hàm khởi tạo và gán sự kiện cho trang quản lý chung
  * @param {object} config - Chứa các cấu hình cụ thể của thực thể
  */
 export function initializeManager(config) {
-    const {
-        apiBaseUrl,
-        modalAddId,
-        modalUpdateId,
-        entityName,
-        entityIdKey,
-        entityNameKey,
-        entityDescKey,
-    } = config
+    const { apiBaseUrl, modalAddId, modalUpdateId, entityName, entityIdKey, entityNameKey, entityDescKey } = config
 
     // --- 1. SETUP ADD MODAL ---
     const addModal = document.getElementById(modalAddId)
@@ -31,9 +65,7 @@ export function initializeManager(config) {
     if (btnAddEntity) {
         btnAddEntity.onclick = async () => {
             const nameValue = newEntityNameInput.value.trim()
-            const descValue = newEntityDescInput
-                ? newEntityDescInput.value.trim()
-                : ''
+            const descValue = newEntityDescInput ? newEntityDescInput.value.trim() : ''
 
             if (nameValue === '') {
                 nameEmptyAddModal.classList.add('active')
@@ -45,6 +77,8 @@ export function initializeManager(config) {
             body[entityDescKey] = descValue
 
             try {
+                showLoading()
+
                 const res = await fetch(apiBaseUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -53,15 +87,11 @@ export function initializeManager(config) {
 
                 const data = await res.json()
 
-                if (!res.ok)
-                    throw new Error(
-                        data.message ||
-                            data.error ||
-                            `Lỗi HTTP ${res.status}: Thao tác thất bại.`
-                    )
+                if (!res.ok) throw new Error(data.message || data.error || `Lỗi HTTP ${res.status}: Thao tác thất bại.`)
 
                 updateView(1)
-                showToast(`Đã thêm ${entityName}`, 'success')
+                hideLoading()
+                notifySuccess(`Thêm ${entityName} thành công!`)
 
                 const modalInstance = bootstrap.Modal.getInstance(addModal)
                 modalInstance.hide()
@@ -70,7 +100,8 @@ export function initializeManager(config) {
                     notUniqueAddModal.classList.add('active')
                     return
                 }
-                showToast(error.message, 'danger')
+                hideLoading()
+                notifyError(error.message, `Thêm ${entityName} thất bại!`)
             }
         }
     }
@@ -105,10 +136,8 @@ export function initializeManager(config) {
     if (!updateModal) return
 
     const btnUpdate = updateModal.querySelector('.btn-save-entity')
-    const updateEntityNameInput =
-        updateModal.querySelector('#entity-name-input')
-    const updateEntityDescInput =
-        updateModal.querySelector('#entity-desc-input')
+    const updateEntityNameInput = updateModal.querySelector('#entity-name-input')
+    const updateEntityDescInput = updateModal.querySelector('#entity-desc-input')
     const nameEmptyUpdateModal = updateModal.querySelector('.empty-name')
     const notUniqueUpdateModal = updateModal.querySelector('.not-unique-name')
 
@@ -155,6 +184,7 @@ export function initializeManager(config) {
             body[entityDescKey] = descValue
 
             try {
+                showLoading()
                 const id = updateEntityNameInput.dataset.id
                 const res = await fetch(`${apiBaseUrl}/${id}`, {
                     method: 'PUT',
@@ -164,22 +194,16 @@ export function initializeManager(config) {
 
                 const data = await res.json()
 
-                if (!res.ok)
-                    throw new Error(
-                        data.message ||
-                            data.error ||
-                            `Lỗi HTTP ${res.status}: Thao tác thất bại.`
-                    )
+                if (!res.ok) throw new Error(data.message || data.error || `Lỗi HTTP ${res.status}: Thao tác thất bại.`)
 
-                const dataAttributeElement =
-                    tableWrapper.querySelector('#data-attribute')
+                const dataAttributeElement = tableWrapper.querySelector('#data-attribute')
                 const currentPage = dataAttributeElement.dataset.currentPage
                 updateView(currentPage)
-                showToast(`Đã cập nhật ${entityName}`, 'success')
+                hideLoading()
+                notifySuccess(`Chỉnh sửa ${entityName} thành công!`)
 
                 if (updateModal) {
-                    const modalInstance =
-                        bootstrap.Modal.getInstance(updateModal)
+                    const modalInstance = bootstrap.Modal.getInstance(updateModal)
                     modalInstance.hide()
                 }
             } catch (error) {
@@ -188,7 +212,8 @@ export function initializeManager(config) {
                     return
                 }
                 console.log(error)
-                showToast(error.message, 'danger')
+                hideLoading()
+                notifyError(error.message, `Chỉnh sửa ${entityName} thất bại!`)
             }
         }
     }
@@ -239,48 +264,45 @@ export function initializeManager(config) {
 
     // Hàm Delete chung
     async function deleteEntity(btnDelete) {
+        const confirmed = await confirm({
+            title: 'Bạn có chắc muốn tiếp tục xóa?',
+            text: 'Bạn sẽ không hoàn tác được sau khi xóa!',
+        })
+
+        if (!confirmed) return
+
         const rowElement = btnDelete.closest('tr')
         const entityId = rowElement.dataset.id
 
         if (entityId) {
             try {
+                showLoading()
+
                 const res = await fetch(`${apiBaseUrl}/${entityId}`, {
                     method: 'DELETE',
                 })
 
                 const data = await res.json()
 
-                if (!res.ok)
-                    throw new Error(
-                        data.message ||
-                            data.error ||
-                            `Lỗi HTTP ${res.status}: Thao tác thất bại.`
-                    )
+                if (!res.ok) throw new Error(data.message || data.error || `Lỗi HTTP ${res.status}: Thao tác thất bại.`)
 
-                const dataAttributeElement =
-                    tableWrapper.querySelector('#data-attribute')
+                const dataAttributeElement = tableWrapper.querySelector('#data-attribute')
                 let targetPage = dataAttributeElement.dataset.currentPage
 
-                if (dataAttributeElement.dataset.totalItemPerPage < 2)
-                    targetPage -= 1
+                if (dataAttributeElement.dataset.totalItemPerPage < 2) targetPage -= 1
 
                 updateView(targetPage)
-                showToast(`Đã xóa ${entityName}`, 'success')
+                hideLoading()
+                notifySuccess(`Xóa ${entityName} thành công!`)
             } catch (error) {
-                showToast(error.message, 'danger')
+                hideLoading()
+                notifyError(error.message, `Xóa ${entityName} thất bại!`)
             }
         }
     }
 
     // Hàm Update View (phân trang, sắp xếp)
-    async function updateView(
-        page = 1,
-        sort,
-        order,
-        keyword,
-        shouldPushState = true,
-        shouldReplaceState = false
-    ) {
+    async function updateView(page = 1, sort, order, keyword, shouldPushState = true, shouldReplaceState = false) {
         try {
             if (isNaN(page) || Number(page) < 1) page = 1
 
@@ -293,9 +315,7 @@ export function initializeManager(config) {
             const data = await res.json()
 
             if (!res.ok) {
-                throw new Error(
-                    data.message || `Lỗi không xác định: ${res.status}`
-                )
+                throw new Error(data.message || `Lỗi không xác định: ${res.status}`)
             }
 
             if (tableWrapper) tableWrapper.innerHTML = data.table
@@ -347,13 +367,10 @@ export function initializeManager(config) {
 
         currentHeader.setAttribute('data-order', newOrder)
 
-        const currentPage =
-            tableWrapper.querySelector('#data-attribute').dataset.currentPage
+        const currentPage = tableWrapper.querySelector('#data-attribute').dataset.currentPage
         const sort = currentHeader.dataset.sort
 
-        const inputSearch = document.querySelector(
-            '.manager-container .search-value'
-        )
+        const inputSearch = document.querySelector('.manager-container .search-value')
         let keyword = null
         if (inputSearch) keyword = inputSearch.value.trim()
 
@@ -361,21 +378,15 @@ export function initializeManager(config) {
     }
 
     // Hàm tìm kiếm
-    const btnSearch = document.querySelector(
-        '.manager-container .search-button'
-    )
-    const inputSearch = document.querySelector(
-        '.manager-container .search-value'
-    )
+    const btnSearch = document.querySelector('.manager-container .search-button')
+    const inputSearch = document.querySelector('.manager-container .search-value')
 
     if (!btnSearch || !inputSearch) return
 
     btnSearch.onclick = () => {
         const keyword = inputSearch.value.trim()
 
-        const sortableHeader = tableWrapper.querySelector(
-            'tr i.sortable[data-order]'
-        )
+        const sortableHeader = tableWrapper.querySelector('tr i.sortable[data-order]')
         let sort = null,
             order = null
         if (sortableHeader) {
@@ -405,10 +416,7 @@ export function initializeManager(config) {
         btnExport.onclick = async () => {
             try {
                 const res = await fetch(`${apiBaseUrl}/export`)
-                if (!res.ok)
-                    throw new Error(
-                        `Lỗi HTTP ${res.status}: Không thể tải file.`
-                    )
+                if (!res.ok) throw new Error(`Lỗi HTTP ${res.status}: Không thể tải file.`)
 
                 const blob = await res.blob()
                 const url = window.URL.createObjectURL(blob)
@@ -420,9 +428,7 @@ export function initializeManager(config) {
                 let filename = 'DanhSachTheLoai.xlsx' // Tên mặc định
                 if (disposition && disposition.indexOf('filename=') !== -1) {
                     // Cố gắng trích xuất tên file từ header (loại bỏ dấu nháy kép)
-                    filename = disposition
-                        .split('filename=')[1]
-                        .replace(/"/g, '')
+                    filename = disposition.split('filename=')[1].replace(/"/g, '')
                 }
                 a.download = filename
 
@@ -436,7 +442,6 @@ export function initializeManager(config) {
             }
         }
     }
-
 
     // --- 4. XỬ LÝ TIẾN/LÙI TRÊN TRÌNH DUYỆT ---
     // Hàm xử lý sự kiện Back/Forward

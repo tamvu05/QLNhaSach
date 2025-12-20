@@ -6,6 +6,7 @@ import OrderDetailModel from '../models/orderDetail.model.js'
 import CartModel from '../models/cart.model.js'
 import { deleteImage } from '../utils/cloudinary.js'
 import ImportReceiptModel from '../models/importReceipt.model.js'
+import { uploadImage } from '../utils/cloudinary.js'
 import ExportReceiptModel from '../models/exportReceipt.model.js'
 
 const { PAGE_LIMIT } = config
@@ -179,6 +180,11 @@ const BookService = {
         const isbnExist = await BookModel.getByISBN(payload.ISBN)
         if (isbnExist) throw createHttpError('Trùng mã ISBN!', 409)
 
+        if (payload.filepath) {
+            const uploadResult = await uploadImage(payload.filepath, 'book_coves')
+            payload = {...payload, uploadResult}
+        }
+
         const book = BookModel.create(payload)
 
         return book
@@ -196,9 +202,9 @@ const BookService = {
 
         const isUpdate = BookModel.update(id, payload)
         if (!isUpdate) throw createHttpError('Có lỗi khi cập nhật thông tin sách', 500)
-
-        const uploadResult = payload.uploadResult
-        if (uploadResult) {
+            
+        if (payload.filepath) {
+            const uploadResult = await uploadImage(payload.filepath, 'book_coves')
             const ok = await BookModel.updateImage(id, uploadResult)
             if (!ok) throw createHttpError('Có lỗi khi thay đổi ảnh bìa', 500)
             deleteImage(exist.HinhAnhID)

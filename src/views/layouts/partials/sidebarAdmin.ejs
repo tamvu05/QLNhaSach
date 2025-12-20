@@ -110,7 +110,7 @@
                 <div class="collapse submenu" id="promotion-submenu">
                     <ul class="nav flex-column sub-ul">
                         <li class="nav-item">
-                            <a class="nav-link" href="/admin/discount">
+                            <a class="nav-link disabled" href="/admin/discount" >
                                 <i class="fas fa-tags"></i> <span>Khuyến mãi</span>
                             </a>
                         </li>
@@ -317,6 +317,19 @@
         margin: 15px 20px;
         background: rgba(255, 255, 255, 0.2);
         list-style: none;
+    }
+
+    /* Kiểu cho link bị disabled */
+    .sidebar-menu a.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .sidebar-menu a.disabled:hover {
+        background-color: transparent;
+        color: #ecf0f1;
+        border-left-color: transparent;
     }
 </style>
 

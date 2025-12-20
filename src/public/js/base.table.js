@@ -17,7 +17,11 @@ export default class BaseTable {
 
     // ---------- Utilities ----------
     notifySuccess(message) {
-        if (window.Swal) Swal.fire({ icon: 'success', title: message })
+        if (window.Swal)
+            Swal.fire({
+                icon: 'success',
+                title: message,
+            })
         else alert(message)
     }
 
@@ -36,6 +40,8 @@ export default class BaseTable {
                 showCancelButton: true,
                 confirmButtonText: 'Xác nhận',
                 cancelButtonText: 'Hủy bỏ',
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
             }).then((r) => r.isConfirmed)
         }
         return Promise.resolve(window.confirm(`${title}\n${text}`))

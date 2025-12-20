@@ -122,7 +122,7 @@ const CategoryService = {
         const bookCount = await BookModel.countByCategory(id)
         if (bookCount > 0)
             throw createHttpError(
-                'Không thể xóa thể loại vì đang có sách tham chiếu',
+                'Thể loại này đã có sách trong hệ thống',
                 409
             )
 

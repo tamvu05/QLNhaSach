@@ -1,4 +1,5 @@
 import SupplierModel from '../models/supplier.model.js'
+import ImportReceiptModel from '../models/importReceipt.model.js'
 import config from '../configs/app.config.js'
 import { createHttpError } from '../utils/errorUtil.js'
 
@@ -114,6 +115,8 @@ const SupplierService = {
         if (!exist) throw new Error('Nhà cung cấp không tồn tại')
 
         /// kiểm tra nhà cung cấp có trong phiếu nhập
+        const hasReceipt = await ImportReceiptModel.hasSupplier(id)
+        if(hasReceipt) throw createHttpError('Đã có phiếu nhập từ nhà cung cấp này!', 401)
 
         const success = await SupplierModel.delete(id)
         if (!success) throw new Error('Xóa thất bại')

@@ -46,8 +46,6 @@ class EmployeeFormModal {
         this.contStateSelect = this.modal.querySelector('#cont-state-select')
         this.btnSave = this.modal.querySelector('.btn-save-voucher') // Nút Lưu
         
-        this.btnSave.textContent = 'Thêm nhân viên mới' 
-        
         this.initEventListeners()
     }
 
@@ -78,7 +76,6 @@ class EmployeeFormModal {
         this.type = 'update'
         this.updateId = id
         this.headerModal.textContent = 'Chỉnh sửa thông tin nhân viên' 
-        this.btnSave.textContent = 'Lưu thay đổi'
         this.inputEmail.disabled = true // Không cho phép đổi Email đăng nhập
         this.inputPassword.placeholder = 'Để trống nếu không muốn đổi mật khẩu'
         this.contStateSelect.classList.remove('d-none')
@@ -115,7 +112,6 @@ class EmployeeFormModal {
         this.type = 'add'
         this.updateId = null
         this.headerModal.textContent = 'Thêm nhân viên mới' 
-        this.btnSave.textContent = 'Thêm nhân viên mới' 
         this.inputEmail.disabled = false
         this.inputPassword.placeholder = ''
         this.stateSelect.value = ''

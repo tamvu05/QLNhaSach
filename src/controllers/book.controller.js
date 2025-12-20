@@ -3,7 +3,6 @@ import CategoryService from '../services/category.service.js'
 import AuthorService from '../services/author.service.js'
 import PublisherService from '../services/publisher.service.js'
 import { bookConfig } from '../configs/adminView.config.js'
-import { uploadImage } from '../utils/cloudinary.js'
 import exportFileExcel from '../utils/exportFileExcel.js'
 import { formatPrice } from '../utils/helpers.js'
 
@@ -203,12 +202,9 @@ const BookController = {
     // POST /api/book
     async create(req, res, next) {
         try {
-            let uploadResult = null
-            if (req.file) {
-                uploadResult = await uploadImage(req.file.path, 'book_coves')
-            }
+            const filepath = req.file ? req.file.path : null
+            let payload = {...req.body, filepath}
 
-            const payload = { ...req.body, uploadResult }
             const data = await BookService.create(payload)
             res.json(data)
         } catch (error) {
@@ -219,12 +215,8 @@ const BookController = {
     // PUT /api/book/:id
     async update(req, res, next) {
         try {
-            let uploadResult = null
-            if (req.file) {
-                uploadResult = await uploadImage(req.file.path, 'book_coves')
-            }
-
-            const payload = { ...req.body, uploadResult }
+            const filepath = req.file ? req.file.path : null
+            let payload = {...req.body, filepath}
 
             const { id } = req.params
 

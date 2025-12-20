@@ -64,7 +64,6 @@ class VoucherFormModal {
         this.type = 'update'
         this.updateId = id
         this.headerModal.textContent = 'Chỉnh sửa mã giảm giá'
-        this.btnSave.textContent = 'Lưu thay đổi'
         this.inputCode.disabled = true
         this.selectType.disabled = true
         this.inputValue.disabled = true
@@ -107,7 +106,6 @@ class VoucherFormModal {
         this.type = 'add'
         this.updateId = null
         this.headerModal.textContent = 'Tạo mã giảm giá'
-        this.btnSave.textContent = 'Tạo mã giảm giá'
         this.inputCode.disabled = false
         this.selectType.disabled = false
         this.inputValue.disabled = false

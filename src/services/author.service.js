@@ -57,7 +57,7 @@ const AuthorService = {
         if (!exist) throw new Error('Tác giả không tồn tại')
 
         const bookCount = await BookModel.countByAuthor(id)
-        if(bookCount > 0) throw createHttpError('Không thể xóa tác giả vì đang có sách tham chiếu', 409)
+        if(bookCount > 0) throw createHttpError('Tác giả này đã có sách trong hệ thống', 409)
 
         const success = await AuthorModel.delete(id)
         if (!success) throw new Error('Xóa thất bại')
