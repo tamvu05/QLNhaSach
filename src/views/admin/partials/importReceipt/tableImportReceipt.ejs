@@ -13,10 +13,11 @@
         <thead>
             <tr>
                 <th>STT</th>
-                <th>Ngày nhập hàng</th>
-                <th><i class="sortable" data-sort="TenNCC">Tên nhà cung cấp</i></th>
-                <th>Số điện thoại</th>
-                <th>Tên nhân viên</th>
+                <th>Ngày nhập</th>
+                <th><i class="sortable" data-sort="TenNCC">Nhà cung cấp</i></th>
+                <th>Điện thoại</th>
+                <th>Nhân viên lập phiếu</th>
+                <th>Trạng thái</th>
                 <th class="text-center">Thao tác</th>
             </tr>
         </thead>
@@ -50,10 +51,26 @@
                         <td class="text-muted">
                             <%= importReceipt.HoTen %> 
                         </td>
+                        <td>
+                            <% if (importReceipt.TrangThai === 'HIEU_LUC') { %>
+                                <span class="badge bg-success">Có hiệu lực</span>
+                            <% } else { %>
+                                <span class="badge bg-secondary">Đã hủy</span>
+                            <% } %>
+                        </td>
                         <td class="action-col text-center">
                             <button class="btn-show-details btn action-btn view-btn" title="Xem chi tiết">
                                 <i class="fa-solid fa-eye"></i> 
                             </button>
+                            <% if (importReceipt.TrangThai === 'HIEU_LUC') { %>
+                                <button class="btn-cancel-receipt btn action-btn delete-btn" title="Hủy phiếu">
+                                    <i class="fa-solid fa-ban"></i>
+                                </button>
+                            <% } else { %>
+                                <button class="btn action-btn" disabled title="Phiếu đã hủy">
+                                    <i class="fa-solid fa-ban" style="opacity: 0.5;"></i>
+                                </button>
+                            <% } %>
                         </td>
                     </tr>
                     <% }) %>
@@ -61,7 +78,7 @@
                         <% } else { %>
 
                             <tr class="no-data">
-                                <td colspan="6" class="text-center py-4">
+                                <td colspan="7" class="text-center py-4">
                                     Không có dữ liệu...
                                 </td>
                             </tr>

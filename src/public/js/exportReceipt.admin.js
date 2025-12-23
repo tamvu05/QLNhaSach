@@ -258,7 +258,7 @@ class ExportReceiptFormModal {
             )
 
             const payload = {
-                MaNV: 1, // Đổi thành mã NV sau
+                // MaNV: 1, 
                 NgayXuat: this.inputDate.value,
                 NoiDung: this.textareaNotes.value.trim(),
                 ChiTietPX: ChiTietPX,
@@ -458,12 +458,18 @@ class ExportReceiptTable extends BaseTable {
         if (this.tableWrapper)
             this.tableWrapper.addEventListener('click', (event) => {
                 const btnDetails = event.target.closest('.btn-show-details')
+                const btnCancel = event.target.closest('.btn-cancel-receipt')
                 const sortableHeader = event.target.closest('tr i.sortable')
 
                 if (btnDetails) {
                     const id = btnDetails.closest('tr').dataset.id
                     this.exportDetailModalInstance.showModal(id)
-                } else if (sortableHeader) this.sortData(sortableHeader)
+                } 
+                // Hủy phiếu
+                else if (btnCancel) {
+                    this.cancelReceipt(btnCancel)
+                }
+                else if (sortableHeader) this.sortData(sortableHeader)
             })
 
         if (this.paginationWrapper) {
@@ -496,6 +502,48 @@ class ExportReceiptTable extends BaseTable {
 
     setExportDetailModalInstance(instance) {
         this.exportDetailModalInstance = instance
+    }
+
+    async cancelReceipt(btnCancel) {
+        const rowElement = btnCancel.closest('tr')
+        const receiptId = rowElement.dataset.id
+
+        if (!receiptId) return
+
+        const confirmed = await this.confirm({
+            title: 'Bạn có chắc muốn hủy phiếu xuất này?',
+            text: 'Hành động này sẽ hoàn trả số lượng sách vào kho!',
+        })
+
+        if (!confirmed) return
+
+        try {
+            this.showLoading()
+
+            const res = await fetch(`${this.config.apiBaseUrl}/cancel/${receiptId}`, {
+                method: 'PUT',
+            })
+
+            const data = await res.json()
+
+            if (!res.ok)
+                throw new Error(
+                    data.message ||
+                        data.error ||
+                        `Lỗi HTTP ${res.status}: Thao tác hủy phiếu thất bại.`
+                )
+
+            const dataAttributeElement =
+                this.tableWrapper.querySelector('#data-attribute')
+            let targetPage = dataAttributeElement.dataset.currentPage
+
+            this.hideLoading()
+            this.notifySuccess(`Đã hủy phiếu xuất thành công`)
+            this.updateView(targetPage)
+        } catch (error) {
+            this.hideLoading()
+            this.notifyError(error.message)
+        }
     }
 
     // ... (Các hàm còn lại: handlePageChange, updateView, sortData, handlePopState, handleSearch, debounced, exportExcel giữ nguyên logic của ImportReceiptTable, chỉ thay đổi tên biến và endpoint API) ...

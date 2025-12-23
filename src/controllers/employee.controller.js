@@ -42,27 +42,21 @@ const EmployeeController = {
         try {
             const query = req.query
             const data = await EmployeeService.getWithParam(query)
-            const table = await renderPartial(
-                'admin/partials/employee/tableEmployee',
-                {
-                    employees: data.employees,
-                    currentPage: data.currentPage,
-                    totalPage: data.totalPage,
-                    totalItem: data.totalItem,
-                    totalItemPerPage: data.employees.length,
-                    PAGE_LIMIT: data.PAGE_LIMIT,
-                }
-            )
+            const table = await renderPartial('admin/partials/employee/tableEmployee', {
+                employees: data.employees,
+                currentPage: data.currentPage,
+                totalPage: data.totalPage,
+                totalItem: data.totalItem,
+                totalItemPerPage: data.employees.length,
+                PAGE_LIMIT: data.PAGE_LIMIT,
+            })
 
-            const pagination = await renderPartial(
-                'admin/partials/pagination',
-                {
-                    currentPage: data.currentPage,
-                    totalPage: data.totalPage,
-                    hrefBase: employeeConfig.hrefBase,
-                    apiBase: employeeConfig.apiBase,
-                }
-            )
+            const pagination = await renderPartial('admin/partials/pagination', {
+                currentPage: data.currentPage,
+                totalPage: data.totalPage,
+                hrefBase: employeeConfig.hrefBase,
+                apiBase: employeeConfig.apiBase,
+            })
 
             return res.json({
                 table,
@@ -74,12 +68,31 @@ const EmployeeController = {
         }
     },
 
-    // GET /api/employee/:id 
+    // GET /api/employee/:id
     async getById(req, res, next) {
         try {
             const { id } = req.params
             const data = await EmployeeService.getById(id)
             return res.json(data)
+        } catch (err) {
+            next(err)
+        }
+    },
+
+    // GET /admin/profile
+    async profile(req, res, next) {
+        try {
+            const MaNV = req?.session?.account?.MaNV
+
+            if (!MaNV) {
+                return res.redirect('/login')
+            }
+
+            const employee = await EmployeeService.getById(MaNV)
+
+            res.render('admin/profile.ejs', {
+                account: employee,
+            })
         } catch (err) {
             next(err)
         }

@@ -1,6 +1,6 @@
-import { importReceiptConfig } from "../configs/adminView.config.js"
+import { importReceiptConfig } from '../configs/adminView.config.js'
 import exportFileExcel from '../utils/exportFileExcel.js'
-import ImportReceiptService from "../services/importReceipt.service.js"
+import ImportReceiptService from '../services/importReceipt.service.js'
 import BookService from '../services/book.service.js'
 import SupplierService from '../services/supplier.service.js'
 
@@ -9,7 +9,8 @@ const ImportReceiptController = {
     async getViewManager(req, res, next) {
         try {
             const query = req.query
-            const data = await ImportReceiptService.getWithParam(query)
+            const account = req?.session?.account ?? {}
+            const data = await ImportReceiptService.getWithParam(query, account)
             const books = await BookService.getAllJSON()
             const suppliers = await SupplierService.getAll()
             res.render('admin/viewManager', {
@@ -53,32 +54,27 @@ const ImportReceiptController = {
 
         try {
             const query = req.query
-            const data = await ImportReceiptService.getWithParam(query)
+            const account = req?.session?.account ?? {}
+            const data = await ImportReceiptService.getWithParam(query, account)
             const books = await BookService.getAllJSON()
             const suppliers = await SupplierService.getAll()
-            const table = await renderPartial(
-                'admin/partials/importReceipt/tableImportReceipt',
-                {
-                    importReceipts: data.importReceipts,
-                    books,
-                    suppliers,
-                    currentPage: data.currentPage,
-                    totalPage: data.totalPage,
-                    totalItem: data.totalItem,
-                    totalItemPerPage: data.importReceipts.length,
-                    PAGE_LIMIT: data.PAGE_LIMIT,
-                }
-            )
+            const table = await renderPartial('admin/partials/importReceipt/tableImportReceipt', {
+                importReceipts: data.importReceipts,
+                books,
+                suppliers,
+                currentPage: data.currentPage,
+                totalPage: data.totalPage,
+                totalItem: data.totalItem,
+                totalItemPerPage: data.importReceipts.length,
+                PAGE_LIMIT: data.PAGE_LIMIT,
+            })
 
-            const pagination = await renderPartial(
-                'admin/partials/pagination',
-                {
-                    currentPage: data.currentPage,
-                    totalPage: data.totalPage,
-                    hrefBase: importReceiptConfig.hrefBase,
-                    apiBase: importReceiptConfig.apiBase,
-                }
-            )
+            const pagination = await renderPartial('admin/partials/pagination', {
+                currentPage: data.currentPage,
+                totalPage: data.totalPage,
+                hrefBase: importReceiptConfig.hrefBase,
+                apiBase: importReceiptConfig.apiBase,
+            })
 
             return res.json({
                 table,
@@ -112,17 +108,28 @@ const ImportReceiptController = {
         }
     },
 
-      // POST /api/import-receipt
+    // POST /api/import-receipt
     async create(req, res, next) {
         try {
-            const data = await ImportReceiptService.create(req.body)
+             const MaNV = req?.session?.account?.MaNV ?? null
+            const payload = { ...req.body, MaNV } 
+            const data = await ImportReceiptService.create(payload)
             res.status(201).json(data)
         } catch (err) {
             next(err)
         }
     },
 
-    
+    // PUT /api/import-receipt/cancel/:id
+    async cancel(req, res, next) {
+        try {
+            const { id } = req.params
+            const result = await ImportReceiptService.cancel(id)
+            res.json({ success: true, message: 'Đã hủy phiếu nhập thành công' })
+        } catch (err) {
+            next(err)
+        }
+    },
 }
 
 export default ImportReceiptController

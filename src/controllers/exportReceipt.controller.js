@@ -8,7 +8,8 @@ const ImportReceiptController = {
     async getViewManager(req, res, next) {
         try {
             const query = req.query
-            const data = await ExportReceiptService.getWithParam(query)
+            const account = req?.session?.account ?? {}
+            const data = await ExportReceiptService.getWithParam(query, account)
             res.render('admin/viewManager', {
                 exportReceipts: data.exportReceipts,
                 currentPage: data.currentPage,
@@ -47,7 +48,8 @@ const ImportReceiptController = {
 
         try {
             const query = req.query
-            const data = await ExportReceiptService.getWithParam(query)
+            const account = req?.session?.account ?? {}
+            const data = await ExportReceiptService.getWithParam(query, account)
             const table = await renderPartial(
                 'admin/partials/exportReceipt/tableExportReceipt',
                 {
@@ -105,8 +107,21 @@ const ImportReceiptController = {
     // POST /api/export-receipt
     async create(req, res, next) {
         try {
-            const data = await ExportReceiptService.create(req.body)
+            const MaNV = req?.session?.account?.MaNV ?? null
+            const payload = { ...req.body, MaNV } 
+            const data = await ExportReceiptService.create(payload)
             res.status(201).json(data)
+        } catch (err) {
+            next(err)
+        }
+    },
+
+    // PUT /api/export-receipt/cancel/:id
+    async cancel(req, res, next) {
+        try {
+            const { id } = req.params
+            const result = await ExportReceiptService.cancel(id)
+            res.json({ success: true, message: 'Đã hủy phiếu xuất thành công' })
         } catch (err) {
             next(err)
         }

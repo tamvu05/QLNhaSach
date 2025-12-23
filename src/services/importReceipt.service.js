@@ -1,12 +1,14 @@
 import config from '../configs/app.config.js'
 import { createHttpError } from '../utils/errorUtil.js'
 import ImportReceiptModel from '../models/importReceipt.model.js'
+import EmployeeModel from '../models/employee.model.js'
 
 const { PAGE_LIMIT } = config
 
 const ImportReceiptService = {
-    async getWithParam(query) {
+    async getWithParam(query, account = {}) {
         let { page, sort, order, keyword } = query
+        const { VaiTro, MaNV } = account || {}
 
         let currentPage = Number(page)
         let limit = Number(PAGE_LIMIT)
@@ -15,7 +17,9 @@ const ImportReceiptService = {
 
         if (!keyword) keyword = ''
 
-        const total = await ImportReceiptModel.getTotal(keyword)
+        const filterMaNV = Number(VaiTro) === 3 ? MaNV : null
+
+        const total = await ImportReceiptModel.getTotal(keyword, filterMaNV)
         const totalPage = Math.ceil(total / limit)
 
         if (isNaN(currentPage) || currentPage > totalPage) currentPage = 1
@@ -33,7 +37,8 @@ const ImportReceiptService = {
             offset,
             sortBy,
             sortOrder,
-            keyword
+            keyword,
+            filterMaNV
         )
 
         return {
@@ -56,7 +61,7 @@ const ImportReceiptService = {
         return PN
     },
 
-     async getDetailById(id) {
+    async getDetailById(id) {
         if (!id) throw new Error('Thiếu mã phiếu nhập')
 
         const PN = await ImportReceiptModel.getDetailById(id)
@@ -65,60 +70,34 @@ const ImportReceiptService = {
         return PN
     },
 
-    // async update(id, payload) {
-    //     if (!id) throw new Error('Thiếu mã nhà cung cấp')
-
-    //     const exist = await ImportReceiptModel.getById(id)
-    //     if (!exist) throw new Error('Nhà cung cấp không tồn tại')
-
-    //     const { TenNCC, DiaChi, SDT } = payload
-
-    //     if (
-    //         !TenNCC ||
-    //         !DiaChi ||
-    //         !SDT ||
-    //         TenNCC === '' ||
-    //         DiaChi === '' ||
-    //         SDT === ''
-    //     )
-    //         throw createHttpError('Thông tin nhà cung cấp không hợp lệ', 401)
-
-    //     const success = await ImportReceiptModel.update(id, {
-    //         TenNCC,
-    //         DiaChi,
-    //         SDT,
-    //     })
-
-    //     if (!success) throw new Error('Cập nhật thất bại')
-
-    //     return await ImportReceiptModel.getById(id)
-    // },
-
     async create(payload) {
-        const { MaNCC, MaNV, NgayNhap, ChiTietPN } = payload
+        let { MaNCC, MaNV, MaTK, NgayNhap, ChiTietPN } = payload
 
-        if (!MaNCC || !MaNV || !NgayNhap || !ChiTietPN || 
-            MaNCC === '' || MaNV === '' || NgayNhap === '' || ChiTietPN.length === 0)
+        if (!MaNV && MaTK) {
+            MaNV = await EmployeeModel.getEmpIdByAccountId(MaTK)
+        }
+
+        if (!MaNV) throw createHttpError('Nhân viên chưa đăng nhập', 401)
+
+        if (!MaNCC || !NgayNhap || !ChiTietPN ||
+            MaNCC === '' || NgayNhap === '' || ChiTietPN.length === 0)
             throw createHttpError('Thông tin phiếu nhập không hợp lệ', 401)
 
-        const insertId = await ImportReceiptModel.create(payload)
+        const insertId = await ImportReceiptModel.create({ ...payload, MaNV })
 
         return insertId
     },
 
-    // async delete(id) {
-    //     if (!id) throw new Error('Thiếu mã nhà cung cấp')
+    async cancel(id) {
+        if (!id) throw createHttpError('Thiếu mã phiếu nhập', 400)
 
-    //     const exist = await ImportReceiptModel.getById(id)
-    //     if (!exist) throw new Error('Nhà cung cấp không tồn tại')
+        const receipt = await ImportReceiptModel.getById(id)
+        if (!receipt) throw createHttpError('Phiếu nhập không tồn tại', 404)
 
-    //     /// kiểm tra nhà cung cấp có trong phiếu nhập
+        const result = await ImportReceiptModel.cancel(id)
 
-    //     const success = await ImportReceiptModel.delete(id)
-    //     if (!success) throw new Error('Xóa thất bại')
-
-    //     return true
-    // },
+        return result
+    },
 }
 
 export default ImportReceiptService

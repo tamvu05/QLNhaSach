@@ -30,6 +30,11 @@ const EmployeeModel = {
         return rows[0] || null
     },
 
+    async getEmpIdByAccountId(MaTK) {
+        const [rows] = await pool.query(`SELECT MaNV FROM NhanVien WHERE MaTK = ?`, [MaTK])
+        return rows[0].MaNV || null
+    },
+
     async existEmail(email) {
         const [rows] = await pool.query('SELECT 1 FROM TaiKhoan WHERE TenDangNhap = ?', [email])
         return rows[0] || null
@@ -99,11 +104,6 @@ const EmployeeModel = {
             connection.release()
         }
     },
-
-    // async delete(id) {
-    //     const [result] = await pool.query('DELETE FROM Voucher WHERE MaVC = ?', [id])
-    //     return result.affectedRows > 0
-    // },
 }
 
 export default EmployeeModel

@@ -15,7 +15,7 @@ import { isAdmin } from '../../middlewares/auth.middleware.js'
 
 const router = express.Router()
 
-// router.use('/', checkLoginAdmin)
+router.use('/', checkLoginAdmin)
 
 router.get('/category', CategoryController.getViewManager)
 router.get('/author', AuthorController.getViewManager)
@@ -29,9 +29,7 @@ router.get('/sale/invoice', InvoiceController.getViewManager)
 router.get('/discount', isAdmin, (req, res) => res.json('comming soon'))
 router.get('/voucher', isAdmin, VoucherController.getViewManager)
 router.get('/employee', isAdmin, EmployeeController.getViewManager)
-router.get('/profile', (req, res, next) => {
-    res.render('admin/profile.ejs')
-})
+router.get('/profile', EmployeeController.profile)
 
 router.get('/', (req, res, next) => {
     res.render('admin/dashboard', {

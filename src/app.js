@@ -5,6 +5,8 @@ import express from 'express'
 import morgan from 'morgan'
 import compression from 'compression'
 import session from 'express-session'
+import { RedisStore } from 'connect-redis'
+import { createClient } from 'redis'
 import router from './routers/index.js'
 import path from 'path'
 import expressEjsLayouts from 'express-ejs-layouts'
@@ -29,16 +31,24 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false,
 }))
 
-// 3. Cấu hình Session (Quan trọng: Đặt trước middleware check user)
+// 3. Cấu hình Redis Session Store
+const redisClient = createClient({ url: process.env.REDIS_URL })
+redisClient.on('error', (err) => console.error('Redis Client Error', err))
+await redisClient.connect()
+console.log('Connected to Redis successfully')
+
+const redisStore = new RedisStore({ client: redisClient, prefix: 'sess:' })
+
 app.use(session({
-    secret: 'secret-key-cua-du-an-nay', 
+    store: redisStore,
+    secret: process.env.SESSION_SECRET || 'secret-key-cua-du-an-nay',
     resave: false,
-    saveUninitialized: true, // Nên để true để tạo session ngay khi vào
-    cookie: { 
-        secure: false, 
-        maxAge: 24 * 60 * 60 * 1000 
-    }
-}));
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // đặt true nếu dùng HTTPS
+        maxAge: 24 * 60 * 60 * 1000,
+    },
+}))
 
 // 4. Middleware toàn cục: Check User & Đếm Giỏ hàng
 app.use(async (req, res, next) => {

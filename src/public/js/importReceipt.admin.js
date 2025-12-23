@@ -234,7 +234,7 @@ class ImportReceiptFormModal {
 
             const payload = {
                 MaNCC: this.selectSupplier.value,
-                MaNV: '1',
+                // MaNV: '1',
                 NgayNhap: this.inputDate.value,
                 NoiDung: this.textareaNotes.value.trim(),
                 ChiTietPN: ChiTietPN,
@@ -421,12 +421,17 @@ class ImportReceiptTable extends BaseTable {
         if (this.tableWrapper)
             this.tableWrapper.addEventListener('click', (event) => {
                 const btnDetails = event.target.closest('.btn-show-details')
+                const btnCancel = event.target.closest('.btn-cancel-receipt')
                 const sortableHeader = event.target.closest('tr i.sortable')
 
                 // Xem Chi tiết
                 if (btnDetails) {
                     const id = btnDetails.closest('tr').dataset.id
                     this.importDetailModalInstance.showModal(id)
+                }
+                // Hủy phiếu
+                else if (btnCancel) {
+                    this.cancelReceipt(btnCancel)
                 }
                 // Sắp xếp
                 else if (sortableHeader) this.sortData(sortableHeader)
@@ -465,6 +470,48 @@ class ImportReceiptTable extends BaseTable {
 
     setImportDetailModalInstance(instance) {
         this.importDetailModalInstance = instance
+    }
+
+    async cancelReceipt(btnCancel) {
+        const rowElement = btnCancel.closest('tr')
+        const receiptId = rowElement.dataset.id
+
+        if (!receiptId) return
+
+        const confirmed = await this.confirm({
+            title: 'Bạn có chắc muốn hủy phiếu nhập này?',
+            text: 'Hành động này sẽ hoàn trả số lượng sách trong kho!',
+        })
+
+        if (!confirmed) return
+
+        try {
+            this.showLoading()
+
+            const res = await fetch(`${this.config.apiBaseUrl}/cancel/${receiptId}`, {
+                method: 'PUT',
+            })
+
+            const data = await res.json()
+
+            if (!res.ok)
+                throw new Error(
+                    data.message ||
+                        data.error ||
+                        `Lỗi HTTP ${res.status}: Thao tác hủy phiếu thất bại.`
+                )
+
+            const dataAttributeElement =
+                this.tableWrapper.querySelector('#data-attribute')
+            let targetPage = dataAttributeElement.dataset.currentPage
+
+            this.hideLoading()
+            this.notifySuccess(`Đã hủy phiếu nhập thành công`)
+            this.updateView(targetPage)
+        } catch (error) {
+            this.hideLoading()
+            this.notifyError(error.message)
+        }
     }
 
     handlePageChange(targetElement) {

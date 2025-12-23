@@ -2,6 +2,7 @@ import pool from '../configs/db.js'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import { sendMail } from '../utils/mailer.js'
+import EmployeeModel from '../models/employee.model.js'
 
 const AuthService = {
     // --- ĐĂNG KÝ (Đã chuẩn hóa trả về Object) ---
@@ -83,8 +84,11 @@ const AuthService = {
 
         if (user.TrangThai !== 'ACTIVE') throw new Error('Tài khoản đã bị khóa')
 
+        const MaNV = await EmployeeModel.getEmpIdByAccountId(user.MaTK)
+
         return {
             MaTK: user.MaTK,
+            MaNV,
             email: user.TenDangNhap,
             VaiTro: user.VaiTro
         }
