@@ -1,6 +1,7 @@
 import config from '../configs/app.config.js'
 import EmployeeModel from '../models/employee.model.js'
 import { createHttpError } from '../utils/errorUtil.js'
+import { uploadImage, deleteImage } from '../utils/cloudinary.js'
 import bcrypt from 'bcrypt'
 
 const { PAGE_LIMIT } = config
@@ -100,21 +101,112 @@ const EmployeeService = {
         }
     },
 
-    // async delete(id) {
-    //     try {
-    //         const employee = await EmployeeModel.getById(id)
-    //         if (!employee) throw createHttpError('Mã giảm giá không tồn tại!', 401)
+    async delete(id) {
+        try {
+            const employee = await EmployeeModel.getById(id)
+            if (!employee) throw createHttpError('Nhân viên không tồn tại!', 404)
 
-    //         if (employee.SLDaDung > 0) throw createHttpError('Mã giảm giá đã được sử dụng!', 401)
+            const hasTransactions = await EmployeeModel.hasTransactions(id)
+            if (hasTransactions) {
+                throw createHttpError('Nhân viên đã phát sinh giao dịch, không thể xóa!', 409)
+            }
 
-    //         const result = await EmployeeModel.delete(id)
-    //         if (!result) throw createHttpError('Lỗi khi xóa employee!', 401)
+            const result = await EmployeeModel.delete(id)
+            if (!result) throw createHttpError('Lỗi khi xóa nhân viên!', 500)
 
-    //         return result
-    //     } catch (error) {
-    //         throw error
-    //     }
-    // },
+            return result
+        } catch (error) {
+            throw error
+        }
+    },
+
+    async updateProfile(MaNV, payload, isManager = false) {
+        const allowed = ['HoTen', 'SDT', 'NgaySinh']
+        if (isManager) allowed.push('Email')
+
+        const data = {}
+        for (const key of allowed) {
+            if (payload[key] !== undefined && payload[key] !== null && payload[key] !== '') {
+                data[key] = payload[key]
+            }
+        }
+
+        if (!data.HoTen || !data.SDT || !data.NgaySinh) {
+            throw createHttpError('Vui lòng nhập đầy đủ Họ tên, SĐT, Ngày sinh', 400)
+        }
+
+        // Basic phone check
+        const phoneRegex = /^(0|\+84)(9\d|8\d|7\d|5\d|3\d)\d{7}$/
+        if (!phoneRegex.test(String(data.SDT).trim())) {
+            throw createHttpError('Số điện thoại không hợp lệ', 400)
+        }
+
+        // Date validity
+        const dob = new Date(data.NgaySinh)
+        if (isNaN(dob.getTime())) {
+            throw createHttpError('Ngày sinh không hợp lệ', 400)
+        }
+
+        const result = await EmployeeModel.updateProfile(MaNV, data, isManager)
+        if (!result) throw createHttpError('Cập nhật hồ sơ thất bại', 500)
+
+        return result
+    },
+
+    async changePassword(MaNV, currentPassword, newPassword) {
+        if (!currentPassword || !newPassword) {
+            throw createHttpError('Thiếu mật khẩu hiện tại hoặc mật khẩu mới', 400)
+        }
+
+        const account = await EmployeeModel.getAccountByEmployeeId(MaNV)
+        if (!account) throw createHttpError('Tài khoản không tồn tại', 404)
+
+        const match = await bcrypt.compare(String(currentPassword), account.MatKhauHash)
+        if (!match) throw createHttpError('Mật khẩu hiện tại không đúng', 401)
+
+        const salt = await bcrypt.genSalt(10)
+        const hash = await bcrypt.hash(String(newPassword), salt)
+
+        const ok = await EmployeeModel.updatePassword(account.MaTK, hash)
+        if (!ok) throw createHttpError('Đổi mật khẩu thất bại', 500)
+
+        return true
+    },
+
+    async updateAvatar(MaNV, file) {
+        if (!MaNV) throw createHttpError('Thiếu mã nhân viên', 400)
+        if (!file || !file.path) throw createHttpError('Chưa có file ảnh tải lên', 400)
+
+        const employee = await EmployeeModel.getById(MaNV)
+        if (!employee) throw createHttpError('Nhân viên không tồn tại', 404)
+
+        let uploaded = null
+        try {
+            uploaded = await uploadImage(file.path, 'employee_avatars')
+        } catch (err) {
+            throw createHttpError(err?.message || 'Tải ảnh thất bại', 500)
+        }
+
+        try {
+            const ok = await EmployeeModel.updateAvatar(MaNV, {
+                HinhAnh: uploaded.url,
+                HinhAnhID: uploaded.publicId,
+            })
+
+            if (!ok) throw new Error('Cập nhật ảnh đại diện thất bại')
+
+            if (employee.HinhAnhID) {
+                await deleteImage(employee.HinhAnhID)
+            }
+
+            return { HinhAnh: uploaded.url, HinhAnhID: uploaded.publicId }
+        } catch (err) {
+            if (uploaded?.publicId) {
+                await deleteImage(uploaded.publicId)
+            }
+            throw createHttpError(err?.message || 'Cập nhật ảnh đại diện thất bại', 500)
+        }
+    },
 }
 
 export default EmployeeService

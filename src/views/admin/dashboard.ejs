@@ -1,31 +1,39 @@
 <%
-const stats = {
-    totalBooks: 4520,
-    totalAuthors: 580,
-    totalCategories: 45,
-    totalPublishers: 120,
-    totalOrders: 1250,
-    totalRevenue: 125400000,
-    newUsersToday: 15,
-    lowStockBooks: 23
+const stats = locals.stats || {
+    totalBooks: 0,
+    totalInvoices: 0,
+    revenueThisMonth: 0,
+    recentBooks: [],
+    totalAuthors: 0,
+    totalCategories: 0,
+    totalPublishers: 0,
+    lowStockBooks: 0,
+    lowStockBooksList: [],
+    newOrders: [],
 };
 
-const recentBooks = [
-    { title: "Lịch Sử Việt Nam Toàn Tập", author: "Trần Trọng Kim", price: 185000 },
-    { title: "Marketing Căn Bản", author: "Philip Kotler", price: 275000 },
-    { title: "Thuật Đắc Nhân Tâm", author: "Dale Carnegie", price: 95000 },
-    { title: "Thế Giới Phẳng", author: "Thomas Friedman", price: 165000 },
-];
+console.log('======================================');
+console.log(stats);
 
-const alerts = [
-    { type: "danger", icon: "fa-triangle-exclamation", message: "Cuốn 'Kiến trúc phần mềm' chỉ còn 5 bản tồn kho." },
-    { type: "warning", icon: "fa-clock", message: "Có 8 đơn hàng chưa được xác nhận." },
-    { type: "info", icon: "fa-info-circle", message: "Cập nhật hàng tuần vào thứ 2 hàng tuần." },
-];
+const recentBooks = stats.recentBooks || [];
+
+const lowStockAlerts = (stats.lowStockBooksList || []).map(book => ({
+    type: "danger",
+    icon: "fa-triangle-exclamation",
+    message: `Cuốn '${book.TenSach}' chỉ còn ${book.SoLuongTon} bản tồn kho.`
+})).slice(0, 3);
+
+const newOrderAlerts = (stats.newOrders || []).filter(order => order.TrangThai === 'CHO_XAC_NHAN').map(order => ({
+    type: "warning",
+    icon: "fa-clock",
+    message: `Đơn hàng #${order.MaDH} từ ${order.TenNguoiNhan} chờ xác nhận.`
+})).slice(0, 2);
+
+const alerts = [...lowStockAlerts, ...newOrderAlerts];
 
 const quickActions = [
     { label: "Quản lý Đơn hàng", href: "/admin/sale/order", icon: "fa-shopping-cart", color: "success" },
-    { label: "Báo cáo", href: "#", icon: "fa-chart-bar", color: "warning" },
+    { label: "Sách tồn thấp", href: "/admin/book", icon: "fa-warehouse", color: "danger" },
 ];
 %>
 
@@ -41,7 +49,7 @@ const quickActions = [
         </p>
     </div>
     <div>
-        <button class="btn btn-outline-secondary me-2">
+        <button id="refresh-dashboard-btn" class="btn btn-outline-secondary me-2">
             <i class="fas fa-sync-alt"></i> Làm mới
         </button>
     </div>
@@ -50,7 +58,7 @@ const quickActions = [
 <!-- Main Statistics Section -->
 <div class="row g-4 mb-5">
     <div class="col-lg-4 col-md-6">
-        <a href="#" class="text-decoration-none">
+        <a href="/admin/book" class="text-decoration-none">
             <div class="card border-0 shadow-sm h-100 stat-card stat-primary">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
@@ -77,7 +85,7 @@ const quickActions = [
                             <p class="text-muted small mb-1">
                                 <i class="fas fa-receipt"></i> Hóa đơn
                             </p>
-                            <h3 class="mb-0 fw-bold text-success"><%= stats.totalOrders.toLocaleString('vi-VN') %></h3>
+                            <h3 class="mb-0 fw-bold text-success"><%= stats.totalInvoices.toLocaleString('vi-VN') %></h3>
                             <small class="text-muted">Tổng số hóa đơn</small>
                         </div>
                         <i class="fas fa-file-invoice-dollar fa-2x text-success opacity-25"></i>
@@ -95,7 +103,8 @@ const quickActions = [
                         <p class="text-muted small mb-1">
                             <i class="fas fa-dollar-sign"></i> Doanh thu
                         </p>
-                        <h3 class="mb-0 fw-bold text-warning"><%= (stats.totalRevenue / 1000000).toFixed(1) %>M</h3>
+                        <% const revenue = Number(stats.revenueThisMonth) || 0; %>
+                        <h3 class="mb-0 fw-bold text-warning"><%= revenue > 0 ? (revenue / 1000000).toFixed(1) + 'M' : '0₫' %></h3>
                         <small class="text-muted">Tháng này</small>
                     </div>
                     <i class="fas fa-chart-line fa-2x text-warning opacity-25"></i>
@@ -104,25 +113,6 @@ const quickActions = [
         </div>
     </div>
 </div>
-
-<!-- Quick Actions -->
-<div class="row mb-5">
-    <div class="col-12">
-        <h5 class="mb-3">
-            <i class="fas fa-lightning-bolt text-warning"></i> Hành động nhanh
-        </h5>
-        <div class="row g-3">
-            <% quickActions.forEach(action => { %>
-                <div class="col-lg-3 col-md-6">
-                    <a href="<%= action.href %>" class="btn btn-outline-<%= action.color %> w-100 py-2 text-start">
-                        <i class="fas <%= action.icon %> me-2"></i> <%= action.label %>
-                    </a>
-                </div>
-            <% }); %>
-        </div>
-    </div>
-</div>
-
 <!-- Content Grid -->
 <div class="row g-4">
     <!-- Alerts & Warnings -->
@@ -134,25 +124,18 @@ const quickActions = [
                 </h5>
             </div>
             <div class="card-body p-0">
-                <% if (alerts.length > 0) { %>
+                <% if (stats.lowStockBooksList && stats.lowStockBooksList.length > 0) { %>
                     <div class="list-group list-group-flush">
-                        <% alerts.forEach((alert, index) => { %>
-                            <div class="list-group-item border-start-4 border-<%= alert.type %> ps-3">
+                        <% stats.lowStockBooksList.slice(0, 3).forEach(book => { %>
+                            <div class="list-group-item border-start-4 border-danger ps-3 py-3">
                                 <div class="d-flex align-items-start justify-content-between">
                                     <div class="flex-grow-1">
                                         <div class="d-flex align-items-center gap-2 mb-1">
-                                            <i class="fas <%= alert.icon %> text-<%= alert.type %>"></i>
-                                            <small class="text-muted text-uppercase fw-bold">
-                                                <% if(alert.type === 'danger') { %>Nguy hiểm<% } %>
-                                                <% if(alert.type === 'warning') { %>Cảnh báo<% } %>
-                                                <% if(alert.type === 'info') { %>Thông tin<% } %>
-                                            </small>
+                                            <i class="fas fa-triangle-exclamation text-danger"></i>
+                                            <small class="text-muted text-uppercase fw-bold">Hàng tồn thấp</small>
                                         </div>
-                                        <p class="mb-0"><%= alert.message %></p>
+                                        <p class="mb-0">Cuốn <strong><%= book.TenSach %></strong> chỉ còn <span class="badge bg-danger"><%= book.SoLuongTon %></span> bản</p>
                                     </div>
-                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Xóa">
-                                        <i class="fas fa-times"></i>
-                                    </button>
                                 </div>
                             </div>
                         <% }); %>
@@ -162,6 +145,27 @@ const quickActions = [
                         <i class="fas fa-check-circle text-success fa-2x mb-3"></i>
                         <p class="text-muted">Hệ thống ổn định. Không có cảnh báo.</p>
                     </div>
+                <% } %>
+                <% if (stats.newOrders && stats.newOrders.length > 0) { %>
+                    <% const pendingOrders = stats.newOrders.filter(o => o.TrangThai === 'CHO_XAC_NHAN'); %>
+                    <% if (pendingOrders.length > 0) { %>
+                        <div class="border-top">
+                            <% pendingOrders.slice(0, 2).forEach(order => { %>
+                                <div class="list-group-item border-start-4 border-warning ps-3 py-3">
+                                    <div class="d-flex align-items-start justify-content-between">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <i class="fas fa-clock text-warning"></i>
+                                                <small class="text-muted text-uppercase fw-bold">Đơn hàng mới</small>
+                                            </div>
+                                            <p class="mb-0">Đơn #<strong><%= order.MaDH %></strong> từ <strong><%= order.TenNguoiNhan %></strong> chờ xác nhận</p>
+                                        </div>
+                                        <a href="/admin/sale/order" class="btn btn-sm btn-outline-primary">Xác nhận</a>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } %>
                 <% } %>
             </div>
         </div>
@@ -185,17 +189,25 @@ const quickActions = [
                         </tr>
                     </thead>
                     <tbody>
-                        <% recentBooks.forEach(book => { %>
+                        <% if (recentBooks.length > 0) { %>
+                            <% recentBooks.forEach(book => { %>
+                                <tr>
+                                    <td class="ps-3">
+                                        <small class="fw-bold"><%= book.TenSach %></small>
+                                    </td>
+                                    <td><small><%= book.TenTacGia || 'N/A' %></small></td>
+                                    <td class="text-end pe-3 fw-bold text-success">
+                                        <small><%= Math.floor(book.DonGia || 0).toLocaleString('vi-VN') %>₫</small>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
                             <tr>
-                                <td class="ps-3">
-                                    <small class="fw-bold"><%= book.title %></small>
-                                </td>
-                                <td><small><%= book.author %></small></td>
-                                <td class="text-end pe-3 fw-bold text-success">
-                                    <small><%= book.price.toLocaleString('vi-VN') %>₫</small>
+                                <td colspan="3" class="text-center text-muted py-3">
+                                    <small>Chưa có sách nào</small>
                                 </td>
                             </tr>
-                        <% }); %>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
@@ -211,7 +223,7 @@ const quickActions = [
 <!-- Secondary Stats -->
 <div class="row g-4 mt-2">
     <div class="col-lg-3 col-md-6">
-        <a href="#" class="text-decoration-none">
+        <a href="/admin/author" class="text-decoration-none">
             <div class="card border-0 shadow-sm h-100 stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
@@ -229,7 +241,7 @@ const quickActions = [
     </div>
 
     <div class="col-lg-3 col-md-6">
-        <a href="#" class="text-decoration-none">
+        <a href="/admin/category" class="text-decoration-none">
             <div class="card border-0 shadow-sm h-100 stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
@@ -247,7 +259,7 @@ const quickActions = [
     </div>
 
     <div class="col-lg-3 col-md-6">
-        <a href="#" class="text-decoration-none">
+        <a href="/admin/publisher" class="text-decoration-none">
             <div class="card border-0 shadow-sm h-100 stat-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
@@ -280,6 +292,21 @@ const quickActions = [
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const btn = document.getElementById('refresh-dashboard-btn')
+        if (!btn) return
+
+        btn.addEventListener('click', function (e) {
+            e.preventDefault()
+            btn.disabled = true
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang làm mới...'
+            // Reload page to refresh dashboard data
+            window.location.reload()
+        })
+    })
+</script>
 
 <style>
     .stat-card {

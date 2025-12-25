@@ -31,10 +31,6 @@ router.get('/voucher', isAdmin, VoucherController.getViewManager)
 router.get('/employee', isAdmin, EmployeeController.getViewManager)
 router.get('/profile', EmployeeController.profile)
 
-router.get('/', (req, res, next) => {
-    res.render('admin/dashboard', {
-        title: 'Admin Dashboard',
-    })
-})
+router.get('/', EmployeeController.dashboard)
 
 export default router

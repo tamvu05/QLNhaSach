@@ -1,190 +1,192 @@
 <%
-// Lấy dữ liệu từ API EmployeeService
-const account = locals.account || {};
-const statusMap = {
-    'ACTIVE': 'Đang hoạt động',
-    'HOAT_DONG': 'Đang hoạt động',
-    'INACTIVE': 'Không hoạt động',
-    'DUNG_HOAT_DONG': 'Không hoạt động'
-};
+const account = locals.account || {}
 
 const user = {
-    fullName: account.TenNV || "N/A",
-    email: account.Email || "N/A",
-    role: account.VaiTro ? (account.VaiTro > 3 ? "Quản lý" : "Nhân viên") : "Không xác định",
-    phone: account.SDT || "N/A",
-    joinDate: account.NgayVaoLam ? new Date(account.NgayVaoLam).toLocaleDateString('vi-VN') : "N/A",
-    employeeId: account.MaNV || "N/A",
-    dateOfBirth: account.NgaySinh ? new Date(account.NgaySinh).toLocaleDateString('vi-VN') : "N/A",
-    status: statusMap[account.TrangThai] || "Không xác định"
-};
+    fullName: account.TenNV || 'N/A',
+    email: account.Email || 'N/A',
+    role: account.VaiTro ? (account.VaiTro > 3 ? 'Quản lý' : 'Nhân viên') : 'Không xác định',
+    phone: account.SDT || 'N/A',
+    joinDate: account.NgayVaoLam ? new Date(account.NgayVaoLam).toLocaleDateString('vi-VN') : 'N/A',
+    employeeId: account.MaNV || 'N/A',
+    dateOfBirth: account.NgaySinh ? new Date(account.NgaySinh).toLocaleDateString('vi-VN') : 'N/A',
+    avatar: account.HinhAnh || null,
+}
+const isManager = Number(account?.VaiTro) > 3
 %>
 
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="mb-2 fw-bold">
-                Thông tin cá nhân
-            </h1>
-            <p class="text-muted mb-0">Xem và chỉnh sửa thông tin tài khoản của bạn</p>
-        </div>
-    </div>
-
-    <div class="row g-4">
-        <!-- Profile Card -->
+<div class="container-fluid profile-page py-3">
+    <div class="row g-4 align-items-start">
+        <!-- Left: Avatar + Quick facts -->
         <div class="col-lg-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center py-5">
-                    <div class="mb-4">
-                        <div class="avatar-circle mx-auto mb-3">
-                            <i class="fas fa-user fa-4x text-white"></i>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center py-5 d-flex flex-column gap-3">
+                    <div>
+                        <div class="avatar-wrap mx-auto mb-3" id="avatar-wrapper">
+                            <% if (user.avatar) { %>
+                                <img src="<%= user.avatar %>" alt="Avatar" class="avatar-img" id="avatar-image">
+                            <% } else { %>
+                                <div class="avatar-placeholder" id="avatar-placeholder">
+                                    <span><%= user.fullName?.slice(0,1) || 'N' %></span>
+                                </div>
+                            <% } %>
                         </div>
-                        <h4 class="mb-1 fw-bold"><%= user.fullName %></h4>
-                        <span class="badge bg-primary"><%= user.role %></span>
+                        <h4 class="fw-bold mb-1"><%= user.fullName %></h4>
+                        <span class="badge bg-primary px-3 py-2 text-uppercase">Vai trò: <%= user.role %></span>
                     </div>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary" disabled>
+                    <div class="small text-muted">
+                        Mã NV: <strong><%= user.employeeId %></strong>
+                    </div>
+                    <div class="small text-muted">
+                        Ngày vào làm: <strong><%= user.joinDate %></strong>
+                    </div>
+                    <div class="d-grid gap-2 mt-2">
+                        <input type="file" accept="image/*" id="avatar-input" class="d-none">
+                        <button class="btn btn-outline-primary" id="change-avatar-btn">
                             <i class="fas fa-camera me-2"></i> Đổi ảnh đại diện
                         </button>
-                        <button class="btn btn-outline-danger" disabled>
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                             <i class="fas fa-key me-2"></i> Đổi mật khẩu
                         </button>
                     </div>
                 </div>
             </div>
-
-           
         </div>
 
-        <!-- Information Form -->
+        <!-- Right: Details -->
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-light border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-id-card"></i> Chi tiết tài khoản
-                    </h5>
+                <div class="card-header bg-light border-bottom d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="mb-0">Hồ sơ nhân viên</h5>
+                        <small class="text-muted">Các trường khóa với nhân viên, quản lý có thể chỉnh.</small>
+                    </div>
                 </div>
                 <div class="card-body p-4">
-                    <form>
+                    <form id="admin-profile-form">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-id-badge text-primary"></i> Mã nhân viên
-                                </label>
-                                <input type="text" class="form-control" value="<%= user.employeeId %>" readonly>
+                                <label class="form-label text-uppercase small fw-bold text-muted">Email</label>
+                                <input type="email" class="form-control" name="Email" value="<%= user.email %>" <%= isManager ? '' : 'readonly' %>>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label text-uppercase small fw-bold text-muted">Họ và tên</label>
+                                <input type="text" class="form-control" name="HoTen" value="<%= user.fullName %>">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-user text-primary"></i> Họ và tên
-                                </label>
-                                <input type="text" class="form-control" value="<%= user.fullName %>" readonly>
+                                <label class="form-label text-uppercase small fw-bold text-muted">Số điện thoại</label>
+                                <input type="tel" class="form-control" name="SDT" value="<%= user.phone %>">
                             </div>
+
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-envelope text-primary"></i> Email
-                                </label>
-                                <input type="text" class="form-control" value="<%= user.email %>" readonly>
+                                <label class="form-label text-uppercase small fw-bold text-muted">Ngày sinh</label>
+                                <input type="date" class="form-control" name="NgaySinh" value="<%= account.NgaySinh ? account.NgaySinh.toISOString ? account.NgaySinh.toISOString().slice(0,10) : new Date(account.NgaySinh).toISOString().slice(0,10) : '' %>">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-phone text-primary"></i> Số điện thoại
-                                </label>
-                                <input type="tel" class="form-control" value="<%= user.phone %>" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-birthday-cake text-primary"></i> Ngày sinh
-                                </label>
-                                <input type="text" class="form-control" value="<%= user.dateOfBirth %>" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-user-tag text-primary"></i> Vai trò
-                                </label>
-                                <input type="text" class="form-control" value="<%= user.role %>" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-calendar text-primary"></i> Ngày vào làm
-                                </label>
-                                <input type="text" class="form-control" value="<%= user.joinDate %>" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">
-                                    <i class="fas fa-check-circle text-primary"></i> Trạng thái
-                                </label>
-                                <input type="text" class="form-control" value="<%= user.status %>" readonly>
-                            </div>
+                            <!-- Ngày vào làm ẩn khỏi form theo yêu cầu -->
                         </div>
 
-                        <hr class="my-4">
-
-                        <div class="alert alert-info border-0" role="alert">
-                            <i class="fas fa-info-circle me-2"></i>
-                            Để cập nhật thông tin cá nhân, vui lòng liên hệ quản trị viên hệ thống.
-                        </div>
-
-                        <div class="d-flex gap-2 justify-content-end">
-                            <button type="button" class="btn btn-outline-secondary" disabled>
-                                <i class="fas fa-times me-2"></i> Hủy
-                            </button>
-                            <button type="button" class="btn btn-primary" disabled>
-                                <i class="fas fa-save me-2"></i> Lưu thay đổi
-                            </button>
+                        <div class="d-flex gap-2 justify-content-end mt-4">
+                            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
                         </div>
                     </form>
                 </div>
             </div>
-
-            <!-- Activity Card -->
-            
         </div>
     </div>
 </div>
 
+<!-- Modal đổi mật khẩu -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Đổi mật khẩu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="change-password-form">
+                    <div class="mb-3">
+                        <label class="form-label text-uppercase small fw-bold text-muted">Mật khẩu hiện tại</label>
+                        <input type="password" class="form-control" name="currentPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-uppercase small fw-bold text-muted">Mật khẩu mới</label>
+                        <input type="password" class="form-control" name="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-uppercase small fw-bold text-muted">Nhập lại mật khẩu mới</label>
+                        <input type="password" class="form-control" name="confirmPassword" required>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="reset" class="btn btn-outline-secondary">Hủy</button>
+                        <button type="submit" class="btn btn-danger">Đổi mật khẩu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/profile.admin.js"></script>
+
 <style>
-    .avatar-circle {
-        width: 120px;
-        height: 120px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .avatar-wrap {
+        width: 140px;
+        height: 140px;
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at 30% 30%, #7aa0ff, #3e4da7);
+        box-shadow: 0 10px 25px rgba(62, 77, 167, 0.35);
+        overflow: hidden;
+        cursor: pointer;
     }
 
-    .timeline-badge {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        flex-shrink: 0;
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
-    .timeline-item {
+    .avatar-placeholder {
+        color: #fff;
+        font-size: 42px;
+        font-weight: 700;
+    }
+
+    .info-box {
+        border: 1px solid #e6e9f2;
+        border-radius: 10px;
+        padding: 12px 14px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        background: #fff;
         position: relative;
     }
 
-    .timeline-item:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        left: 18px;
-        top: 40px;
-        bottom: -20px;
-        width: 2px;
-        background: #e0e0e0;
+    .info-box.readonly {
+        background: #f7f8fb;
+        color: #6c757d;
+    }
+
+    .lock-note {
+        font-size: 11px;
+        color: #6c757d;
+        margin-left: auto;
+    }
+
+    .info-box i {
+        width: 20px;
+        text-align: center;
     }
 
     .card {
-        transition: transform 0.2s;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .card:hover {
         transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 </style>

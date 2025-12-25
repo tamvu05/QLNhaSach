@@ -382,7 +382,13 @@ class EmployeeTable extends BaseTable {
             const data = await res.json()
 
             if (!res.ok) {
-                throw new Error(data.message || `Lỗi HTTP ${res.status}: Xóa ${this.config.entityName} thất bại.`)
+                const apiMessage = data?.message || ''
+                // Hiển thị thông báo chi tiết nếu nhân viên đã có giao dịch
+                if (res.status === 409 && apiMessage) {
+                    throw new Error(apiMessage)
+                }
+
+                throw new Error(apiMessage || `Lỗi HTTP ${res.status}: Xóa ${this.config.entityName} thất bại.`)
             }
 
             Swal.close()

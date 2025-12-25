@@ -1,6 +1,7 @@
 import { employeeConfig } from '../configs/adminView.config.js'
 import exportFileExcel from '../utils/exportFileExcel.js'
 import EmployeeService from '../services/employee.service.js'
+import DashboardService from '../services/dashboard.service.js'
 
 const EmployeeController = {
     // /admin/employee
@@ -79,6 +80,19 @@ const EmployeeController = {
         }
     },
 
+    // GET /admin (dashboard)
+    async dashboard(req, res, next) {
+        try {
+            const stats = await DashboardService.getDashboardStats()
+            res.render('admin/dashboard', {
+                title: 'Admin Dashboard',
+                stats,
+            })
+        } catch (err) {
+            next(err)
+        }
+    },
+
     // GET /admin/profile
     async profile(req, res, next) {
         try {
@@ -93,6 +107,57 @@ const EmployeeController = {
             res.render('admin/profile.ejs', {
                 account: employee,
             })
+        } catch (err) {
+            next(err)
+        }
+    },
+
+    // PUT /api/profile
+    async updateProfile(req, res, next) {
+        try {
+            const MaNV = req?.session?.account?.MaNV
+            if (!MaNV) return res.status(401).json({ message: 'Chưa đăng nhập' })
+
+            const isManager = Number(req?.session?.account?.VaiTro) > 3
+            await EmployeeService.updateProfile(MaNV, req.body, isManager)
+
+            // refresh session snapshot
+            const fresh = await EmployeeService.getById(MaNV)
+            req.session.account = { ...req.session.account, ...fresh }
+
+            return res.json({ success: true, account: fresh })
+        } catch (err) {
+            next(err)
+        }
+    },
+
+    // PUT /api/profile/password
+    async updatePassword(req, res, next) {
+        try {
+            const MaNV = req?.session?.account?.MaNV
+            if (!MaNV) return res.status(401).json({ message: 'Chưa đăng nhập' })
+
+            const { currentPassword, newPassword } = req.body || {}
+            await EmployeeService.changePassword(MaNV, currentPassword, newPassword)
+
+            return res.json({ success: true })
+        } catch (err) {
+            next(err)
+        }
+    },
+
+    // PUT /api/profile/avatar
+    async updateAvatar(req, res, next) {
+        try {
+            const MaNV = req?.session?.account?.MaNV
+            if (!MaNV) return res.status(401).json({ message: 'Chưa đăng nhập' })
+
+            const updated = await EmployeeService.updateAvatar(MaNV, req.file)
+
+            const fresh = await EmployeeService.getById(MaNV)
+            req.session.account = { ...req.session.account, ...fresh }
+
+            return res.json({ success: true, avatar: updated?.HinhAnh })
         } catch (err) {
             next(err)
         }
@@ -119,16 +184,23 @@ const EmployeeController = {
         }
     },
 
-    // // // DELETE /api/employee/:id
-    // async delete(req, res, next) {
-    //     try {
-    //         const { id } = req.params
-    //         const success = await EmployeeService.delete(id)
-    //         return res.json({ success })
-    //     } catch (err) {
-    //         next(err)
-    //     }
-    // },
+    // DELETE /api/employee/:id
+    async delete(req, res, next) {
+        try {
+            const { id } = req.params
+
+            // Chặn tự xóa tài khoản đang đăng nhập
+            const currentEmpId = req?.session?.account?.MaNV
+            if (currentEmpId && String(currentEmpId) === String(id)) {
+                return res.status(403).json({ message: 'Không thể tự xóa tài khoản đang đăng nhập!' })
+            }
+
+            const success = await EmployeeService.delete(id)
+            return res.json({ success })
+        } catch (err) {
+            next(err)
+        }
+    },
 
     // // /api/employee/export
     // async export(req, res, next) {

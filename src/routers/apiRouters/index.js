@@ -11,6 +11,7 @@ import invoiceRouter from './invoice.router.js'
 import voucherRouter from './voucher.router.js'
 import employeeRouter from './employee.router.js'
 import authRouter from './auth.router.js'
+import profileRouter from './profile.router.js'
 
 const router = express.Router()
 
@@ -26,5 +27,6 @@ router.use('/sale/invoice', invoiceRouter)
 router.use('/voucher', voucherRouter)
 router.use('/employee', employeeRouter)
 router.use('/auth', authRouter)
+router.use('/profile', profileRouter)
 
 export default router

@@ -42,6 +42,15 @@ const VoucherModel = {
         const [result] = await pool.query('DELETE FROM Voucher WHERE MaVC = ?', [id])
         return result.affectedRows > 0
     },
+
+    async updateExpiredVouchers() {
+        const [result] = await pool.query(
+            `UPDATE Voucher 
+            SET TrangThai = 'VO_HIEU' 
+            WHERE NgayKT < NOW() AND TrangThai = 'HOAT_DONG'`
+        )
+        return result.affectedRows
+    },
 }
 
 export default VoucherModel

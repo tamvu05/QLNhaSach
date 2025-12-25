@@ -64,6 +64,8 @@ CREATE TABLE NhanVien (
     NgaySinh DATETIME,
     SDT VARCHAR(15),
     NgayVaoLam DATETIME,
+    HinhAnh VARCHAR(500),
+    HinhAnhID VARCHAR(500),
     FOREIGN KEY (MaTK) REFERENCES TaiKhoan(MaTK)
 );
 
@@ -165,7 +167,6 @@ CREATE TABLE CTHoaDon (
     FOREIGN KEY (MaHD) REFERENCES HoaDon(MaHD) ON DELETE CASCADE,
     FOREIGN KEY (MaSach) REFERENCES Sach(MaSach)
 );
-
 
 CREATE TABLE GioHang (
     MaKH INT,       

@@ -7,6 +7,6 @@ router.get('/partials', EmployeeController.getPartials)
 router.get('/:id', EmployeeController.getById)
 router.post('/', EmployeeController.create)
 router.put('/:id', EmployeeController.update)
-// router.delete('/:id', EmployeeController.delete)
+router.delete('/:id', EmployeeController.delete)
 
 export default router

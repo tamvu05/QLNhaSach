@@ -6,6 +6,9 @@ const { PAGE_LIMIT } = config
 
 const VoucherService = {
     async getWithParam(query) {
+        // Tự động cập nhật trạng thái voucher hết hạn
+        await VoucherModel.updateExpiredVouchers()
+
         let { page, sort, order, keyword, status } = query
 
         let currentPage = Number(page)
@@ -45,6 +48,9 @@ const VoucherService = {
 
     async getById(id) {
         if (!id) throw createHttpError('Thiếu id voucher!', 401)
+
+        // Cập nhật trạng thái nếu hết hạn
+        await VoucherModel.updateExpiredVouchers()
 
         const voucher = await VoucherModel.getById(id)
         if (!voucher) throw createHttpError('Voucher không tồn tại!', 401)
