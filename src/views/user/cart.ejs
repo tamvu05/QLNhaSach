@@ -191,9 +191,10 @@ document.addEventListener("DOMContentLoaded", function() {
         let count = 0;
         const selectedIds = [];
 
-        itemCheckboxes.forEach(cb => {
+        const currentCheckboxes = document.querySelectorAll('.item-checkbox');
+
+        currentCheckboxes.forEach(cb => {
             if (cb.checked) {
-                // Lấy giá trị thành tiền từ data attribute (Cần cập nhật data này khi đổi số lượng)
                 total += parseFloat(cb.getAttribute('data-total')) || 0;
                 selectedIds.push(cb.value);
                 count++;

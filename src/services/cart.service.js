@@ -80,8 +80,8 @@ const CartService = {
         }
     },
 
-    // 6. Lấy danh sách Voucher hợp lệ (ĐÃ SỬA)
-    // 👉 Thêm tham số customerId để check lịch sử
+    // 6. Lấy danh sách Voucher hợp lệ 
+    // Thêm tham số customerId để check lịch sử
     async getEligibleVouchers(currentTotal, customerId) {
         try {
             const query = `
