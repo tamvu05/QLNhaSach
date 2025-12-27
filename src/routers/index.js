@@ -4,7 +4,7 @@ import adminRouter from './viewRouters/admin.router.js'
 import userRouter from './viewRouters/user.router.js'
 import cartRouter from './viewRouters/cart.router.js'
 import checkoutRouter from './viewRouters/checkout.router.js'
-import orderRouter from './viewRouters/order.router.js';
+import orderRouter from './viewRouters/order.router.js'
 import commonRouter from './viewRouters/login.router.js'
 
 import apiRouter from './apiRouters/index.js'
