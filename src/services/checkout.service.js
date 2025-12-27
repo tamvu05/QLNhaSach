@@ -2,13 +2,12 @@ import pool from '../configs/db.js';
 import CartService from './cart.service.js';
 
 const CheckoutService = {
-    // 1. Hàm phụ: Kiểm tra và tính tiền giảm giá (ĐÃ SỬA)
-    // 👉 Thêm tham số customerId
+    // 1. Hàm phụ: Kiểm tra và tính tiền giảm giá
     async calculateDiscount(voucherCode, totalCartAmount, customerId) {
         if (!voucherCode) return 0;
 
         try {
-            // [MỚI] Bước 1: Check xem khách đã dùng mã này trong quá khứ chưa?
+            // Bước 1: Check xem khách đã dùng mã này chưa
             const [history] = await pool.query(
                 `SELECT 1 FROM LichSuDungVoucher WHERE MaKH = ? AND MaVC = ? LIMIT 1`,
                 [customerId, voucherCode]
@@ -16,7 +15,7 @@ const CheckoutService = {
 
             if (history.length > 0) {
                 console.log(`🚫 Khách hàng ${customerId} đã từng dùng mã ${voucherCode}`);
-                return 0; // Đã dùng rồi -> Không giảm nữa
+                return 0;
             }
 
             // Bước 2: Lấy thông tin voucher
@@ -28,18 +27,24 @@ const CheckoutService = {
             if (rows.length === 0) return 0;
             const voucher = rows[0];
 
+            // Ép kiểu dữ liệu về số để so sánh và tính toán
+            const dieuKienTongTien = Number(voucher.DKTongTien) || 0;
+            const giaTriGiam = Number(voucher.GiaTriGiam) || 0;
+            const soTienGiamMax = Number(voucher.SoTienGiamMax) || 0;
+            const cartAmount = Number(totalCartAmount) || 0;
+
             // Kiểm tra điều kiện đơn tối thiểu
-            if (totalCartAmount < voucher.DKTongTien) return 0;
+            if (cartAmount < dieuKienTongTien) return 0;
 
             // Tính toán mức giảm
             let discount = 0;
             if (voucher.LoaiVC === 'PHAN_TRAM' || voucher.LoaiVC === 'PhanTram') {
-                discount = (voucher.GiaTriGiam / 100) * totalCartAmount;
-                if (voucher.SoTienGiamMax > 0 && discount > voucher.SoTienGiamMax) {
-                    discount = voucher.SoTienGiamMax;
+                discount = (giaTriGiam / 100) * cartAmount;
+                if (soTienGiamMax > 0 && discount > soTienGiamMax) {
+                    discount = soTienGiamMax;
                 }
             } else {
-                discount = voucher.GiaTriGiam;
+                discount = giaTriGiam;
             }
 
             return discount;
@@ -49,7 +54,7 @@ const CheckoutService = {
         }
     },
 
-    // 2. HÀM ĐẶT HÀNG (ĐÃ SỬA)
+    // 2. HÀM ĐẶT HÀNG
     async placeOrder(customerId, orderInfo, voucherCode, selectedIds) {
         let connection;
         try {
@@ -57,22 +62,30 @@ const CheckoutService = {
 
             // Lấy toàn bộ giỏ hàng
             const cartData = await CartService.getCartDetails(customerId);
-            if (cartData.items.length === 0) throw new Error('Giỏ hàng trống!');
+            if (!cartData || cartData.items.length === 0) throw new Error('Giỏ hàng trống!');
 
-            // 👇 LỌC: Chỉ lấy những item user đã chọn mua
+            // LỌC: Chỉ lấy những item user đã chọn mua
             let itemsToBuy = cartData.items;
             if (selectedIds && selectedIds.length > 0) {
-                itemsToBuy = cartData.items.filter(item => selectedIds.includes(item.MaSach));
+                // Ép kiểu về String để so sánh cho chắc chắn
+                const selectedIdsString = selectedIds.map(id => String(id));
+                itemsToBuy = cartData.items.filter(item => selectedIdsString.includes(String(item.MaSach)));
             }
 
             if (itemsToBuy.length === 0) throw new Error('Không có sản phẩm nào được chọn để thanh toán!');
 
-            // Tính lại tổng tiền của các món được chọn
-            let finalTotal = itemsToBuy.reduce((sum, item) => sum + item.ThanhTien, 0);
+            // 🔥 [FIX QUAN TRỌNG]: Ép kiểu Number khi tính tổng tiền
+            // Dùng Number(item.ThanhTien) để tránh trường hợp nó là string hoặc undefined
+            let finalTotal = itemsToBuy.reduce((sum, item) => sum + (Number(item.ThanhTien) || 0), 0);
             
             const discountAmount = await CheckoutService.calculateDiscount(voucherCode, finalTotal, customerId);
-            finalTotal = finalTotal - discountAmount;
+            
+            // 🔥 [FIX QUAN TRỌNG]: Đảm bảo phép trừ ra số
+            finalTotal = Number(finalTotal) - Number(discountAmount);
             if (finalTotal < 0) finalTotal = 0;
+
+            // Log kiểm tra lần cuối trước khi insert (Xóa dòng này khi chạy ổn)
+            console.log("DEBUG ORDER:", { finalTotal, discountAmount, voucherCode });
 
             connection = await pool.getConnection();
             await connection.beginTransaction();
@@ -85,7 +98,7 @@ const CheckoutService = {
             );
             const orderId = orderResult.insertId;
 
-            // Lưu CTDonHang và Trừ kho (Chỉ items được chọn)
+            // Lưu CTDonHang và Trừ kho
             for (const item of itemsToBuy) {
                 await connection.query(
                     `INSERT INTO CTDonHang (MaDH, MaSach, SoLuong, DonGia) VALUES (?, ?, ?, ?)`,
@@ -104,15 +117,13 @@ const CheckoutService = {
                 await connection.query(`INSERT INTO LichSuDungVoucher (MaKH, MaVC, MaDH) VALUES (?, ?, ?)`, [customerId, voucherCode, orderId]);
             }
 
-            // 👇 XÓA GIỎ HÀNG: Chỉ xóa những món đã mua
+            // XÓA GIỎ HÀNG
             if (selectedIds && selectedIds.length > 0) {
-                // Xóa từng món
                 await connection.query(
                     `DELETE FROM GioHang WHERE MaKH = ? AND MaSach IN (?)`, 
                     [customerId, selectedIds]
                 );
             } else {
-                // Fallback: Xóa hết nếu không lọc (đề phòng)
                 await connection.query('DELETE FROM GioHang WHERE MaKH = ?', [customerId]);
             }
 

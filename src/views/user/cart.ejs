@@ -172,136 +172,160 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     
-    // Khởi tạo biến tổng tiền hiện tại (dựa trên các ô đã check)
-    let currentSelectedTotal = 0;
-    
+    // ==========================================
+    // 1. KHỞI TẠO & TÌM ELEMENT
+    // ==========================================
     const checkAll = document.getElementById('check-all');
     const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+    const voucherRadios = document.querySelectorAll('.voucher-radio');
+    
     const displaySubtotal = document.getElementById('display-subtotal');
+    const displayDiscount = document.getElementById('display-discount');
     const displayGrandTotal = document.getElementById('display-grand-total');
     const btnCheckout = document.getElementById('btn-checkout');
     const selectedCountSpan = document.getElementById('selected-count');
 
-    // Hàm format tiền
     const formatVND = (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 
-    // 1. Hàm tính toán lại toàn bộ (Gọi khi check/uncheck hoặc đổi số lượng)
-    function recalculateCart() {
-        let total = 0;
+    // ==========================================
+    // 2. HÀM XỬ LÝ CHÍNH (QUAN TRỌNG NHẤT)
+    // ==========================================
+    function updateCartState() {
+        // --- BƯỚC 1: Tính tổng tiền hàng (Dựa trên sách được chọn) ---
+        let subTotal = 0;
         let count = 0;
         const selectedIds = [];
 
+        // Quét lại DOM để lấy trạng thái mới nhất (phòng trường hợp vừa xóa row)
         const currentCheckboxes = document.querySelectorAll('.item-checkbox');
-
+        
         currentCheckboxes.forEach(cb => {
             if (cb.checked) {
-                total += parseFloat(cb.getAttribute('data-total')) || 0;
+                // Lấy thành tiền của từng dòng (đảm bảo là số)
+                const lineTotal = parseFloat(cb.getAttribute('data-total')) || 0;
+                subTotal += lineTotal;
                 selectedIds.push(cb.value);
                 count++;
             }
         });
 
-        currentSelectedTotal = total;
+        // --- BƯỚC 2: Tính giảm giá (Dựa trên voucher được chọn) ---
+        let discount = 0;
+        const selectedVoucher = document.querySelector('input[name="selected_voucher"]:checked');
+        let voucherCode = '';
+
+        if (selectedVoucher) {
+            voucherCode = selectedVoucher.value;
+            const type = selectedVoucher.getAttribute('data-type');
+            const val = parseFloat(selectedVoucher.getAttribute('data-value')) || 0;
+            const max = parseFloat(selectedVoucher.getAttribute('data-max')) || 0;
+            const minCondition = parseFloat(selectedVoucher.closest('.voucher-card')?.querySelector('.text-secondary')?.innerText.replace(/\D/g, '')) || 0; 
+            // Lưu ý: Lấy điều kiện đơn tối thiểu từ UI hoặc data attribute nếu có (để chính xác hơn nên thêm data-min vào input voucher)
+
+            // Logic tính tiền
+            if (type === 'percent' || type === 'PHAN_TRAM') {
+                discount = (val / 100) * subTotal;
+                if (max > 0 && discount > max) discount = max;
+            } else {
+                discount = val;
+            }
+
+            // Không giảm quá số tiền hàng
+            if (discount > subTotal) discount = subTotal;
+        }
+
+        const finalTotal = subTotal - discount;
+
+        // --- BƯỚC 3: Cập nhật Giao diện ---
         
-        // Cập nhật giao diện Tạm tính
-        if(displaySubtotal) displaySubtotal.innerText = formatVND(total);
+        // 3.1 Cập nhật số liệu
+        if(displaySubtotal) displaySubtotal.innerText = formatVND(subTotal);
         if(selectedCountSpan) selectedCountSpan.innerText = count;
+        
+        if(displayDiscount) {
+            displayDiscount.innerText = discount > 0 ? '-' + formatVND(discount) : '0 ₫';
+            if(discount > 0) displayDiscount.classList.remove('d-none');
+        }
+        
+        if(displayGrandTotal) displayGrandTotal.innerText = formatVND(finalTotal);
 
-        // Tính lại Voucher (nếu đang chọn)
-        const selectedVoucherRadio = document.querySelector('input[name="selected_voucher"]:checked');
-        applyVoucherLogic(selectedVoucherRadio); 
+        // 3.2 Highlight Voucher Card đang chọn
+        document.querySelectorAll('.voucher-card').forEach(card => {
+            card.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10');
+            card.classList.add('border-warning', 'bg-warning', 'bg-opacity-10');
+            card.style.backgroundColor = '';
+        });
+        if (selectedVoucher) {
+            const activeCard = selectedVoucher.closest('.voucher-card');
+            if(activeCard) {
+                activeCard.classList.remove('border-warning', 'bg-warning');
+                activeCard.classList.add('border-primary', 'bg-primary');
+                activeCard.style.backgroundColor = '#e7f1ff';
+            }
+        }
 
-        // Cập nhật Link nút Thanh toán (Gửi danh sách ID qua URL)
-        // Ví dụ: /checkout?items=1,2,5&voucher=ABC
-        const voucherCode = selectedVoucherRadio ? selectedVoucherRadio.value : '';
+        // --- BƯỚC 4: Cập nhật Nút Mua Hàng (Tạo Link chuẩn) ---
+        // Link sẽ có dạng: /checkout?selected=1,2&voucher=ABC
         if (count > 0) {
             btnCheckout.href = `/checkout?selected=${selectedIds.join(',')}&voucher=${voucherCode}`;
             btnCheckout.classList.remove('disabled');
         } else {
             btnCheckout.href = '#';
             btnCheckout.classList.add('disabled');
+            // Nếu không chọn sách nào thì reset tổng về 0
             if(displayGrandTotal) displayGrandTotal.innerText = formatVND(0);
         }
     }
 
-    // 2. Xử lý sự kiện Checkbox
+    // ==========================================
+    // 3. GẮN SỰ KIỆN (LISTENERS)
+    // ==========================================
+    
+    // Sự kiện Checkbox Sách
     if(checkAll) {
         checkAll.addEventListener('change', function() {
-            itemCheckboxes.forEach(cb => cb.checked = this.checked);
-            recalculateCart();
+            document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = this.checked);
+            updateCartState();
         });
     }
 
-    itemCheckboxes.forEach(cb => {
+    // Sự kiện cho từng checkbox con (Dùng delegation hoặc gán trực tiếp)
+    // Lưu ý: Vì itemCheckboxes là static list, nếu xóa row thì cần cẩn thận. 
+    // Tốt nhất gán sự kiện cho container table hoặc gán lại khi render.
+    // Ở đây gán trực tiếp cho đơn giản:
+    document.querySelectorAll('.item-checkbox').forEach(cb => {
         cb.addEventListener('change', function() {
-            // Nếu bỏ check 1 cái thì bỏ check nút All
-            if (!this.checked && checkAll) checkAll.checked = false;
-            // Nếu check đủ hết thì check nút All
-            if (this.checked && checkAll) {
-                const allChecked = Array.from(itemCheckboxes).every(c => c.checked);
-                checkAll.checked = allChecked;
-            }
-            recalculateCart();
+            // Logic cập nhật checkAll
+            const all = document.querySelectorAll('.item-checkbox');
+            const allChecked = Array.from(all).every(c => c.checked);
+            if(checkAll) checkAll.checked = allChecked;
+            
+            updateCartState();
         });
     });
 
-    // 3. Logic Voucher (Tách ra để tái sử dụng)
-    function applyVoucherLogic(radio) {
-        let finalTotal = currentSelectedTotal;
-        let discount = 0;
-        
-        const discountEl = document.getElementById('display-discount');
-        if(discountEl) discountEl.classList.add('d-none'); // Mặc định ẩn
-
-        if (radio) {
-            const type = radio.getAttribute('data-type');
-            const value = parseFloat(radio.getAttribute('data-value')) || 0;
-            const max = parseFloat(radio.getAttribute('data-max')) || 0;
-
-            if (type === 'percent') {
-                discount = (value / 100) * currentSelectedTotal;
-                if (max > 0 && discount > max) discount = max;
-            } else {
-                discount = value;
-            }
-
-            // Không giảm quá số tiền
-            if (discount > currentSelectedTotal) discount = currentSelectedTotal;
-            
-            finalTotal = currentSelectedTotal - discount;
-
-            // Hiển thị giảm giá
-            if(discountEl) {
-                discountEl.innerText = '-' + formatVND(discount);
-                discountEl.classList.remove('d-none');
-            }
-        }
-
-        if(displayGrandTotal) displayGrandTotal.innerText = formatVND(finalTotal);
-    }
-
-    // Lắng nghe sự kiện chọn voucher
-    const voucherRadios = document.querySelectorAll('.voucher-radio');
+    // Sự kiện chọn Voucher
     voucherRadios.forEach(radio => {
-        radio.addEventListener('change', () => applyVoucherLogic(radio));
+        radio.addEventListener('change', updateCartState);
     });
 
-    // Reset Voucher
+    // ==========================================
+    // 4. CÁC HÀM BỔ TRỢ & EXTERNAL API
+    // ==========================================
+
+    // Hàm Reset Voucher (để nút X gọi)
     window.resetVoucher = function() {
         const checked = document.querySelector('input[name="selected_voucher"]:checked');
         if (checked) checked.checked = false;
-        applyVoucherLogic(null);
-        
-        // Cập nhật lại link nút mua hàng (bỏ mã voucher ra)
-        recalculateCart();
+        updateCartState();
+    }
+
+    // Hàm cập nhật từ file cart.js (khi tăng giảm số lượng hoặc xóa)
+    window.updateCartSelection = function() {
+        updateCartState();
     }
 
     // Chạy lần đầu khi load trang
-    recalculateCart();
-
-    // ⚠️ QUAN TRỌNG: Cần lắng nghe sự kiện từ file cart.js khi số lượng thay đổi
-    // Để làm được điều đó, ta sẽ tạo một Custom Event hoặc sửa trực tiếp trong cart.js
-    // Ở đây ta gán hàm recalculateCart vào window để cart.js gọi được
-    window.updateCartSelection = recalculateCart;
+    updateCartState();
 });
 </script>
