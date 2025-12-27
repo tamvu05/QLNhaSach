@@ -207,4 +207,66 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // XỬ LÝ NÚT "MUA NGAY" 
+    const buyNowButtons = document.querySelectorAll('.btn-buy-now');
+
+    buyNowButtons.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            // Hiệu ứng Loading
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Đang xử lý...';
+            btn.classList.add('disabled');
+
+            const bookId = btn.getAttribute('data-id');
+
+            try {
+                // 1. Gọi API thêm vào giỏ hàng trước
+                const response = await fetch('/cart/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookId })
+                });
+
+                if (response.ok) {
+                    // 2. Nếu thành công -> Chuyển hướng ngay sang trang Thanh toán
+                    // Kèm theo tham số selected để chỉ thanh toán cuốn này
+                    window.location.href = `/checkout?selected=${bookId}`;
+                } else {
+                    // Xử lý lỗi (ví dụ chưa đăng nhập)
+                    if (response.status === 401) {
+                        Swal.fire({
+                            title: 'Bạn chưa đăng nhập',
+                            text: "Vui lòng đăng nhập để mua hàng!",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#0d6efd',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Đăng nhập ngay',
+                            cancelButtonText: 'Để sau'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/login';
+                            }
+                        });
+                        // Trả lại nút bình thường
+                        btn.innerHTML = originalContent;
+                        btn.classList.remove('disabled');
+                    } else {
+                        const result = await response.json();
+                        Swal.fire('Lỗi!', result.message || 'Không thể mua hàng lúc này', 'error');
+                        btn.innerHTML = originalContent;
+                        btn.classList.remove('disabled');
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                Swal.fire('Lỗi!', 'Không thể kết nối đến server', 'error');
+                btn.innerHTML = originalContent;
+                btn.classList.remove('disabled');
+            }
+        });
+    });
 });
