@@ -55,10 +55,17 @@ const CheckoutService = {
     },
 
     // 2. HÀM ĐẶT HÀNG
-    async placeOrder(customerId, orderInfo, voucherCode, selectedIds) {
+    async placeOrder(customerId, orderInfo, voucherCode, selectedIds, paymentMethod = 'COD') {
         let connection;
         try {
             const { nguoiNhan, diaChi, sdt, ghiChu } = orderInfo;
+
+            // Nếu là MoMo thì set trạng thái là 'CHO_THANH_TOAN' (Pending)
+            // Nếu là COD thì set là 'CHO_XAC_NHAN'
+            let initialStatus = 'CHO_XAC_NHAN';
+            if (paymentMethod === 'MOMO') {
+                initialStatus = 'CHO_THANH_TOAN'; 
+            }
 
             // Lấy toàn bộ giỏ hàng
             const cartData = await CartService.getCartDetails(customerId);
@@ -74,7 +81,6 @@ const CheckoutService = {
 
             if (itemsToBuy.length === 0) throw new Error('Không có sản phẩm nào được chọn để thanh toán!');
 
-            // 🔥 [FIX QUAN TRỌNG]: Ép kiểu Number khi tính tổng tiền
             // Dùng Number(item.ThanhTien) để tránh trường hợp nó là string hoặc undefined
             let finalTotal = itemsToBuy.reduce((sum, item) => sum + (Number(item.ThanhTien) || 0), 0);
             
@@ -93,8 +99,8 @@ const CheckoutService = {
             // Lưu Đơn hàng
             const [orderResult] = await connection.query(
                 `INSERT INTO DonHang (MaKH, NgayDat, TongTien, TenNguoiNhan, DiaChiNhan, SDT, GhiChu, TrangThai, MaVC) 
-                VALUES (?, NOW(), ?, ?, ?, ?, ?, 'CHO_XAC_NHAN', ?)`,
-                [customerId, finalTotal, nguoiNhan, diaChi, sdt, ghiChu, voucherCode || null] 
+                VALUES (?, NOW(), ?, ?, ?, ?, ?, ?, ?)`, // Chỗ này thay string cứng bằng biến ?
+                [customerId, finalTotal, nguoiNhan, diaChi, sdt, ghiChu, initialStatus, voucherCode || null] 
             );
             const orderId = orderResult.insertId;
 
